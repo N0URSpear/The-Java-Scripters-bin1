@@ -7,28 +7,30 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.image.Image?>
+<?import javafx.scene.paint.Color?>
+<?import javafx.scene.text.Font?>
 
 
-<VBox xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.example.addressbook.NinjaController"
-      alignment="CENTER" spacing="15"
-      style="-fx-background-color: #140B38;">
+<StackPane fx:id="backgroundPane"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="com.example.addressbook.NinjaController"
+           stylesheets="@NinjaStyles.css"
+           style="-fx-background-color: #140B38;">
 
-    <!-- App title -->
-    <Label text="TYPING NINJA" style="-fx-font-size: 36px; -fx-text-fill: white;"/>
-
-    <!-- Logo image -->
-    <ImageView fitHeight="2000" fitWidth="1200" pickOnBounds="true" preserveRatio="true">
+    <!-- Background -->
+    <ImageView fx:id="logoImage" preserveRatio="true" pickOnBounds="true">
         <image>
-            <Image url="@Typing Ninja.png"/> <!-- put ninja.png in resources -->
+            <Image url="@Typing_Ninja_with_text.png"/>
         </image>
     </ImageView>
 
-    <!-- Menu buttons -->
-    <VBox alignment="CENTER" spacing="10">
+    <!-- Overlay -->
+    <Pane>
+
         <Button text="LOG IN" fx:id="loginButton" onAction="#onloginClicked"/>
         <Button text="CREATE ACCOUNT" fx:id="createAccountButton" onAction="#onCreateAccountClicked"/>
         <Button text="HELP" fx:id="helpButton" onAction="#onHelpClicked"/>
-    </VBox>
 
-</VBox>
+    </Pane>
+
+</StackPane>
