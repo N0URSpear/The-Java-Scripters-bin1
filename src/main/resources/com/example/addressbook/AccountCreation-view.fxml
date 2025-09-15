@@ -31,8 +31,8 @@
     </HBox>
 
     <HBox>
-        <Button onAction="#onCreateAccountClicked"  text="Create Account and Log In" />
-        <Button onAction="#onCancelClicked" text="Cancel" />
+        <Button onAction="#onCreateAccountClicked"  text="Create Account and Log In" style="-fx-text-fill: black; -fx-font-size: 24; -fx-font-family: 'Jaro';"/>
+        <Button onAction="#onCancelClicked" text="Cancel" style="-fx-text-fill: black; -fx-font-size: 24; -fx-font-family: 'Jaro';" />
     </HBox>
 
 </VBox>

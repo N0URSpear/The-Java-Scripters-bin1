@@ -5,6 +5,7 @@ import com.example.addressbook.MockNinjaDAO;
 import com.example.addressbook.NinjaUser;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
@@ -54,5 +55,10 @@ public class LoginController {
     private void onCancelClicked() {
         Stage stage = (Stage) usernameField.getScene().getWindow();
         stage.close();
+    }
+
+    @FXML
+    private void onForgotPasswordClicked() {
+
     }
 }

@@ -8,12 +8,12 @@
 }
 
 
-/* Glows while hovered over */
+
 .button:hover {
     -fx-effect: dropshadow(gaussian, #2EFF04, 20, 0.1, 0, 0);
 }
 
-/* Changes colour while pressed */
+
 .button:armed {
     -fx-text-fill: #2EFF04;
 }

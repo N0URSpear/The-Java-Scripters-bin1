@@ -12,7 +12,8 @@
 <VBox style="-fx-background-color: #D9D9D9; -fx-padding: 20"
       xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.example.addressbook.controllers.HelpController">
+      fx:controller="com.example.addressbook.controllers.HelpController"
+      alignment="CENTER" >
 
     <Label style="-fx-text-fill: black; -fx-font-size: 24; -fx-font-family: 'Jaro';" text="Help" textAlignment="CENTER" alignment="CENTER" maxWidth="500">
         <VBox.margin>
@@ -20,9 +21,13 @@
         </VBox.margin>
     </Label>
 
-    <Text style="-fx-text-fill: black; -fx-font-size: 24; -fx-font-family: 'Jaro';" text="Typing Ninja is a fun way to learn to type with basic tutorials as well as artificial intelligence integration to create custom lessons where you can type about any topic you choose!&#10;&#10;Your typing results are analysed to identify the key combinations you mistype most often and custom lessons can be created to help you improve.&#10;&#10;All passwords and secret question answers are encoded for security.&#10;&#10;Developed by “The Java Scripters” Version 0.1.1 " wrappingWidth="500"/>
+    <Text style="-fx-text-fill: black; -fx-font-size: 24; -fx-font-family: 'Jaro';" text="Typing Ninja is a fun way to learn to type with basic tutorials as well as artificial intelligence integration to create custom lessons where you can type about any topic you choose!&#10;&#10;Your typing results are analysed to identify the key combinations you mistype most often and custom lessons can be created to help you improve.&#10;&#10;All passwords and secret question answers are encoded for security.&#10;&#10;Developed by “The Java Scripters” Version 0.1.1 " wrappingWidth="500">
+        <VBox.margin>
+            <Insets bottom="20"/>
+        </VBox.margin>
+    </Text>
 
-    <Button text="Email us" style="-fx-text-fill: black; -fx-font-size: 24; -fx-font-family: 'Jaro';" />
-    <Button text="Visit our website" style="-fx-text-fill: black; -fx-font-size: 24; -fx-font-family: 'Jaro';" />
+    <Button text="Email us" style="-fx-text-fill: black; -fx-font-size: 24; -fx-font-family: 'Jaro';" prefWidth="450" />
+    <Button text="Visit our website" style="-fx-text-fill: black; -fx-font-size: 24; -fx-font-family: 'Jaro';" prefWidth="450" />
 
 </VBox>

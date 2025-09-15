@@ -1,0 +1,7 @@
+#ForgotPasswordButton {
+-fx-cursor: hand;
+}
+
+#ForgotPasswordButton:hover {
+    -fx-effect: dropshadow(gaussian, #000000, 20, 0.1, 0, 0);
+}
