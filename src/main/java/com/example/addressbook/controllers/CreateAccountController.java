@@ -2,7 +2,7 @@ package com.example.addressbook.controllers;
 
 import com.example.addressbook.INinjaContactDAO;
 import com.example.addressbook.MainMenu;
-import com.example.addressbook.MockNinjaDAO;
+import com.example.addressbook.SqliteContactDAO;
 import com.example.addressbook.NinjaUser;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -23,7 +23,7 @@ public class CreateAccountController {
     @FXML private TextField SecretQuestion1Answer;
     @FXML private TextField SecretQuestion2Answer;
     private final INinjaContactDAO NinjaDAO;
-    public CreateAccountController() {NinjaDAO = new MockNinjaDAO();}
+    public CreateAccountController() {NinjaDAO = new SqliteContactDAO();}
 
     @FXML
     public void initialize() {
@@ -79,6 +79,8 @@ public class CreateAccountController {
             showError("Username cannot be empty.");
             return;
         }
+        // Normalize username to avoid duplicates caused by stray spaces
+        username = username.trim();
 
         if (password == null || password.trim().isEmpty()) {
             showError("Password cannot be empty.");
@@ -103,6 +105,12 @@ public class CreateAccountController {
         if (answer1 == null || answer1.trim().isEmpty() ||
                 answer2 == null || answer2.trim().isEmpty()) {
             showError("Both secret question answers must be filled.");
+            return;
+        }
+
+        // Check for existing username before attempting to insert
+        if (NinjaDAO.getNinjaUser(username) != null) {
+            showError("That username is already taken. Please choose a different one.");
             return;
         }
 

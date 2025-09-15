@@ -2,11 +2,10 @@ package com.example.addressbook.controllers;
 
 import com.example.addressbook.INinjaContactDAO;
 import com.example.addressbook.MainMenu;
-import com.example.addressbook.MockNinjaDAO;
+import com.example.addressbook.SqliteContactDAO;
 import com.example.addressbook.NinjaUser;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
@@ -16,7 +15,7 @@ public class LoginController {
     @FXML private TextField usernameField;
     @FXML private PasswordField passwordField;
     private final INinjaContactDAO NinjaDAO;
-    public LoginController() {this.NinjaDAO = new MockNinjaDAO();}
+    public LoginController() {this.NinjaDAO = new SqliteContactDAO();}
 
     @FXML
     private void onLoginClicked() {

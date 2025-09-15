@@ -2,12 +2,15 @@ package com.example.addressbook;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.nio.file.Paths;
 
 public class SqliteConnection {
     private static Connection instance = null;
 
     private SqliteConnection() {
-        String url = "jdbc:sqlite:TypingNinjas.db";
+        // Resolve an absolute path to ensure we are always using the intended DB file
+        String dbFilePath = Paths.get(System.getProperty("user.dir"), "TypingNinjaSQL.db").toString();
+        String url = "jdbc:sqlite:" + dbFilePath;
         try {
             instance = DriverManager.getConnection(url);
         } catch (SQLException sqlEx) {
