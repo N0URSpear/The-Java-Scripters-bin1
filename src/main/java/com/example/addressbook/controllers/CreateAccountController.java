@@ -1,6 +1,7 @@
 package com.example.addressbook.controllers;
 
 import com.example.addressbook.INinjaContactDAO;
+import com.example.addressbook.MainMenu;
 import com.example.addressbook.MockNinjaDAO;
 import com.example.addressbook.NinjaUser;
 import javafx.collections.FXCollections;
@@ -121,6 +122,13 @@ public class CreateAccountController {
         NinjaDAO.addNinjaUser(newUser);
 
         showSuccess("Account created successfully!");
+
+        MainMenu menu = new MainMenu();
+        Stage newStage = new Stage();
+        newStage.setScene(menu.buildScene(newStage));
+        newStage.setTitle("Main Menu - Typing Ninja");
+        newStage.show();
+
     }
 
     private void showError(String message) {

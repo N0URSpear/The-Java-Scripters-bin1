@@ -1,6 +1,7 @@
 package com.example.addressbook.controllers;
 
 import com.example.addressbook.INinjaContactDAO;
+import com.example.addressbook.MainMenu;
 import com.example.addressbook.MockNinjaDAO;
 import com.example.addressbook.NinjaUser;
 import javafx.fxml.FXML;
@@ -45,6 +46,14 @@ public class LoginController {
         alert.setHeaderText(null);
         alert.setContentText("Welcome, " + ninja.getUserName() + "!");
         alert.showAndWait();
+
+        MainMenu menu = new MainMenu();
+        Stage newStage = new Stage();
+        newStage.setScene(menu.buildScene(newStage));
+        newStage.setTitle("Main Menu - Typing Ninja");
+        newStage.show();
+
+
 
         // Close popup after login
         Stage stage = (Stage) usernameField.getScene().getWindow();
