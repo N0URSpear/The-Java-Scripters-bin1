@@ -12,13 +12,13 @@
       style="-fx-background-color: #D9D9D9; -fx-padding: 20">
 
 
-    <Label style="-fx-text-fill: white; -fx-font-size: 24; -fx-font-family: 'Jaro';" text="Create Account" />
+    <Label style="-fx-text-fill: black; -fx-font-size: 24; -fx-font-family: 'Jaro';" text="Create Account" />
 
     <TextField fx:id="usernameField" promptText="Username" />
     <PasswordField fx:id="passwordField" promptText="Password" />
     <PasswordField fx:id="passwordRepeatField" promptText="Confirm Password" />
 
-    <Label style="-fx-text-fill: white; -fx-font-size: 24; -fx-font-family: 'Jaro';" text="Secret Questions" />
+    <Label style="-fx-text-fill: black; -fx-font-size: 24; -fx-font-family: 'Jaro';" text="Secret Questions" />
 
     <HBox>
         <ComboBox fx:id="SecretQuestion1ComboBox"/>

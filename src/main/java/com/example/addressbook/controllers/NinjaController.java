@@ -96,7 +96,12 @@ public class NinjaController {
         AccountCreation.showAndWait();
     }
 
-    public void onHelpClicked() {
-
+    public void onHelpClicked() throws IOException{
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/example/addressbook/Help-view.fxml"));
+        Stage HelpPopup = new Stage();
+        HelpPopup.setTitle("Help");
+        HelpPopup.initModality(Modality.APPLICATION_MODAL);
+        HelpPopup.setScene(new Scene(fxmlLoader.load()));
+        HelpPopup.showAndWait();
     }
 }
