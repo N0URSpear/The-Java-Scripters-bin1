@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.example.addressbook.controllers.CreateAccountController"
+      style="-fx-background-color: #D9D9D9; -fx-padding: 20">
+
+
+    <Label style="-fx-text-fill: white; -fx-font-size: 24; -fx-font-family: 'Jaro';" text="Create Account" />
+
+    <TextField fx:id="usernameField" promptText="Username" />
+    <PasswordField fx:id="passwordField" promptText="Password" />
+    <PasswordField fx:id="passwordRepeatField" promptText="Confirm Password" />
+
+    <Label style="-fx-text-fill: white; -fx-font-size: 24; -fx-font-family: 'Jaro';" text="Secret Questions" />
+
+    <HBox>
+        <ComboBox fx:id="SecretQuestion1ComboBox"/>
+        <TextField fx:id="SecretQuestion1Answer" promptText="Answer" />
+    </HBox>
+
+    <HBox>
+        <ComboBox fx:id="SecretQuestion2ComboBox"/>
+        <TextField fx:id="SecretQuestion2Answer" promptText="Answer" />
+    </HBox>
+
+    <HBox>
+        <Button onAction="#onCreateAccountClicked"  text="Create Account and Log In" />
+        <Button onAction="#onCancelClicked" text="Cancel" />
+    </HBox>
+
+</VBox>

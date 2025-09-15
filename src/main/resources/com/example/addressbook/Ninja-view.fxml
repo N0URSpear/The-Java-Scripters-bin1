@@ -1,27 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.image.Image?>
-<?import javafx.scene.paint.Color?>
-<?import javafx.scene.text.Font?>
-
 
 <StackPane fx:id="backgroundPane"
            xmlns:fx="http://javafx.com/fxml"
-           fx:controller="com.example.addressbook.NinjaController"
+           fx:controller="com.example.addressbook.controllers.NinjaController"
            stylesheets="@NinjaStyles.css"
            style="-fx-background-color: #140B38;">
 
     <!-- Background -->
     <ImageView fx:id="logoImage" preserveRatio="true" pickOnBounds="true">
-        <image>
-            <Image url="@Typing_Ninja_with_text.png"/>
-        </image>
+        <Image url="@Typing_Ninja_with_text.png"/>
     </ImageView>
 
     <!-- Overlay -->

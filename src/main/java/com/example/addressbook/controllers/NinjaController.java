@@ -1,12 +1,17 @@
-package com.example.addressbook;
+package com.example.addressbook.controllers;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+
+import java.io.IOException;
 
 
 public class NinjaController {
@@ -73,13 +78,25 @@ public class NinjaController {
         });
     }
 
-    public void onloginClicked(ActionEvent actionEvent) {
-
+    public void onloginClicked() throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/example/addressbook/Login-view.fxml"));
+        Stage loginPopup = new Stage();
+        loginPopup.setTitle("Login");
+        loginPopup.initModality(Modality.APPLICATION_MODAL);
+        loginPopup.setScene(new Scene(fxmlLoader.load()));
+        loginPopup.showAndWait();
     }
 
-    public void onCreateAccountClicked(ActionEvent actionEvent) {
+    public void onCreateAccountClicked() throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/example/addressbook/AccountCreation-view.fxml"));
+        Stage AccountCreation = new Stage();
+        AccountCreation.setTitle("Login");
+        AccountCreation.initModality(Modality.APPLICATION_MODAL);
+        AccountCreation.setScene(new Scene(fxmlLoader.load()));
+        AccountCreation.showAndWait();
     }
 
-    public void onHelpClicked(ActionEvent actionEvent) {
+    public void onHelpClicked() {
+
     }
 }
