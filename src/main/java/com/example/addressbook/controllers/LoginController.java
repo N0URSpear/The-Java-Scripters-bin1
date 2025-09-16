@@ -14,6 +14,7 @@ import org.mindrot.jbcrypt.BCrypt;
 public class LoginController {
     @FXML private TextField usernameField;
     @FXML private PasswordField passwordField;
+    private boolean loginSuccessful = false;
     private final INinjaContactDAO NinjaDAO;
     public LoginController() {this.NinjaDAO = new SqliteContactDAO();}
 
@@ -46,13 +47,7 @@ public class LoginController {
         alert.setContentText("Welcome, " + ninja.getUserName() + "!");
         alert.showAndWait();
 
-        MainMenu menu = new MainMenu();
-        Stage newStage = new Stage();
-        newStage.setScene(menu.buildScene(newStage));
-        newStage.setTitle("Main Menu - Typing Ninja");
-        newStage.show();
-
-
+        loginSuccessful = true;
 
         // Close popup after login
         Stage stage = (Stage) usernameField.getScene().getWindow();
@@ -68,5 +63,9 @@ public class LoginController {
     @FXML
     private void onForgotPasswordClicked() {
 
+    }
+
+    public boolean isLoginSuccessful() {
+        return loginSuccessful;
     }
 }
