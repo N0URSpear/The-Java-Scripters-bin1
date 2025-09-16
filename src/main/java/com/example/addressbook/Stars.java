@@ -19,7 +19,7 @@ public class Stars {
         return 1;
     }
 
-    // ⭐ 生成星星组件
+    // 生成星星组件
     public static HBox create(double percent, double starHeight, double gap) {
         int stars = percentToStars(percent);
         Image on  = new Image(Stars.class.getResourceAsStream(STAR_ON));

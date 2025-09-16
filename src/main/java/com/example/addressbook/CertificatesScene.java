@@ -23,22 +23,22 @@ public class CertificatesScene {
     // 标题（Jaro 180）
     private static final double TITLE_X = 36, TITLE_Y = 0, TITLE_SIZE = 180;
 
-    // ScrollPane：1569×724，位置与大小
+    // ScrollPane
     private static final double SCROLL_X = 178, SCROLL_Y = 249; // = 249 + 200
     private static final double SCROLL_W = 1569, SCROLL_H = 724;
 
-    // 内容占位（高于 ScrollPane 以产生滚动）
+    // 内容占位高于ScrollPane
     private static final double CONTENT_W = 1569, CONTENT_H = 1000;
 
     // 右上角返回按钮
     private static final double BACK_X = 1734, BACK_Y = 52;
 
-    // 底部 3 个文字“按钮”
+    // 底部 3 个文字按钮
     private static final double NAV_Y = 1000, NAV_FONT = 40;
     private static final double NAV_MM_X = 600, NAV_PF_X = 900, NAV_ST_X = 1150;
 
     public static Scene createScene(Stage stage) {
-        // -------- 设计层 --------
+        // 设计层
         Pane design = new Pane();
         design.setPrefSize(DESIGN_W, DESIGN_H);
         design.setMinSize(DESIGN_W, DESIGN_H);
@@ -47,7 +47,7 @@ public class CertificatesScene {
         Font jaro180 = loadFont(JARO, TITLE_SIZE, Font.font("System", TITLE_SIZE));
         Label title  = label("CERTIFICATES", jaro180, Color.WHITE, TITLE_X, TITLE_Y);
 
-        // ===== ScrollPane，严格限制为 1569×724 =====
+        //ScrollPane
         ScrollPane sp = new ScrollPane();
         sp.setLayoutX(SCROLL_X);
         sp.setLayoutY(SCROLL_Y);
@@ -88,7 +88,7 @@ public class CertificatesScene {
 
         design.getChildren().addAll(title, sp, backBtn, mainMenu, profile, settings);
 
-        // -------- 缩放容器：等比缩放 + 居中 + 背景 --------
+        //缩放容器
         Group scalable = new Group(design);
         StackPane viewport = new StackPane(scalable);
         viewport.setAlignment(Pos.CENTER);
@@ -105,7 +105,7 @@ public class CertificatesScene {
         return scene;
     }
 
-    // —— 小工具 —— //
+    // —— 小工具
     private static Label label(String text, Font font, Color color, double x, double y) {
         Label l = new Label(text);
         l.setFont(font);

@@ -26,20 +26,15 @@ public final class Keyboard {
 
     // 行的水平偏移（让布局更像真实键盘的错列；单位：一个键宽的比例）
     private static final double[] ROW_OFFSET_IN_KEYW = new double[]{
-            0.0,   // 第一行不偏移
-            0.0,  // 第二行稍右
-            0.0,  // 第三行更多
-            0.0   // 第四行最多
+            0.0,
+            0.0,
+            0.0,
+            0.0
     };
 
     private static final int MAX_COUNT = 10; // 0..10
 
-    /**
-     * 创建键盘热力图组件（0..10 错误次数）
-     * @param width  视图宽度（像素）
-     * @param height 视图高度（像素）
-     * @param counts 键 → 次数(0..10)，大小写均可；未提供的键默认为0
-     */
+
     public static Node create(double width, double height, Map<String, Integer> counts) {
         // 背板：圆角浅灰，风格与其他面板一致
         Rectangle bg = new Rectangle(width, height);

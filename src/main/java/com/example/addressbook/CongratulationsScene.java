@@ -52,7 +52,7 @@ public class CongratulationsScene {
     //星星
     private static final double STARS_X = 748;
     private static final double STARS_Y = 260;
-    private static final double STAR_HEIGHT = 120; // 根据图调，常见 100~140
+    private static final double STAR_HEIGHT = 120;
     private static final double STAR_GAP    = 28;  // 星与星之间的间距
 
     //表格
@@ -68,14 +68,21 @@ public class CongratulationsScene {
     private static final double KEY_H = 223;
 
 
+    //忍者
+    private static final String Ninja  = "/images/Ninja.png";
+    private static final double NINJA_H = 479;
+    private static final double NINJA_W = 416;
+    private static final double NINJA_X = 1555;
+    private static final double NINJA_Y = 601;
+
     public static Scene createScene(Stage stage) {
-        // -------- 设计层：所有坐标完全按 Figma 写 --------
+        // 设计层
         Pane design = new Pane();
         design.setPrefSize(DESIGN_W, DESIGN_H);
         design.setMinSize(DESIGN_W, DESIGN_H);
         design.setMaxSize(DESIGN_W, DESIGN_H);
 
-        // 标题（Jaro 180）
+        // 标题
         Font jaro180 = loadFont(JARO, TITLE_SIZE, Font.font("System", FontWeight.EXTRA_BOLD, TITLE_SIZE));
         Label title = label("CONGRATULATIONS", jaro180, Color.WHITE, TITLE_X, TITLE_Y);
 
@@ -90,13 +97,13 @@ public class CongratulationsScene {
         Rectangle accBox = whiteBox(ACC_X, ACC_Y);
         Label accLabel   = label("Accuracy section", Font.font("System", 28), Color.BLACK, ACC_X + 19, ACC_Y + 10);
 
-        // 绿色按钮（示例：都跳到 Certificates）
+        // 绿色按钮
         Button printBtn = greenButton("Print Certificate button", PRINT_X, PRINT_Y);
         Button backBtn  = greenButton("Return to Main Menu button", BACK_X, BACK_Y);
         printBtn.setOnAction(e -> stage.setScene(CertificatesScene.createScene(stage)));
 
 
-// 示例数据（10 次记录，和你截图一致为两条线）
+// 数据10 次
         List<Integer> wpmData = List.of(48, 52, 55, 57, 60, 61, 63, 64, 65, 66);
         List<Integer> accData = List.of(88, 90, 92, 93, 95, 96, 96, 97, 98, 99);
 
@@ -147,7 +154,7 @@ public class CongratulationsScene {
         heat.put("M", 0);
         heat.put(" ", 0);
 
-// …按需填 0..10
+// 按需填 0..10
 
         Node keyboard = Keyboard.create(KEY_W, KEY_H, heat);
         keyboard.setLayoutX(KEY_X);
@@ -163,7 +170,7 @@ public class CongratulationsScene {
                 printBtn, backBtn
         );
 
-        // -------- 缩放容器：等比缩放 + 居中 + 背景 --------
+        // 缩放容器：等比缩放 + 居中 + 背景
         Group scalable = new Group(design);
         StackPane viewport = new StackPane(scalable);
         viewport.setAlignment(Pos.CENTER);
@@ -181,7 +188,9 @@ public class CongratulationsScene {
         return scene;
     }
 
-    // —— 小工具 —— //
+
+
+    // 工具
     private static Rectangle whiteBox(double x, double y) {
         Rectangle r = new Rectangle(BOX_W, BOX_H);
         r.setArcWidth(BOX_R * 2);
