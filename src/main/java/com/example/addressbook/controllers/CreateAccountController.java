@@ -22,6 +22,7 @@ public class CreateAccountController {
     @FXML private ComboBox<String> SecretQuestion2ComboBox;
     @FXML private TextField SecretQuestion1Answer;
     @FXML private TextField SecretQuestion2Answer;
+    private boolean isCreateAccountSuccessful = false;
     private final INinjaContactDAO NinjaDAO;
     public CreateAccountController() {NinjaDAO = new SqliteContactDAO();}
 
@@ -131,12 +132,7 @@ public class CreateAccountController {
 
         showSuccess("Account created successfully!");
 
-        MainMenu menu = new MainMenu();
-        Stage newStage = new Stage();
-        newStage.setScene(menu.buildScene(newStage));
-        newStage.setTitle("Main Menu - Typing Ninja");
-        newStage.show();
-
+        isCreateAccountSuccessful = true;
     }
 
     private void showError(String message) {
@@ -159,5 +155,9 @@ public class CreateAccountController {
     public void onCancelClicked() {
         Stage stage = (Stage) usernameField.getScene().getWindow();
         stage.close();
+    }
+
+    public boolean isCreateAccountSuccessful() {
+        return isCreateAccountSuccessful;
     }
 }

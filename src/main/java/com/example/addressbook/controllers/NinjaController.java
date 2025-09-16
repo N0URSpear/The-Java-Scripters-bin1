@@ -1,9 +1,12 @@
 package com.example.addressbook.controllers;
 
+import com.example.addressbook.MainMenu;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
@@ -81,19 +84,39 @@ public class NinjaController {
     public void onloginClicked() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/example/addressbook/Login-view.fxml"));
         Stage loginPopup = new Stage();
+        Parent root = fxmlLoader.load();
+        LoginController controller = fxmlLoader.getController();
         loginPopup.setTitle("Login");
         loginPopup.initModality(Modality.APPLICATION_MODAL);
-        loginPopup.setScene(new Scene(fxmlLoader.load()));
+        loginPopup.setScene(new Scene(root));
         loginPopup.showAndWait();
+
+        if (controller.isLoginSuccessful()) {
+            Stage stage = (Stage) logoImage.getScene().getWindow();
+            MainMenu menu = new MainMenu();
+            Scene mainMenuScene = menu.buildScene(stage);
+            stage.setScene(mainMenuScene);
+            stage.setTitle("Main Menu - Typing Ninja");
+        }
     }
 
     public void onCreateAccountClicked() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/example/addressbook/AccountCreation-view.fxml"));
         Stage AccountCreation = new Stage();
+        Parent root = fxmlLoader.load();
+        CreateAccountController controller = fxmlLoader.getController();
         AccountCreation.setTitle("Login");
         AccountCreation.initModality(Modality.APPLICATION_MODAL);
-        AccountCreation.setScene(new Scene(fxmlLoader.load()));
+        AccountCreation.setScene(new Scene(root));
         AccountCreation.showAndWait();
+
+        if (controller.isCreateAccountSuccessful()) {
+            Stage stage = (Stage) logoImage.getScene().getWindow();
+            MainMenu menu = new MainMenu();
+            Scene mainMenuScene = menu.buildScene(stage);
+            stage.setScene(mainMenuScene);
+            stage.setTitle("Main Menu - Typing Ninja");
+        }
     }
 
     public void onHelpClicked() throws IOException{
