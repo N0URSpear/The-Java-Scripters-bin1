@@ -38,67 +38,44 @@ public class ForgotPasswordController {
         if (stageNumber == 1) {
             String username = usernameField.getText();
             if (username == null || username.isBlank()) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Forgot Password Error!");
-                alert.setContentText("Username cannot be Empty!");
-                alert.showAndWait();
+                showError("Username cannot be Empty!");
                 return;
             }
             ninja = NinjaDAO.getNinjaUser(username);
             if (ninja == null) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Forgot Password Error!");
-                alert.setContentText("Username cannot be Found!");
-                alert.showAndWait();
+                showError("Username cannot be Found!");
                 return;
             }
             setSecretMessage(ninja.getSecretQuestion1(), ninja.getSecretQuestion2());
         }
         if (stageNumber == 2) {
             if (SecretQuestion1Answer.getText().isBlank() || SecretQuestion2Answer.getText().isBlank()) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Forgot Password Error!");
-                alert.setContentText("Please answer the secret questions!");
-                alert.showAndWait();
+                showError("Please answer the secret questions!");
                 return;
             }
             if (!BCrypt.checkpw(SecretQuestion1Answer.getText(),ninja.getSecretQuestion1Answer()) || !BCrypt.checkpw(SecretQuestion2Answer.getText(), ninja.getSecretQuestion2Answer())) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Forgot Password Error!");
-                alert.setContentText("Your answer to Secret Question 1 or 2 is wrong!");
-                alert.showAndWait();
+                showError("Your answer to Secret Question 1 or 2 is wrong!");
                 return;
             }
         }
         if (stageNumber == 3) {
             if (passwordField.getText().isBlank() || passwordField.getText() == null) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Forgot Password Error!");
-                alert.setContentText("Please enter a password!");
-                alert.showAndWait();
+                showError("Please enter a password!");
                 return;
             }
             if (confirmPasswordField.getText().isBlank() || confirmPasswordField.getText() == null) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Forgot Password Error!");
-                alert.setContentText("Please confirm your password!");
-                alert.showAndWait();
+                showError("Please confirm your password!");
                 return;
             }
             if (!Objects.equals(passwordField.getText(), confirmPasswordField.getText())) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Forgot Password Error!");
-                alert.setContentText("Passwords do not match!");
-                alert.showAndWait();
+                showError("Passwords do not match!");
                 return;
             }
-            ninja.setPasswordHash(BCrypt.hashpw(confirmPasswordField.getText(),BCrypt.gensalt()));
 
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Forgot Password");
-            alert.setHeaderText(null);
-            alert.setContentText("Password changed successfully!");
-            alert.showAndWait();
+            ninja.setPasswordHash(BCrypt.hashpw(confirmPasswordField.getText(),BCrypt.gensalt()));
+            NinjaDAO.updateNinjaUser(ninja);
+
+            showSuccess("Password changed successfully!");
 
             Stage stage = (Stage) getUsername.getScene().getWindow();
             stage.close();
@@ -137,5 +114,21 @@ public class ForgotPasswordController {
                     changePassword.setVisible(true);
                     break;
         }
+    }
+
+    private void showError(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Invalid Input");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private void showSuccess(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Success");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }
