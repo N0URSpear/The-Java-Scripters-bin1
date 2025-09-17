@@ -1,7 +1,6 @@
 package com.example.addressbook.controllers;
 
 import com.example.addressbook.INinjaContactDAO;
-import com.example.addressbook.MainMenu;
 import com.example.addressbook.SqliteContactDAO;
 import com.example.addressbook.NinjaUser;
 import javafx.fxml.FXML;
@@ -15,6 +14,7 @@ public class LoginController {
     @FXML private TextField usernameField;
     @FXML private PasswordField passwordField;
     private boolean loginSuccessful = false;
+    private boolean forgotPassword = false;
     private final INinjaContactDAO NinjaDAO;
     public LoginController() {this.NinjaDAO = new SqliteContactDAO();}
 
@@ -62,10 +62,17 @@ public class LoginController {
 
     @FXML
     private void onForgotPasswordClicked() {
+        forgotPassword = true;
 
+        Stage stage = (Stage) usernameField.getScene().getWindow();
+        stage.close();
     }
 
     public boolean isLoginSuccessful() {
         return loginSuccessful;
+    }
+
+    public boolean isForgotPassword() {
+        return forgotPassword;
     }
 }
