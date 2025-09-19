@@ -2,8 +2,8 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-
 <?import javafx.geometry.Insets?>
+
 <VBox style="-fx-background-color: #D9D9D9; -fx-padding: 20"
       xmlns="http://javafx.com/javafx/17.0.12"
       xmlns:fx="http://javafx.com/fxml/1"
@@ -17,7 +17,7 @@
     <Button fx:id="ForgotPasswordButton" text="Forgot Password?" onAction="#onForgotPasswordClicked"
             style="-fx-background-color: transparent; -fx-border-color: transparent;-fx-text-fill: black;" textAlignment="RIGHT">
         <VBox.margin>
-            <Insets top="0" right="0" bottom="0" left="230"/>
+            <Insets left="230"/>
         </VBox.margin>
     </Button>
     <HBox>

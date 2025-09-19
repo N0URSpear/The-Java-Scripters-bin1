@@ -5,7 +5,6 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -97,6 +96,16 @@ public class NinjaController {
             Scene mainMenuScene = menu.buildScene(stage);
             stage.setScene(mainMenuScene);
             stage.setTitle("Main Menu - Typing Ninja");
+        }
+
+        if (controller.isForgotPassword()) {
+            FXMLLoader fxmlLoader1 = new FXMLLoader(getClass().getResource("/com/example/addressbook/ForgorPassword-view.fxml"));
+            Stage forgotPasswordPopup = new Stage();
+            Parent root1 = fxmlLoader1.load();
+            forgotPasswordPopup.setTitle("Forgot Password");
+            forgotPasswordPopup.initModality(Modality.APPLICATION_MODAL);
+            forgotPasswordPopup.setScene(new Scene(root1));
+            forgotPasswordPopup.showAndWait();
         }
     }
 
