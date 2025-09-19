@@ -18,11 +18,11 @@
 
     <HBox prefWidth="340">
         <Label text="Username:" style="-fx-text-fill: black; -fx-font-size: 20; -fx-font-family: 'Jaro';" prefWidth="100"/>
-        <TextField fx:id="usernameField" promptText="Username" prefWidth="240" alignment="CENTER_RIGHT"/>
+        <TextField fx:id="usernameField" promptText="Username" prefWidth="240" />
     </HBox>
     <HBox>
         <Label text="Password:" style="-fx-text-fill: black; -fx-font-size: 20; -fx-font-family: 'Jaro';" prefWidth="100"/>
-        <PasswordField fx:id="passwordField" promptText="Password" prefWidth="240" alignment="CENTER_RIGHT"/>
+        <PasswordField fx:id="passwordField" promptText="Password" prefWidth="240" />
     </HBox>
 
 

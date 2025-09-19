@@ -18,15 +18,15 @@
     </Label>
     <HBox spacing="20" prefWidth="500">
         <Label style="-fx-text-fill: black; -fx-font-size: 20; -fx-font-family: 'Jaro';" text="Username:" prefWidth="200" alignment="CENTER_LEFT"/>
-        <TextField fx:id="usernameField" promptText="Username" prefWidth="300" alignment="CENTER_RIGHT"/>
+        <TextField fx:id="usernameField" promptText="Username" prefWidth="300" />
     </HBox>
     <HBox spacing="20" prefWidth="500">
         <Label style="-fx-text-fill: black; -fx-font-size: 20; -fx-font-family: 'Jaro';" text="Password:" prefWidth="200" alignment="CENTER_LEFT"/>
-        <PasswordField fx:id="passwordField" promptText="Password" prefWidth="300" alignment="CENTER_RIGHT"/>
+        <PasswordField fx:id="passwordField" promptText="Password" prefWidth="300" />
     </HBox>
     <HBox spacing="20" prefWidth="500">
         <Label style="-fx-text-fill: black; -fx-font-size: 20; -fx-font-family: 'Jaro';" text="Confirm Password:" prefWidth="200" alignment="CENTER_LEFT"/>
-        <PasswordField fx:id="passwordRepeatField" promptText="Confirm Password" prefWidth="300" alignment="CENTER_RIGHT"/>
+        <PasswordField fx:id="passwordRepeatField" promptText="Confirm Password" prefWidth="300" />
     </HBox>
 
     <Label style="-fx-text-fill: black; -fx-font-size: 20; -fx-font-family: 'Jaro';" text="Secret Questions" >

@@ -122,19 +122,19 @@ public class ForgotPasswordController {
 
     private void getStage(int number) {
         switch (number) {
-            case 1: getUsername.setVisible(true);
-                    getSecretQuestions.setVisible(false);
-                    changePassword.setVisible(false);
+            case 1: getUsername.setDisable(false);
+                    getSecretQuestions.setDisable(true);
+                    changePassword.setDisable(true);
                     break;
 
             case 2: getUsername.setDisable(true);
-                    getSecretQuestions.setVisible(true);
-                    changePassword.setVisible(false);
+                    getSecretQuestions.setDisable(false);
+                    changePassword.setDisable(true);
                     break;
 
             case 3: getUsername.setDisable(true);
                     getSecretQuestions.setDisable(true);
-                    changePassword.setVisible(true);
+                    changePassword.setDisable(false);
                     break;
         }
     }
