@@ -3,33 +3,54 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
+<?import javafx.geometry.Insets?>
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.example.addressbook.controllers.CreateAccountController"
-      style="-fx-background-color: #D9D9D9; -fx-padding: 20">
+      style="-fx-background-color: #D9D9D9; -fx-padding: 10 20 20 20;"
+      prefWidth="500" >
 
 
-    <Label style="-fx-text-fill: black; -fx-font-size: 24; -fx-font-family: 'Jaro';" text="Create Account" />
+    <Label style="-fx-text-fill: black; -fx-font-size: 24; -fx-font-family: 'Jaro';" text="Create Account" alignment="CENTER" prefWidth="500">
+        <VBox.margin>
+            <Insets bottom="10"/>
+        </VBox.margin>
+    </Label>
+    <HBox spacing="20" prefWidth="500">
+        <Label style="-fx-text-fill: black; -fx-font-size: 20; -fx-font-family: 'Jaro';" text="Username:" prefWidth="200" alignment="CENTER_LEFT"/>
+        <TextField fx:id="usernameField" promptText="Username" prefWidth="300" />
+    </HBox>
+    <HBox spacing="20" prefWidth="500">
+        <Label style="-fx-text-fill: black; -fx-font-size: 20; -fx-font-family: 'Jaro';" text="Password:" prefWidth="200" alignment="CENTER_LEFT"/>
+        <PasswordField fx:id="passwordField" promptText="Password" prefWidth="300" />
+    </HBox>
+    <HBox spacing="20" prefWidth="500">
+        <Label style="-fx-text-fill: black; -fx-font-size: 20; -fx-font-family: 'Jaro';" text="Confirm Password:" prefWidth="200" alignment="CENTER_LEFT"/>
+        <PasswordField fx:id="passwordRepeatField" promptText="Confirm Password" prefWidth="300" />
+    </HBox>
 
-    <TextField fx:id="usernameField" promptText="Username" />
-    <PasswordField fx:id="passwordField" promptText="Password" />
-    <PasswordField fx:id="passwordRepeatField" promptText="Confirm Password" />
+    <Label style="-fx-text-fill: black; -fx-font-size: 20; -fx-font-family: 'Jaro';" text="Secret Questions" >
+        <VBox.margin>
+            <Insets top="10"/>
+        </VBox.margin>
+    </Label>
 
-    <Label style="-fx-text-fill: black; -fx-font-size: 24; -fx-font-family: 'Jaro';" text="Secret Questions" />
-
-    <HBox>
-        <ComboBox fx:id="SecretQuestion1ComboBox"/>
+    <HBox prefWidth="500">
+        <ComboBox fx:id="SecretQuestion1ComboBox" prefWidth="375"/>
         <TextField fx:id="SecretQuestion1Answer" promptText="Answer" />
     </HBox>
 
-    <HBox>
-        <ComboBox fx:id="SecretQuestion2ComboBox"/>
+    <HBox prefWidth="500">
+        <ComboBox fx:id="SecretQuestion2ComboBox" prefWidth="375"/>
         <TextField fx:id="SecretQuestion2Answer" promptText="Answer" />
     </HBox>
 
-    <HBox>
-        <Button onAction="#onCreateAccountClicked"  text="Create Account and Log In" style="-fx-text-fill: black; -fx-font-size: 24; -fx-font-family: 'Jaro';"/>
-        <Button onAction="#onCancelClicked" text="Cancel" style="-fx-text-fill: black; -fx-font-size: 24; -fx-font-family: 'Jaro';" />
+    <HBox alignment="CENTER">
+        <Button onAction="#onCreateAccountClicked"  text="Create Account and Log In" style="-fx-text-fill: black; -fx-font-size: 24; -fx-font-family: 'Jaro';" prefWidth="300"/>
+        <Button onAction="#onCancelClicked" text="Cancel" style="-fx-text-fill: black; -fx-font-size: 24; -fx-font-family: 'Jaro';" prefWidth="200"/>
+        <VBox.margin>
+            <Insets top="10"/>
+        </VBox.margin>
     </HBox>
 
 </VBox>

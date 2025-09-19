@@ -16,6 +16,7 @@ public class TypingNinjaApp extends Application {
     @Override
     public void start(Stage stage) throws IOException {
 
+        // Load Jaro font for stylesheets and FXML usage
         Font.loadFont(getClass().getResourceAsStream("/com/example/addressbook/Jaro-Regular-VariableFont_opsz.ttf"), 14);
 
         // Load FXML
@@ -27,6 +28,7 @@ public class TypingNinjaApp extends Application {
         double WIDTH = screenBounds.getWidth() * 0.75;
         double HEIGHT = screenBounds.getHeight() * 0.75;
 
+        // Create and Display the scene
         Scene scene = new Scene(root, WIDTH, HEIGHT);
         stage.setTitle(TITLE);
         stage.setScene(scene);

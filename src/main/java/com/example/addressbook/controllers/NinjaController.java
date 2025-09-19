@@ -12,6 +12,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 import java.io.IOException;
 
@@ -41,7 +42,7 @@ public class NinjaController {
                 for (Button btn : new Button[]{loginButton, createAccountButton, helpButton}) {
                     btn.styleProperty().bind(
                             Bindings.createStringBinding(() -> {
-                                double fontSize = scaleFactor.get() * 0.03; // adjust proportionally
+                                double fontSize = scaleFactor.get() * 0.03; // adjust font size
                                 return String.format(
                                         "-fx-font-size: %.0fpx;",
                                         fontSize
@@ -88,6 +89,8 @@ public class NinjaController {
         loginPopup.setTitle("Login");
         loginPopup.initModality(Modality.APPLICATION_MODAL);
         loginPopup.setScene(new Scene(root));
+        loginPopup.setResizable(false);
+        loginPopup.initStyle(StageStyle.UNDECORATED);
         loginPopup.showAndWait();
 
         if (controller.isLoginSuccessful()) {
@@ -105,6 +108,8 @@ public class NinjaController {
             forgotPasswordPopup.setTitle("Forgot Password");
             forgotPasswordPopup.initModality(Modality.APPLICATION_MODAL);
             forgotPasswordPopup.setScene(new Scene(root1));
+            forgotPasswordPopup.setResizable(false);
+            forgotPasswordPopup.initStyle(StageStyle.UNDECORATED);
             forgotPasswordPopup.showAndWait();
         }
     }
@@ -117,6 +122,8 @@ public class NinjaController {
         AccountCreation.setTitle("Login");
         AccountCreation.initModality(Modality.APPLICATION_MODAL);
         AccountCreation.setScene(new Scene(root));
+        AccountCreation.setResizable(false);
+        AccountCreation.initStyle(StageStyle.UNDECORATED);
         AccountCreation.showAndWait();
 
         if (controller.isCreateAccountSuccessful()) {
@@ -134,6 +141,7 @@ public class NinjaController {
         HelpPopup.setTitle("Help");
         HelpPopup.initModality(Modality.APPLICATION_MODAL);
         HelpPopup.setScene(new Scene(fxmlLoader.load()));
+        HelpPopup.setResizable(false);
         HelpPopup.showAndWait();
     }
 }

@@ -1,6 +1,7 @@
 package com.example.addressbook.controllers;
 
 import com.example.addressbook.INinjaContactDAO;
+import com.example.addressbook.MainMenu;
 import com.example.addressbook.SqliteContactDAO;
 import com.example.addressbook.NinjaUser;
 import javafx.collections.FXCollections;
@@ -60,7 +61,7 @@ public class CreateAccountController {
         if (sourceSelection != null && sourceSelection.equals(otherSelection)) {
             other.getSelectionModel().clearSelection();
             if (!newOptions.isEmpty()) {
-                other.setValue(newOptions.getFirst());
+                other.setValue(newOptions.get(0));
             }
         }
     }
@@ -79,7 +80,6 @@ public class CreateAccountController {
             showError("Username cannot be empty.");
             return;
         }
-
         // Normalize username to avoid duplicates caused by stray spaces
         username = username.trim();
 
