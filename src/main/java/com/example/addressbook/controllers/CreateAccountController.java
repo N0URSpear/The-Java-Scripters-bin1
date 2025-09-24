@@ -133,6 +133,9 @@ public class CreateAccountController {
         showSuccess("Account created successfully!");
 
         isCreateAccountSuccessful = true;
+
+        Stage stage = (Stage) usernameField.getScene().getWindow();
+        stage.close();
     }
 
     private void showError(String message) {
