@@ -94,7 +94,7 @@ public class ForgotPasswordController {
             }
 
             ninja.setPasswordHash(BCrypt.hashpw(confirmPasswordField.getText(),BCrypt.gensalt()));
-            NinjaDAO.addNinjaUser(ninja);
+            NinjaDAO.updateNinjaUser(ninja);
 
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Forgot Password");
