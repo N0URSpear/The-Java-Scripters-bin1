@@ -98,7 +98,7 @@ public class ForgotPasswordControllerTest {
 
         // fetch updated user from DAO
         NinjaUser updated = mockDao.getNinjaUser("testUser");
-        assertTrue(updated != null);
+        assertNotNull(updated);
         assertNotEquals("testPassword", updated.getPasswordHash());
     }
 
