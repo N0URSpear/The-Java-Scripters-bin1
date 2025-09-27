@@ -15,57 +15,79 @@ public class LoginController {
     @FXML private PasswordField passwordField;
     private boolean loginSuccessful = false;
     private boolean forgotPassword = false;
+    private boolean testMode = false;
     private final INinjaContactDAO NinjaDAO;
     public LoginController() {this.NinjaDAO = new SqliteContactDAO();}
+    public LoginController(INinjaContactDAO mockDAO) {
+        this.NinjaDAO = mockDAO;
+    }
+
+    public void setTestMode(boolean testMode) {
+        this.testMode = testMode;
+    }
 
     @FXML
     private void onLoginClicked() {
-        String username = usernameField.getText();
-        String password = passwordField.getText();
+        String username = usernameField.getText().trim();
+        String password = passwordField.getText().trim();
+        doLogin(username, password);
+    }
+
+    void doLogin(String username, String password) {
 
         //check credentials
         NinjaUser ninja = NinjaDAO.getNinjaUser(username);
         if (ninja == null) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Login Error");
-            alert.setContentText("Username not found!");
-            alert.showAndWait();
+            showAlert(Alert.AlertType.ERROR,"Login Error", "Username not found!");
             return;
         }
         if (!BCrypt.checkpw(password,ninja.getPasswordHash())) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Login Error");
-            alert.setHeaderText(null);
-            alert.setContentText("Incorrect password!");
-            alert.showAndWait();
+            showAlert(Alert.AlertType.ERROR,"Login Error","Incorrect password!");
             return;
         }
 
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Login Successful");
-        alert.setHeaderText(null);
-        alert.setContentText("Welcome, " + ninja.getUserName() + "!");
-        alert.showAndWait();
-
+        showAlert(Alert.AlertType.INFORMATION,"Login Successful","Welcome, " + ninja.getUserName() + "!"  );
         loginSuccessful = true;
 
         // Close popup after login
-        Stage stage = (Stage) usernameField.getScene().getWindow();
-        stage.close();
+        if (usernameField != null && usernameField.getScene() != null) {
+            Stage stage = (Stage) usernameField.getScene().getWindow();
+            stage.close();
+        }
+    }
+
+    private void showAlert(Alert.AlertType type, String title, String message) {
+        if (testMode) {
+            // Don’t show alerts while testing
+            return;
+        }
+
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     @FXML
     private void onCancelClicked() {
-        Stage stage = (Stage) usernameField.getScene().getWindow();
-        stage.close();
+        if (usernameField != null && usernameField.getScene() != null) {
+            Stage stage = (Stage) usernameField.getScene().getWindow();
+            stage.close();
+        }
     }
 
     @FXML
     private void onForgotPasswordClicked() {
-        forgotPassword = true;
+        ForgotPassword();
+    }
 
-        Stage stage = (Stage) usernameField.getScene().getWindow();
-        stage.close();
+    void ForgotPassword() {
+        forgotPassword = true;
+        if (usernameField != null && usernameField.getScene() != null) {
+            Stage stage = (Stage) usernameField.getScene().getWindow();
+            stage.close();
+        }
     }
 
     public boolean isLoginSuccessful() {

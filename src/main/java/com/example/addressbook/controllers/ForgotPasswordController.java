@@ -24,10 +24,81 @@ public class ForgotPasswordController {
     @FXML private TextField SecretQuestion2Answer;
     @FXML private PasswordField passwordField;
     @FXML private PasswordField confirmPasswordField;
+    private boolean testMode = false;
     private int stageNumber = 1;
     private NinjaUser ninja;
     private final INinjaContactDAO NinjaDAO;
     public ForgotPasswordController() {this.NinjaDAO = new SqliteContactDAO();}
+    public ForgotPasswordController(INinjaContactDAO mockDAO) {
+        this.NinjaDAO = mockDAO;
+    }
+
+    public enum ForgotPasswordResult {
+        SUCCESS,
+        EMPTY_USERNAME,
+        USER_NOT_FOUND,
+        EMPTY_SECRET_ANSWERS,
+        WRONG_ANSWERS,
+        EMPTY_PASSWORD,
+        EMPTY_CONFIRMATION,
+        PASSWORDS_MISMATCH
+    }
+
+    private String getMessageForResult(ForgotPasswordResult result) {
+        return switch (result) {
+            case EMPTY_USERNAME -> "Username cannot be empty!";
+            case USER_NOT_FOUND -> "Username not found!";
+            case EMPTY_SECRET_ANSWERS -> "Please answer the secret questions!";
+            case WRONG_ANSWERS -> "Your answer to Secret Question 1 or 2 is wrong!";
+            case EMPTY_PASSWORD -> "Please enter a password!";
+            case EMPTY_CONFIRMATION -> "Please confirm your password!";
+            case PASSWORDS_MISMATCH -> "Passwords do not match!";
+            default -> "Unknown error";
+        };
+    }
+
+    // --- Validation methods for unit tests ---
+    public ForgotPasswordResult validateStage1(String username) {
+        if (username == null || username.isBlank()) {
+            return ForgotPasswordResult.EMPTY_USERNAME;
+        }
+        ninja = NinjaDAO.getNinjaUser(username);
+        if (ninja == null) {
+            return ForgotPasswordResult.USER_NOT_FOUND;
+        }
+        return ForgotPasswordResult.SUCCESS;
+    }
+
+    public ForgotPasswordResult validateStage2(String answer1, String answer2) {
+        if (answer1 == null || answer1.isBlank() || answer2 == null || answer2.isBlank()) {
+            return ForgotPasswordResult.EMPTY_SECRET_ANSWERS;
+        }
+        if (!BCrypt.checkpw(answer1, ninja.getSecretQuestion1Answer())
+                || !BCrypt.checkpw(answer2, ninja.getSecretQuestion2Answer())) {
+            return ForgotPasswordResult.WRONG_ANSWERS;
+        }
+        return ForgotPasswordResult.SUCCESS;
+    }
+
+    public ForgotPasswordResult validateStage3(String password, String confirmPassword) {
+        if (password == null || password.isBlank()) {
+            return ForgotPasswordResult.EMPTY_PASSWORD;
+        }
+        if (confirmPassword == null || confirmPassword.isBlank()) {
+            return ForgotPasswordResult.EMPTY_CONFIRMATION;
+        }
+        if (!Objects.equals(password, confirmPassword)) {
+            return ForgotPasswordResult.PASSWORDS_MISMATCH;
+        }
+        // update password
+        ninja.setPasswordHash(BCrypt.hashpw(password, BCrypt.gensalt()));
+        NinjaDAO.updateNinjaUser(ninja);
+        return ForgotPasswordResult.SUCCESS;
+    }
+
+    public void setTestMode(boolean testMode) {
+        this.testMode = testMode;
+    }
 
     @FXML public void initialize() {
         getStage(stageNumber);
@@ -35,86 +106,55 @@ public class ForgotPasswordController {
 
     @FXML
     private void onConfirmClicked() {
-        if (stageNumber == 1) {
-            String username = usernameField.getText();
-            if (username == null || username.isBlank()) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Forgot Password Error!");
-                alert.setContentText("Username cannot be Empty!");
-                alert.showAndWait();
-                return;
-            }
-            ninja = NinjaDAO.getNinjaUser(username);
-            if (ninja == null) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Forgot Password Error!");
-                alert.setContentText("Username cannot be Found!");
-                alert.showAndWait();
-                return;
-            }
-            setSecretMessage(ninja.getSecretQuestion1(), ninja.getSecretQuestion2());
+        ForgotPasswordResult result;
+        switch (stageNumber) {
+            case 1:
+                result = validateStage1(usernameField.getText().trim());
+                if (result == ForgotPasswordResult.SUCCESS) {
+                    setSecretMessage(ninja.getSecretQuestion1(), ninja.getSecretQuestion2());
+                }
+                break;
+
+            case 2:
+                result = validateStage2(SecretQuestion1Answer.getText().trim(), SecretQuestion2Answer.getText().trim());
+                break;
+
+            case 3:
+                result = validateStage3(passwordField.getText().trim(), confirmPasswordField.getText().trim());
+                break;
+
+            default:
+                result = ForgotPasswordResult.SUCCESS;
         }
-        if (stageNumber == 2) {
-            if (SecretQuestion1Answer.getText().isBlank() || SecretQuestion2Answer.getText().isBlank()) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Forgot Password Error!");
-                alert.setContentText("Please answer the secret questions!");
-                alert.showAndWait();
-                return;
-            }
-            if (!BCrypt.checkpw(SecretQuestion1Answer.getText(),ninja.getSecretQuestion1Answer()) || !BCrypt.checkpw(SecretQuestion2Answer.getText(), ninja.getSecretQuestion2Answer())) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Forgot Password Error!");
-                alert.setContentText("Your answer to Secret Question 1 or 2 is wrong!");
-                alert.showAndWait();
-                return;
-            }
-        }
-        if (stageNumber == 3) {
-            if (passwordField.getText().isBlank() || passwordField.getText() == null) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Forgot Password Error!");
-                alert.setContentText("Please enter a password!");
-                alert.showAndWait();
-                return;
-            }
-            if (confirmPasswordField.getText().isBlank() || confirmPasswordField.getText() == null) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Forgot Password Error!");
-                alert.setContentText("Please confirm your password!");
-                alert.showAndWait();
-                return;
-            }
-            if (!Objects.equals(passwordField.getText(), confirmPasswordField.getText())) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Forgot Password Error!");
-                alert.setContentText("Passwords do not match!");
-                alert.showAndWait();
-                return;
-            }
 
-            ninja.setPasswordHash(BCrypt.hashpw(confirmPasswordField.getText(),BCrypt.gensalt()));
-            NinjaDAO.updateNinjaUser(ninja);
-
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Forgot Password");
-            alert.setHeaderText(null);
-            alert.setContentText("Password changed successfully!");
-            alert.showAndWait();
-
-            Stage stage = (Stage) getUsername.getScene().getWindow();
-            stage.close();
+        if (result != ForgotPasswordResult.SUCCESS) {
+            // Show readable error message
+            showAlert(Alert.AlertType.ERROR,"Forgot Password Error!",getMessageForResult(result));
             return;
         }
 
+        // If successful and on stage 3, finish flow and close
+        if (stageNumber == 3) {
+            showAlert(Alert.AlertType.INFORMATION,"Forgot Password","Password changed successfully!");
+
+            if (getUsername != null && getUsername.getScene() != null) {
+                Stage stage = (Stage) getUsername.getScene().getWindow();
+                stage.close();
+            }
+            return;
+        }
+
+        // advance to next stage and update UI
         stageNumber++;
         getStage(stageNumber);
     }
 
     @FXML
     private void onCancelClicked() {
-        Stage stage = (Stage) getUsername.getScene().getWindow();
-        stage.close();
+        if (usernameField != null && usernameField.getScene() != null) {
+            Stage stage = (Stage) usernameField.getScene().getWindow();
+            stage.close();
+        }
     }
 
     private void setSecretMessage(String message1, String message2) {
@@ -122,22 +162,38 @@ public class ForgotPasswordController {
         secretQuestion2.setText(message2);
     }
 
+    private void showAlert(Alert.AlertType type, String title, String message) {
+        if (testMode) {
+            // Don’t show alerts while testing
+            return;
+        }
+
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
     private void getStage(int number) {
         switch (number) {
-            case 1: getUsername.setDisable(false);
-                    getSecretQuestions.setDisable(true);
-                    changePassword.setDisable(true);
-                    break;
+            case 1:
+                getUsername.setDisable(false);
+                getSecretQuestions.setDisable(true);
+                changePassword.setDisable(true);
+                break;
 
-            case 2: getUsername.setDisable(true);
-                    getSecretQuestions.setDisable(false);
-                    changePassword.setDisable(true);
-                    break;
+            case 2:
+                getUsername.setDisable(true);
+                getSecretQuestions.setDisable(false);
+                changePassword.setDisable(true);
+                break;
 
-            case 3: getUsername.setDisable(true);
-                    getSecretQuestions.setDisable(true);
-                    changePassword.setDisable(false);
-                    break;
+            case 3:
+                getUsername.setDisable(true);
+                getSecretQuestions.setDisable(true);
+                changePassword.setDisable(false);
+                break;
         }
     }
 }
