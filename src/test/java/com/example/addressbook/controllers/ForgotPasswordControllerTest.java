@@ -15,7 +15,6 @@ public class ForgotPasswordControllerTest {
 
     private ForgotPasswordController controller;
     private INinjaContactDAO mockDao;
-    private NinjaUser testNinja;
 
     @BeforeEach
     void setUp() {
@@ -24,7 +23,7 @@ public class ForgotPasswordControllerTest {
         MockNinjaDAO.clearAll();
         mockDao = new MockNinjaDAO();
         controller = new ForgotPasswordController(mockDao);
-        testNinja = new NinjaUser("testUser",BCrypt.hashpw("testPassword", BCrypt.gensalt()), "testQ1","testQ2", BCrypt.hashpw("testQ1Answer",BCrypt.gensalt()),  BCrypt.hashpw("testQ2Answer",BCrypt.gensalt()));
+        NinjaUser testNinja = new NinjaUser("testUser", BCrypt.hashpw("testPassword", BCrypt.gensalt()), "testQ1", "testQ2", BCrypt.hashpw("testQ1Answer", BCrypt.gensalt()), BCrypt.hashpw("testQ2Answer", BCrypt.gensalt()));
         mockDao.addNinjaUser(testNinja);
         controller.setTestMode(true);
     }
