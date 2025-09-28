@@ -1,11 +1,6 @@
 package com.example.addressbook.controllers;
 
-import com.example.addressbook.lesson.InputSection;
-import com.example.addressbook.lesson.KeyboardHands;
-import com.example.addressbook.lesson.Metrics;
-import com.example.addressbook.lesson.PauseMenu;
-import com.example.addressbook.lesson.ProgressBar;
-import com.example.addressbook.lesson.CustomPrompts;
+import com.example.addressbook.lesson.*;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -23,44 +18,43 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.TextFlow;
 import com.example.addressbook.auth.Session;
-import com.example.addressbook.lesson.Lesson;
-import com.example.addressbook.lesson.LessonDAO;
 import com.example.addressbook.ai.AITextService;
 import com.example.addressbook.ai.OpenAITextService;
-
 import java.util.concurrent.CompletableFuture;
 
-
 public class LessonActivePageController {
-  @FXML private HBox buttonBar;
-  @FXML private Button pauseButton;
-  @FXML private ChoiceBox<String> modeChoice;
-  @FXML private Label timerLabel;
+    @FXML private HBox buttonBar;
+    @FXML private Button pauseButton;
+    @FXML private ChoiceBox<String> modeChoice;
+    @FXML private Label timerLabel;
 
-  @FXML private StackPane readingStack;
-  @FXML private TextFlow promptFlow;
-  @FXML private TextFlow userFlow;
-  @FXML private javafx.scene.control.ProgressBar timeProgress;
+    @FXML private StackPane readingStack;
+    @FXML private TextFlow promptFlow;
+    @FXML private TextFlow userFlow;
+    @FXML private javafx.scene.control.ProgressBar timeProgress;
 
-  @FXML private GridPane helpGrid;
-  @FXML private VBox statsBox;
-  @FXML private GridPane keyboardGrid;
-  @FXML private Region handsRegion;
-  @FXML private Label handsLabel;
+    @FXML private GridPane helpGrid;
+    @FXML private VBox statsBox;
+    @FXML private GridPane keyboardGrid;
+    @FXML private Region handsRegion;
+    @FXML private Label handsLabel;
 
-  @FXML private TextArea hiddenInput;
-  @FXML private Label wpmLabel;
-  @FXML private Label errorsLabel;
-  @FXML private Label accuracyLabel;
-  @FXML private Label lessonTitleLabel;
-  @FXML private Label lessonDurationLabel;
+    @FXML private TextArea hiddenInput;
+    @FXML private Label wpmLabel;
+    @FXML private Label errorsLabel;
+    @FXML private Label accuracyLabel;
+    @FXML private Label lessonTitleLabel;
+    @FXML private Label lessonDurationLabel;
 
-  private Metrics metrics;
-  private CustomPrompts prompts;
-  private ProgressBar progressFeature;
-  private PauseMenu pauseMenu;
-  private KeyboardHands keyboardHands;
-  private InputSection inputSection;
+    private Metrics metrics;
+    private CustomPrompts prompts;
+    private ProgressBar progressFeature;
+    private PauseMenu pauseMenu;
+    private KeyboardHands keyboardHands;
+    private InputSection inputSection;
+    private Integer currentLessonId;
+    private int currentUserId;
+    private final LessonDAO lessonDAO = new LessonDAO(); // reuse the same DAO
 
     private void buildInputSectionAndStart(String passage) {
         inputSection = new InputSection(
@@ -87,6 +81,11 @@ public class LessonActivePageController {
             hiddenInput.setText("");
             hiddenInput.requestFocus();
             metrics.start();
+
+            if (currentLessonId != null) {
+                try { lessonDAO.markStarted(currentLessonId, currentUserId); } catch (Exception ex) { ex.printStackTrace(); }
+            }
+
             keyboardHands.highlightExpected(inputSection.peekExpected());
         });
     }
@@ -105,16 +104,16 @@ public class LessonActivePageController {
         progressFeature = new ProgressBar(timeProgress);
         progressFeature.bindTo(metrics.timeRemainingProperty(), metrics.lessonSeconds());
 
+
         keyboardHands = new KeyboardHands(keyboardGrid, handsRegion, handsLabel);
         keyboardHands.buildQwerty();
 
         // Decide passage based on latest Lesson for the current user
-        LessonDAO lessonDAO = new LessonDAO();
-        int userId = Session.getCurrentUserId();
+        currentUserId = Session.getCurrentUserId();
         Lesson latest = null;
 
         try {
-            latest = lessonDAO.fetchLatestForUser(userId);
+            latest = lessonDAO.fetchLatestForUser(currentUserId);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -124,6 +123,7 @@ public class LessonActivePageController {
             // Fallback to the existing p.* values you already set above
             buildInputSectionAndStart(p.text());
         } else {
+            currentLessonId = latest.getLessonId();   // cache for later DB writes
             // Set labels based on DB
             lessonTitleLabel.setText(latest.getLessonType());
             int durationSeconds = Math.max(10, latest.getDurationMinutes() * 60);
@@ -134,6 +134,7 @@ public class LessonActivePageController {
             metrics.bindStats(wpmLabel, errorsLabel, accuracyLabel);
             progressFeature = new com.example.addressbook.lesson.ProgressBar(timeProgress);
             progressFeature.bindTo(metrics.timeRemainingProperty(), metrics.lessonSeconds());
+            lessonDurationLabel.setText(durationSeconds + "s");
 
             String lt = latest.getLessonType();
             boolean isCustom = "CustomTopic".equalsIgnoreCase(lt);
@@ -206,15 +207,35 @@ public class LessonActivePageController {
     userFlow.setTranslateY(26);
     readingStack.setPadding(new Insets(16));
 
-    metrics.onLessonEnd(() -> {
-      inputSection.disable();
-      keyboardHands.dim();
-      Platform.runLater(() -> {
-        Alert a = new Alert(Alert.AlertType.INFORMATION, "You won! Lesson complete.");
-        a.setHeaderText(null);
-        a.setTitle("Lesson");
-        a.showAndWait();
-      });
-    });
+        metrics.onLessonEnd(() -> {
+            inputSection.disable();
+            keyboardHands.dim();
+
+            // gather stats from Metrics
+            double wpmVal;
+            double accuracyVal;
+            int errorCount;
+
+            // Preferred: if Metrics exposes getters, use them:
+            // (If not, see "If Metrics lacks getters" just below)
+            wpmVal      = metrics.getWpm();
+            accuracyVal = metrics.getAccuracyPercent(); // 0..100
+            errorCount  = metrics.getErrors();
+
+            double star = StarRating.compute(wpmVal, accuracyVal, errorCount); // 0.0 .. 5.0
+
+            if (currentLessonId != null) {
+                try { lessonDAO.markCompleted(currentLessonId, currentUserId, star, wpmVal, accuracyVal, errorCount); }
+                catch (Exception ex) { ex.printStackTrace(); }
+            }
+
+
+            Platform.runLater(() -> {
+                Alert a = new Alert(Alert.AlertType.INFORMATION, "You won! Lesson complete.");
+                a.setHeaderText(null);
+                a.setTitle("Lesson");
+                a.showAndWait();
+            });
+        });
   }
 }

@@ -113,4 +113,19 @@ public class Metrics {
   public ReadOnlyIntegerProperty errorsProperty() {
     return errors;
   }
+
+    public int getWpm() { return wpm.get(); }
+
+    public int getErrors() { return errors.get(); }
+
+    public int getCharsTyped() { return charsTyped.get(); }
+
+    /** Returns accuracy as 0..100 (%) */
+    public double getAccuracyPercent() {
+        int typed = getCharsTyped();
+        if (typed <= 0) return 0.0;
+        int correct = Math.max(typed - getErrors(), 0);
+        return (correct * 100.0) / typed;
+    }
+
 }
