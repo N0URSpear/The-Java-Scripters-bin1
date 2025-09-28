@@ -3,9 +3,11 @@ package typingninja.typing_ninja_1;
 import javafx.beans.binding.Bindings;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -13,11 +15,9 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
-import javafx.scene.layout.HBox;
-import javafx.scene.Node;
-import java.util.List;
-import javafx.scene.Node;
+
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -69,13 +69,12 @@ public class CongratulationsScene {
 
 
     public static Scene createScene(Stage stage) {
-        // -------- 设计层：所有坐标完全按 Figma 写 --------
         Pane design = new Pane();
         design.setPrefSize(DESIGN_W, DESIGN_H);
         design.setMinSize(DESIGN_W, DESIGN_H);
         design.setMaxSize(DESIGN_W, DESIGN_H);
 
-        // 标题（Jaro 180）
+        // 标题
         Font jaro180 = loadFont(JARO, TITLE_SIZE, Font.font("System", FontWeight.EXTRA_BOLD, TITLE_SIZE));
         Label title = label("CONGRATULATIONS", jaro180, Color.WHITE, TITLE_X, TITLE_Y);
 
@@ -96,9 +95,24 @@ public class CongratulationsScene {
         printBtn.setOnAction(e -> stage.setScene(CertificatesScene.createScene(stage)));
 
 
-// 示例数据（10 次记录，和你截图一致为两条线）
-        List<Integer> wpmData = List.of(48, 52, 55, 57, 60, 61, 63, 64, 65, 66);
-        List<Integer> accData = List.of(88, 90, 92, 93, 95, 96, 96, 97, 98, 99);
+// 数据10次
+        ResultsBridge.ensureTable();
+        var m = ResultsBridge.loadLastN(10);      // 旧→新顺序
+        List<Integer> wpmData = m.wpm();
+        List<Integer> accData = m.acc();
+
+// 左侧标签显示最新一条（当次）
+        ResultsBridge.getLatest().ifPresent(latest -> {
+            int latestWpm = latest[0];
+            int latestAcc = latest[1];
+            wpmLabel.setText("Words per minute: " + latestWpm);
+            accLabel.setText("Accuracy: " + latestAcc + "%");
+        });
+
+// 用 wpmData / accData 画你的图表
+// buildWpmChart(wpmData);
+// buildAccChart(accData);
+
 
 // 创建图表组件并定位
         Node resultsChart = Table.create(TABLE_W, TABLE_H, wpmData, accData);
@@ -111,7 +125,9 @@ public class CongratulationsScene {
 
 
 // 在 build UI 的地方
-        HBox stars = Stars.create(/*比如*/78 /*百分比*/, STAR_HEIGHT, STAR_GAP);
+        int latestAcc = accData.isEmpty() ? 0 : accData.get(accData.size() - 1);
+        int accPercent = Math.max(0, Math.min(100, latestAcc)); // 夹紧到 0..100
+        HBox stars = Stars.create(accPercent, STAR_HEIGHT, STAR_GAP);
         stars.setLayoutX(STARS_X);
         stars.setLayoutY(STARS_Y);
         design.getChildren().add(stars);
@@ -119,10 +135,10 @@ public class CongratulationsScene {
 
 // 键盘
         Map<String, Integer> heat = new HashMap<>();
-        heat.put("Q", 0);
+        heat.put("Q", 9);
         heat.put("W", 0);
         heat.put("E", 0);
-        heat.put("R", 0);
+        heat.put("R", 6);
         heat.put("T", 0);
         heat.put("Y", 0);
         heat.put("U", 0);

@@ -34,12 +34,7 @@ public final class Keyboard {
 
     private static final int MAX_COUNT = 10; // 0..10
 
-    /**
-     * 创建键盘热力图组件（0..10 错误次数）
-     * @param width  视图宽度（像素）
-     * @param height 视图高度（像素）
-     * @param counts 键 → 次数(0..10)，大小写均可；未提供的键默认为0
-     */
+
     public static Node create(double width, double height, Map<String, Integer> counts) {
         // 背板：圆角浅灰，风格与其他面板一致
         Rectangle bg = new Rectangle(width, height);

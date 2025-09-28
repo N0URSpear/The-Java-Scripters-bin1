@@ -10,7 +10,7 @@ public class Stars {
     private static final String STAR_ON  = "/images/star_on.png";
     private static final String STAR_OFF = "/images/star_off.png";
 
-    // 百分比 -> 星数
+    // 百分比 》 星数
     private static int percentToStars(double p) {
         if (p >= 90) return 5;
         if (p >= 80) return 4;
@@ -19,7 +19,7 @@ public class Stars {
         return 1;
     }
 
-    // ⭐ 生成星星组件
+    //生成星星组件
     public static HBox create(double percent, double starHeight, double gap) {
         int stars = percentToStars(percent);
         Image on  = new Image(Stars.class.getResourceAsStream(STAR_ON));
