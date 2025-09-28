@@ -4,7 +4,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 <BorderPane xmlns="http://javafx.com/javafx/21.0.3" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.example.addressbook.LessonActivePageController"
+            fx:controller="com.example.addressbook.controllers.LessonActivePageController"
             stylesheets="@application.css">
   <top>
     <HBox fx:id="buttonBar" spacing="12" alignment="CENTER_LEFT" styleClass="toolbar">

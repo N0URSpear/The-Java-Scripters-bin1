@@ -4,7 +4,10 @@ module com.example.addressbook {
     requires java.desktop;
     requires jbcrypt;
     requires java.sql;
+    requires javafx.graphics;
 
+    requires com.google.gson;
+    requires java.net.http;
 
     opens com.example.addressbook to javafx.fxml;
     exports com.example.addressbook;
