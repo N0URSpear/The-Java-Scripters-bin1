@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.addressbook.controllers.TypingController"
+      alignment="CENTER"
+      spacing="20"
+      style="-fx-background-color: #140B38; -fx-padding: 40;">
+
+    <Label text="TYPING SCREEN (Placeholder)"
+           style="-fx-text-fill: white; -fx-font-family: 'Jaro'; -fx-font-size: 60;" />
+
+    <Label text="Sub-lesson selection was saved (to be wired)."
+           style="-fx-text-fill: white; -fx-font-family: 'Inter'; -fx-font-size: 25;" />
+
+    <Button text="Back to Main Menu"
+            onAction="#handleBack"
+            style="-fx-font-family: 'Jaro'; -fx-font-size: 30; -fx-background-color: #2EFF04; -fx-text-fill: black;" />
+</VBox>

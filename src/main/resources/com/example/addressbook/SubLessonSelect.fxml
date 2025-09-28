@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.addressbook.controllers.SubLessonSelectController"
+            style="-fx-background-color: #D9D9D9; -fx-border-color: #2EFF04; -fx-border-width: 3; -fx-background-radius: 15; -fx-border-radius: 15;">
+
+    <top>
+        <HBox alignment="CENTER_RIGHT" spacing="12" BorderPane.alignment="CENTER">
+            <padding><Insets top="18" right="18" bottom="0" left="18"/></padding>
+            <Label fx:id="titleLabel"
+                   text="Lesson 1 - The Home Row"
+                   style="-fx-font-family: 'Jaro'; -fx-font-size: 40; -fx-text-fill: black;"
+                   BorderPane.alignment="CENTER_LEFT"/>
+            <Button text="Back"
+                    onAction="#closeFromBack"
+                    style="-fx-font-family: 'Jaro'; -fx-font-size: 30; -fx-background-color: #2EFF04; -fx-text-fill: black; -fx-padding: 4 16 4 16;"/>
+        </HBox>
+    </top>
+
+    <center>
+        <HBox alignment="CENTER" spacing="24">
+            <padding><Insets top="18" right="18" bottom="18" left="18"/></padding>
+
+            <!-- Left: vertical buttons 1a..1f -->
+            <VBox spacing="12" alignment="CENTER">
+                <Button text="1a" onAction="#choose1a" style="-fx-font-family: 'Jaro'; -fx-font-size: 30;"/>
+                <Button text="1b" onAction="#choose1b" style="-fx-font-family: 'Jaro'; -fx-font-size: 30;"/>
+                <Button text="1c" onAction="#choose1c" style="-fx-font-family: 'Jaro'; -fx-font-size: 30;"/>
+                <Button text="1d" onAction="#choose1d" style="-fx-font-family: 'Jaro'; -fx-font-size: 30;"/>
+                <Button text="1e" onAction="#choose1e" style="-fx-font-family: 'Jaro'; -fx-font-size: 30;"/>
+                <Button text="1f" onAction="#choose1f" style="-fx-font-family: 'Jaro'; -fx-font-size: 30;"/>
+            </VBox>
+
+            <!-- Right: placeholder completion text -->
+            <VBox spacing="24" alignment="CENTER_LEFT">
+                <Label text="Not Yet Completed" style="-fx-font-family: 'Jaro'; -fx-font-size: 30; -fx-text-fill: black;"/>
+                <Label text="Not Yet Completed" style="-fx-font-family: 'Jaro'; -fx-font-size: 30; -fx-text-fill: black;"/>
+                <Label text="Not Yet Completed" style="-fx-font-family: 'Jaro'; -fx-font-size: 30; -fx-text-fill: black;"/>
+                <Label text="Not Yet Completed" style="-fx-font-family: 'Jaro'; -fx-font-size: 30; -fx-text-fill: black;"/>
+                <Label text="Not Yet Completed" style="-fx-font-family: 'Jaro'; -fx-font-size: 30; -fx-text-fill: black;"/>
+                <Label text="Not Yet Completed" style="-fx-font-family: 'Jaro'; -fx-font-size: 30; -fx-text-fill: black;"/>
+            </VBox>
+        </HBox>
+    </center>
+</BorderPane>
