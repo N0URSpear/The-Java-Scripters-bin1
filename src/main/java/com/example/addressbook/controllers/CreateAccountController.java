@@ -69,7 +69,7 @@ public class CreateAccountController {
         if (sourceSelection != null && sourceSelection.equals(otherSelection)) {
             other.getSelectionModel().clearSelection();
             if (!newOptions.isEmpty()) {
-                other.setValue(newOptions.get(0));
+                other.setValue(newOptions.getFirst());
             }
         }
     }
@@ -141,7 +141,7 @@ public class CreateAccountController {
 
         NinjaDAO.addNinjaUser(newUser);
 
-        showSuccess("Account created successfully!");
+        showSuccess();
 
         isCreateAccountSuccessful = true;
 
@@ -163,7 +163,7 @@ public class CreateAccountController {
         alert.showAndWait();
     }
 
-    private void showSuccess(String message) {
+    private void showSuccess() {
         if (testMode) {
             // Don’t show alerts while testing
             return;
@@ -171,7 +171,7 @@ public class CreateAccountController {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Success");
         alert.setHeaderText(null);
-        alert.setContentText(message);
+        alert.setContentText("Account created successfully!");
         alert.showAndWait();
     }
 
