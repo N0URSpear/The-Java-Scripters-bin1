@@ -7,7 +7,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-/** SQLite 实现的成绩 DAO */
+// SQLite 实现的成绩 DAO
 public class SqliteResultsDAO implements IResultsDAO {
 
     private final Connection connection;
@@ -45,7 +45,7 @@ public class SqliteResultsDAO implements IResultsDAO {
     private static final String SQL_COUNT = "SELECT COUNT(*) FROM Results;";
     private static final String SQL_DELETE_ALL = "DELETE FROM Results;";
 
-    // --- IResultsDAO ---
+    //IResultsDAO
     @Override
     public void ensureTable() throws Exception {
         try (Statement st = connection.createStatement()) {
@@ -81,7 +81,7 @@ public class SqliteResultsDAO implements IResultsDAO {
                 }
             }
         }
-        return list; // 新→旧；图表若需旧→新可 Collections.reverse(...)
+        return list;
     }
 
     @Override

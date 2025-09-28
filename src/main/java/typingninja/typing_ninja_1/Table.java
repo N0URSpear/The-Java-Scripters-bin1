@@ -15,13 +15,6 @@ public final class Table {
 
     private Table() {}
 
-    /**
-     * 创建一个带圆角浅灰底的折线图（两条线：Accuracy、WPM）
-     * @param width   视图宽度（像素）
-     * @param height  视图高度（像素）
-     * @param wpm     每次练习的 WPM 数据（与 accuracy 等长）
-     * @param accuracy 每次练习的 Accuracy 数据（百分比，0-100，对应 wpm）
-     */
     public static Node create(double width, double height,
                               List<Integer> wpm, List<Integer> accuracy) {
 

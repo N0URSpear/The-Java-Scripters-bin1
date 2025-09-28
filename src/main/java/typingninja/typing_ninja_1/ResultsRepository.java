@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/** 便捷静态封装：仍提供 ensureTable/saveResult/loadLastN，底层用 DAO */
+
 public final class ResultsRepository {
 
     private static IResultsDAO dao() {

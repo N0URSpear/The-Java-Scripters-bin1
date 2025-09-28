@@ -61,7 +61,7 @@ public class MetricsTestApp extends Application {
         stage.show();
     }
 
-    // —— 小工具：输入校验 —— //
+    //输入校验
     private static int parseNonNegativeInt(String text, String field) {
         int v = Integer.parseInt(text);
         if (v < 0) throw new IllegalArgumentException(field + " must be ≥ 0");

@@ -118,9 +118,7 @@ public class CertificatesScene {
         return scene;
     }
 
-    /* -------------------- 从数据库加载，并渲染每条 result 一行 + 按钮 -------------------- */
-
-    /** 简单行模型（旧→新） */
+    // 从数据库加载，并渲染每条 result 一行 + 按钮
     private static final class Row {
         final int index;
         final int wpm;
@@ -176,7 +174,7 @@ public class CertificatesScene {
                     File file = chooser.showSaveDialog(listBox.getScene().getWindow());
                     if (file == null) return;
 
-                    // 证书字段：你可换成弹窗收集（name/lesson/date），此处先与原逻辑保持一致
+                    // 证书字段
                     String name = "Student Name";
                     int typingSpeedWpm = r.wpm;
                     double accuracyPercent = r.acc;
@@ -193,10 +191,9 @@ public class CertificatesScene {
                     );
 
                     // 如需生成后自动打开系统 PDF 查看器：
-                    // CertificatePdfUtil.openWithDesktop(file.toPath());
 
                 } catch (Exception ex) {
-                    ex.printStackTrace(); // 也可改成弹窗提醒
+                    ex.printStackTrace();
                 }
             });
 

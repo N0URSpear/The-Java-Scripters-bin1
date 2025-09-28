@@ -109,10 +109,6 @@ public class CongratulationsScene {
             accLabel.setText("Accuracy: " + latestAcc + "%");
         });
 
-// 用 wpmData / accData 画你的图表
-// buildWpmChart(wpmData);
-// buildAccChart(accData);
-
 
 // 创建图表组件并定位
         Node resultsChart = Table.create(TABLE_W, TABLE_H, wpmData, accData);
@@ -179,7 +175,7 @@ public class CongratulationsScene {
                 printBtn, backBtn
         );
 
-        // -------- 缩放容器：等比缩放 + 居中 + 背景 --------
+        // 缩放容器：等比缩放 + 居中 + 背景
         Group scalable = new Group(design);
         StackPane viewport = new StackPane(scalable);
         viewport.setAlignment(Pos.CENTER);
@@ -187,7 +183,7 @@ public class CongratulationsScene {
 
         Scene scene = new Scene(viewport, 1280, 720, Color.web(BG));
 
-        // 等比缩放绑定（不变形）
+        // 等比缩放绑定
         scalable.scaleXProperty().bind(Bindings.createDoubleBinding(
                 () -> Math.min(scene.getWidth() / DESIGN_W, scene.getHeight() / DESIGN_H),
                 scene.widthProperty(), scene.heightProperty()
@@ -197,7 +193,6 @@ public class CongratulationsScene {
         return scene;
     }
 
-    // —— 小工具 —— //
     private static Rectangle whiteBox(double x, double y) {
         Rectangle r = new Rectangle(BOX_W, BOX_H);
         r.setArcWidth(BOX_R * 2);

@@ -116,7 +116,7 @@ public final class Keyboard {
         return new StackPane(bg, keysLayer);
     }
 
-    // ===== 颜色映射：0..1 → 白(#FFFFFF) → 淡红(#FF6B6B) → 深红(#D80000) =====
+    //  颜色映射：0..1 → 白(#FFFFFF) → 淡红(#FF6B6B) → 深红(#D80000)
     private static Color colorFor(double t) {
         t = clamp01(t);
         if (t < 0.5) {
