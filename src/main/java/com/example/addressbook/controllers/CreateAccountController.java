@@ -1,7 +1,6 @@
 package com.example.addressbook.controllers;
 
 import com.example.addressbook.INinjaContactDAO;
-import com.example.addressbook.MainMenu;
 import com.example.addressbook.SqliteContactDAO;
 import com.example.addressbook.NinjaUser;
 import javafx.collections.FXCollections;
@@ -23,8 +22,17 @@ public class CreateAccountController {
     @FXML private TextField SecretQuestion1Answer;
     @FXML private TextField SecretQuestion2Answer;
     private boolean isCreateAccountSuccessful = false;
+    private boolean testMode = false;
     private final INinjaContactDAO NinjaDAO;
-    public CreateAccountController() {NinjaDAO = new SqliteContactDAO();}
+    public CreateAccountController() {this.NinjaDAO = new SqliteContactDAO();}
+
+    public CreateAccountController (INinjaContactDAO mockDao) {
+        this.NinjaDAO = mockDao;
+    }
+
+    public void setTestMode(boolean testMode) {
+        this.testMode = testMode;
+    }
 
     @FXML
     public void initialize() {
@@ -68,22 +76,25 @@ public class CreateAccountController {
 
     @FXML
     public void onCreateAccountClicked() {
-        String username = usernameField.getText();
-        String password = passwordField.getText();
-        String repeatPassword = passwordRepeatField.getText();
+        String username = usernameField.getText().trim();
+        String password = passwordField.getText().trim();
+        String repeatPassword = passwordRepeatField.getText().trim();
         String secretQ1 = SecretQuestion1ComboBox.getValue();
         String secretQ2 = SecretQuestion2ComboBox.getValue();
-        String answer1 = SecretQuestion1Answer.getText();
-        String answer2 = SecretQuestion2Answer.getText();
+        String answer1 = SecretQuestion1Answer.getText().trim();
+        String answer2 = SecretQuestion2Answer.getText().trim();
 
-        if (username == null || username.trim().isEmpty()) {
+        doCreateAccount(username,password,repeatPassword,secretQ1,secretQ2,answer1,answer2);
+    }
+
+    void doCreateAccount(String username, String password, String repeatPassword, String secretQ1, String secretQ2, String answer1, String answer2) {
+        isCreateAccountSuccessful = false;
+        if (username == null || username.isEmpty()) {
             showError("Username cannot be empty.");
             return;
         }
-        // Normalize username to avoid duplicates caused by stray spaces
-        username = username.trim();
 
-        if (password == null || password.trim().isEmpty()) {
+        if (password == null || password.isEmpty()) {
             showError("Password cannot be empty.");
             return;
         }
@@ -103,8 +114,8 @@ public class CreateAccountController {
             return;
         }
 
-        if (answer1 == null || answer1.trim().isEmpty() ||
-                answer2 == null || answer2.trim().isEmpty()) {
+        if (answer1 == null || answer1.isEmpty() ||
+                answer2 == null || answer2.isEmpty()) {
             showError("Both secret question answers must be filled.");
             return;
         }
@@ -134,11 +145,17 @@ public class CreateAccountController {
 
         isCreateAccountSuccessful = true;
 
-        Stage stage = (Stage) usernameField.getScene().getWindow();
-        stage.close();
+        if (usernameField != null && usernameField.getScene() != null) {
+            Stage stage = (Stage) usernameField.getScene().getWindow();
+            stage.close();
+        }
     }
 
     private void showError(String message) {
+        if (testMode) {
+            // Don’t show alerts while testing
+            return;
+        }
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Invalid Input");
         alert.setHeaderText(null);
@@ -147,6 +164,10 @@ public class CreateAccountController {
     }
 
     private void showSuccess(String message) {
+        if (testMode) {
+            // Don’t show alerts while testing
+            return;
+        }
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Success");
         alert.setHeaderText(null);
@@ -156,8 +177,10 @@ public class CreateAccountController {
 
     @FXML
     public void onCancelClicked() {
-        Stage stage = (Stage) usernameField.getScene().getWindow();
-        stage.close();
+        if (usernameField != null && usernameField.getScene() != null) {
+            Stage stage = (Stage) usernameField.getScene().getWindow();
+            stage.close();
+        }
     }
 
     public boolean isCreateAccountSuccessful() {
