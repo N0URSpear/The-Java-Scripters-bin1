@@ -1,4 +1,4 @@
-package typingninja.typing_ninja_1;
+package com.example.addressbook;
 
 import javafx.beans.binding.Bindings;
 import javafx.geometry.Pos;
@@ -19,8 +19,6 @@ import javafx.stage.Stage;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-
 
 
 public class CongratulationsScene {

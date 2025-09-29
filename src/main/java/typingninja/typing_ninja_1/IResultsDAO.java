@@ -1,4 +1,4 @@
-package typingninja.typing_ninja_1;
+package com.example.addressbook;
 
 import java.util.List;
 
@@ -14,12 +14,12 @@ public interface IResultsDAO {
     //最近 N 条（新→旧），用于图表可再反转
     List<Result> getLastN(int n) throws Exception;
 
-    // 全部成绩（旧→新）
+    // 全部成绩
     List<Result> getAll() throws Exception;
 
     // 记录总数
     int count() throws Exception;
 
-    // 清空（测试用，可选）
+    // 清空
     void deleteAll() throws Exception;
 }

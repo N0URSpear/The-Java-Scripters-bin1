@@ -1,5 +1,4 @@
-package typingninja.typing_ninja_1;
-
+package com.example.addressbook;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
