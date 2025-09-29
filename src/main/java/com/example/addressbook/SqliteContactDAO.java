@@ -131,4 +131,3 @@ public class SqliteContactDAO implements INinjaContactDAO {
         return users;
     }
 }
-

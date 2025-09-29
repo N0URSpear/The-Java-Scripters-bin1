@@ -1,41 +1,68 @@
 package com.example.addressbook.controllers;
 
+import com.example.addressbook.MainLessonDAO;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.control.Toggle;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.stage.Stage;
 
 public class FreeTypeSelectController {
 
-    @FXML private Node root; // from fx:id="root" in FXML
+    @FXML private ToggleGroup durationGroup;
+    @FXML private ToggleButton dur1, dur3, dur5, dur10;
 
-    private String lessonType = "FreeWeakKeys"; // default selection per spec
-    private int durationMinutes = 3;            // default selection per spec
-
-    // Exercise selection
-    @FXML private void pickWeakKeys() { lessonType = "FreeWeakKeys"; }
-    @FXML private void pickAnything() { lessonType = "FreeAnything"; }
-
-    // Duration selection
-    @FXML private void dur1()  { durationMinutes = 1; }
-    @FXML private void dur3()  { durationMinutes = 3; }
-    @FXML private void dur5()  { durationMinutes = 5; }
-    @FXML private void dur10() { durationMinutes = 10; }
+    private final MainLessonDAO dao = new MainLessonDAO();
+    private static final int USER_ID = 1; // for now
 
     @FXML
-    private void handleBack() {
-        close();
+    private void initialize() {
+        if (dur3 != null) dur3.setSelected(true); // default
     }
 
     @FXML
-    private void handleGenerate() {
-        int userId = 1; // TODO: replace with Session.getCurrentUserId()
-        System.out.println("FreeType -> type=" + lessonType + ", duration=" + durationMinutes + ", userId=" + userId);
-        // TODO: insert into DB
-        close();
+    private void onDurationChanged() {
+        // nothing extra; ToggleGroup ensures exclusivity
     }
 
-    private void close() {
-        Stage stage = (Stage) root.getScene().getWindow();
-        stage.close();
+    @FXML
+    private void onBack() {
+        closeWindow();
+    }
+
+    @FXML
+    private void onGenerate() {
+        int duration = getSelectedDuration();
+        dao.insertFreeType(USER_ID, duration);
+
+        try {
+            Stage popup = (Stage) dur3.getScene().getWindow();
+            Stage owner = (Stage) popup.getOwner();
+
+            Parent root = FXMLLoader.load(getClass().getResource("/com/example/addressbook/Typing.fxml"));
+            owner.getScene().setRoot(root);
+            owner.setTitle("Typing - Typing Ninja");
+            owner.centerOnScreen();
+
+            popup.close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private int getSelectedDuration() {
+        Toggle t = durationGroup.getSelectedToggle();
+        if (t == dur1) return 1;
+        if (t == dur3) return 3;
+        if (t == dur5) return 5;
+        if (t == dur10) return 10;
+        return 3;
+    }
+
+    private void closeWindow() {
+        Stage st = (Stage) dur3.getScene().getWindow();
+        st.close();
     }
 }

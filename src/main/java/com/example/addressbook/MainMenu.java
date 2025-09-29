@@ -10,19 +10,16 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
+import javafx.stage.*;
+
 import javafx.fxml.FXMLLoader;
 
 public class MainMenu {
 
-    // Baseline design size (matches Figma at 1920x1080)
     private static final double BASE_WIDTH = 1920.0;
     private static final double BASE_HEIGHT = 1080.0;
 
     public Scene buildScene(Stage stage) {
-        // Load custom fonts
         Font.loadFont(getClass().getResourceAsStream("/com/example/addressbook/fonts/Jaro-Regular.ttf"), 10);
         Font.loadFont(getClass().getResourceAsStream("/com/example/addressbook/fonts/Inter-VariableFont.ttf"), 10);
 
@@ -31,7 +28,7 @@ public class MainMenu {
         title.setTextFill(Color.WHITE);
         title.setFont(Font.font("Jaro", 180));
 
-        Region logoSpace = new Region(); // placeholder for logo
+        Region logoSpace = new Region();
         logoSpace.setPrefSize(520, 180);
 
         BorderPane topBar = new BorderPane();
@@ -40,7 +37,7 @@ public class MainMenu {
         BorderPane.setAlignment(title, Pos.CENTER_LEFT);
         topBar.setPadding(new Insets(10, 20, 0, 20));
 
-        // Lesson grid
+        // Lessons
         VBox lesson1 = createLessonBox("Lesson 1 - The Home Row",
                 "Type words using just the home row\nwhere your fingers rest");
         VBox lesson2 = createLessonBox("Lesson 2 - The Next Step",
@@ -54,32 +51,64 @@ public class MainMenu {
         VBox freeType = createLessonBox("Free Type",
                 "Type whatever you want or practice\nyour least accurate key combos");
 
-        // Click handlers for lessons
-        asButton(lesson1, () -> {
-            openModal("/com/example/addressbook/SubLessonSelect.fxml", "Lesson 1");
-            switchTo(stage, "/com/example/addressbook/Typing.fxml", "Typing - Typing Ninja");
-        });
-        asButton(lesson2, () -> {
-            openModal("/com/example/addressbook/SubLessonSelect.fxml", "Lesson 2");
-            switchTo(stage, "/com/example/addressbook/Typing.fxml", "Typing - Typing Ninja");
-        });
-        asButton(lesson3, () -> {
-            openModal("/com/example/addressbook/SubLessonSelect.fxml", "Lesson 3");
-            switchTo(stage, "/com/example/addressbook/Typing.fxml", "Typing - Typing Ninja");
-        });
-        asButton(lesson4, () -> {
-            openModal("/com/example/addressbook/SubLessonSelect.fxml", "Lesson 4");
-            switchTo(stage, "/com/example/addressbook/Typing.fxml", "Typing - Typing Ninja");
-        });
-        asButton(custom, () -> {
-            openModal("/com/example/addressbook/CustomTopicSelect.fxml", "Custom Topic - AI Gen");
-            switchTo(stage, "/com/example/addressbook/Typing.fxml", "Typing - Typing Ninja");
-        });
-        asButton(freeType, () -> {
-            openModal("/com/example/addressbook/FreeTypeSelect.fxml", "Free Type");
-            switchTo(stage, "/com/example/addressbook/Typing.fxml", "Typing - Typing Ninja");
-        });
+        // Click handlers – open modals (controllers handle DB + navigation)
+        asButton(lesson1, () -> openSubLesson(
+                stage,
+                "Lesson 1 - The Home Row",
+                "1",
+                new String[]{
+                        "Lesson 1a - f, j and space keys",
+                        "Lesson 1b - g, and h keys",
+                        "Lesson 1c - d and k keys",
+                        "Lesson 1d - s and l keys",
+                        "Lesson 1e - a and ; keys",
+                        "Lesson 1f - The whole home row"
+                }));
 
+        asButton(lesson2, () -> openSubLesson(
+                stage,
+                "Lesson 2 - The Next Step",
+                "2",
+                new String[]{
+                        "Lesson 2a - r, t, y, u keys",
+                        "Lesson 2b - q, w, e, i, o, p keys",
+                        "Lesson 2c - The whole upper row",
+                        "Lesson 2d - c, v, b, n keys",
+                        "Lesson 2e - z, x, m keys",
+                        "Lesson 2f - The whole lower row"
+                }));
+
+        asButton(lesson3, () -> openSubLesson(
+                stage,
+                "Lesson 3 - Shift Up",
+                "3",
+                new String[]{
+                        "Lesson 3a - 4, 5, 6, 7",
+                        "Lesson 3b - 1, 2, 3, 8, 9, 0",
+                        "Lesson 3c - The whole number row",
+                        "Lesson 3d - Shift and home row",
+                        "Lesson 3e - Shift and all letters",
+                        "Lesson 3f - Special characters"
+                }));
+
+        asButton(lesson4, () -> openSubLesson(
+                stage,
+                "Lesson 4 - Full Keyboard",
+                "4",
+                new String[]{
+                        "Lesson 4a - Full keyboard - Very Easy",
+                        "Lesson 4b - Full keyboard - Easy",
+                        "Lesson 4c - Full keyboard - Medium",
+                        "Lesson 4d - Full keyboard - Hard",
+                        "Lesson 4e - Full keyboard - Very Hard",
+                        "Lesson 4f - Full keyboard - Expert"
+                }));
+
+        // Custom / FreeType
+        asButton(custom,   () -> openCustomTopic(stage));
+        asButton(freeType, () -> openFreeType(stage));
+
+        // Grid
         GridPane grid = new GridPane();
         grid.setHgap(30);
         grid.setVgap(80);
@@ -110,7 +139,6 @@ public class MainMenu {
         sep1.setFont(Font.font("Jaro", 40));
         sep2.setFont(Font.font("Jaro", 40));
 
-        // Bottom nav click handlers
         asButton(profile, () -> switchTo(stage, "/com/example/addressbook/Profile.fxml", "Profile - Typing Ninja"));
         asButton(settings, () -> switchTo(stage, "/com/example/addressbook/Settings.fxml", "Settings - Typing Ninja"));
 
@@ -118,12 +146,10 @@ public class MainMenu {
         bottomMenu.setAlignment(Pos.CENTER);
         VBox.setMargin(bottomMenu, new Insets(40, 0, 20, 0));
 
-        // Main content
         VBox content = new VBox(40, topBar, grid, bottomMenu);
         content.setPadding(new Insets(20));
         content.setPrefSize(BASE_WIDTH, BASE_HEIGHT);
 
-        // Root and background
         Group contentGroup = new Group(content);
         StackPane outer = new StackPane(contentGroup);
         outer.setBackground(new Background(new BackgroundFill(Color.web("#140B38"),
@@ -131,14 +157,13 @@ public class MainMenu {
 
         Scene scene = new Scene(outer, BASE_WIDTH, BASE_HEIGHT);
 
-        // Reuse the same hover glow as Login
-        scene.getStylesheets().add(
-                getClass().getResource("/com/example/addressbook/NinjaStyles.css").toExternalForm()
-        );
+        try {
+            scene.getStylesheets().add(
+                    getClass().getResource("/com/example/addressbook/NinjaStyles.css").toExternalForm()
+            );
+        } catch (Exception ignored) {}
 
-        // DPI-neutral scaling tied to window size
         bindDpiNeutralScale(outer, content);
-
         return scene;
     }
 
@@ -191,19 +216,20 @@ public class MainMenu {
         }
     }
 
-    private void openModal(String fxmlPath, String title) {
+    // ---------- Popups (controllers will handle DB + navigation) ----------
+
+    private void openSubLesson(Stage owner, String title, String codePrefix, String[] leftTexts) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Parent root = loader.load();
+            FXMLLoader fxml = new FXMLLoader(getClass().getResource("/com/example/addressbook/SubLessonSelect.fxml"));
+            Parent root = fxml.load();
+            com.example.addressbook.controllers.SubLessonSelectController c = fxml.getController();
+            c.configure(title, codePrefix, leftTexts);
 
             Stage popup = new Stage();
+            popup.initOwner(owner);
             popup.initModality(Modality.APPLICATION_MODAL);
-            popup.initStyle(StageStyle.TRANSPARENT); // no OS chrome, true transparent window
-            popup.setTitle(title);
-
-            Scene scene = new Scene(root);
-            scene.setFill(Color.TRANSPARENT);        // let the FXML root render rounded corners
-            popup.setScene(scene);
+            popup.initStyle(StageStyle.UNDECORATED);
+            popup.setScene(new Scene(root));
             popup.setResizable(false);
             popup.showAndWait();
         } catch (Exception ex) {
@@ -211,7 +237,41 @@ public class MainMenu {
         }
     }
 
-    // Scales content based on window size and normalizes by screen DPI (96dpi = 100%)
+    private void openCustomTopic(Stage owner) {
+        try {
+            FXMLLoader fxml = new FXMLLoader(getClass().getResource("/com/example/addressbook/CustomTopicSelect.fxml"));
+            Parent root = fxml.load();
+
+            Stage popup = new Stage();
+            popup.initOwner(owner);
+            popup.initModality(Modality.APPLICATION_MODAL);
+            popup.initStyle(StageStyle.UNDECORATED);
+            popup.setScene(new Scene(root));
+            popup.setResizable(false);
+            popup.showAndWait();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private void openFreeType(Stage owner) {
+        try {
+            FXMLLoader fxml = new FXMLLoader(getClass().getResource("/com/example/addressbook/FreeTypeSelect.fxml"));
+            Parent root = fxml.load();
+
+            Stage popup = new Stage();
+            popup.initOwner(owner);
+            popup.initModality(Modality.APPLICATION_MODAL);
+            popup.initStyle(StageStyle.UNDECORATED);
+            popup.setScene(new Scene(root));
+            popup.setResizable(false);
+            popup.showAndWait();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    // DPI-neutral scaling
     private void bindDpiNeutralScale(StackPane outer, Region content) {
         Runnable apply = () -> {
             double w = outer.getWidth();
