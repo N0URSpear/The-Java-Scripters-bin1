@@ -16,9 +16,7 @@ import javafx.scene.layout.*;
 import com.example.addressbook.lesson.*;
 import com.example.addressbook.auth.Session;
 import com.example.addressbook.ai.AITextService;
-import com.example.addressbook.ai.OpenAITextService;
 import com.example.addressbook.lesson.WeakKeyTracker;
-import java.util.concurrent.CompletableFuture;
 
 
 public class LessonActivePageController {
@@ -134,90 +132,93 @@ public class LessonActivePageController {
 
             if (isFree) {
                 buildInputSectionAndStart("");
-
             }
             else if (isCustom) {
-                AITextService remote = new com.example.addressbook.ai.OpenAITextService();
                 com.example.addressbook.ai.OllamaTextService ollama = new com.example.addressbook.ai.OllamaTextService();
                 com.example.addressbook.ai.LocalSimpleTextService local = new com.example.addressbook.ai.LocalSimpleTextService();
                 int targetWords = Math.max(60, latest.getDurationMinutes() * 50); // ~50 wpm target
 
-                Lesson finalLatest = latest;
-                java.util.concurrent.CompletableFuture
-                .supplyAsync(() -> {
-                // 1) OpenAI (paid)
+                String promptToSend = latest.getPrompt();
+                if ("PracticeWeakKeyCombos".equalsIgnoreCase(promptToSend)) {
+                    java.util.List<String> pairs = java.util.Collections.emptyList();
                     try {
-                        System.out.println("[AI] Trying OpenAI for CustomTopic. prompt='" + finalLatest.getPrompt() + "' "
-                        + "flags: upper=" + finalLatest.isUpperCase()
-                        + " numbers=" + finalLatest.isNumbers()
-                        + " punct=" + finalLatest.isPunctuation()
-                        + " special=" + finalLatest.isSpecialChars());
-                        String t = remote.generatePassage(
-                            finalLatest.getPrompt(),
-                            targetWords,
-                            finalLatest.isUpperCase(),
-                            finalLatest.isNumbers(),
-                            finalLatest.isPunctuation(),
-                            finalLatest.isSpecialChars());
-                        System.out.println("[AI] OpenAITextService SUCCESS");
-                        return t;
-                    }
-                    catch (Exception ex)
-                    {
-                        System.out.println("[AI] OpenAITextService FAILED → " + ex.getMessage());
+                        // only from PAST completed CustomTopic lessons
+                        pairs = lessonDAO.topWeakPairsForUserFromCompletedCustomLessons(currentUserId, 7);
+                    } catch (Exception ex) {
                         ex.printStackTrace();
-                        return null;
                     }
-                })
-                .thenCompose(openaiText -> {
-                    if (openaiText != null && !openaiText.isBlank()) {
-                        return java.util.concurrent.CompletableFuture.completedFuture(openaiText);
+                    String joined = String.join(" ", pairs);
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("PracticeWeakKeyCombos MODE.\n");
+                    if (!pairs.isEmpty()) {
+                        sb.append("You must incorporate these EXACT bigrams (case-sensitive, no spaces inside each bigram): ")
+                                .append(joined).append(".\n");
+                        sb.append("Write normal English sentences with clear grammar and readable vocabulary. ");
+                        sb.append("Embed each bigram inside ordinary words or right next to punctuation where natural ");
+                        sb.append("(e.g., Ab → Abbot/Abberfeld; c. → logic.). ");
+                        sb.append("Avoid alphabet drills or sequences like 'Ab Cd Ef'.\n");
+                        sb.append("Target density: include EACH listed bigram approximately ONCE every 10 words across the passage. ");
+                        sb.append("Keep characters in each bigram contiguous and preserve their original case.\n");
+                    } else {
+                        sb.append("No prior bigrams found; write clear, grammatical English sentences with varied vocabulary.\n");
                     }
-                    // 2) Ollama (free, local API)
-                    return java.util.concurrent.CompletableFuture.supplyAsync(() -> {
-                        try {
-                            System.out.println("[AI] Trying Ollama local API (free).");
-                            String t = ollama.generatePassage(
-                                finalLatest.getPrompt(),
-                                targetWords,
-                                finalLatest.isUpperCase(),
-                                finalLatest.isNumbers(),
-                                finalLatest.isPunctuation(),
-                                finalLatest.isSpecialChars());
-                            System.out.println("[AI] OllamaTextService SUCCESS");
-                            return t;
-                        }
-                        catch (Exception ex) {
-                            System.out.println("[AI] OllamaTextService FAILED → " + ex.getMessage());
-                            ex.printStackTrace();
-                            return null;
-                        }
-                    });
-                })
-                .thenApply(text -> {
-                    if (text != null && !text.isBlank()) return text;
-                    // 3) Local fallback (always free)
-                    System.out.println("[AI] Falling back to LocalSimpleTextService");
-                    try {
-                        return local.generatePassage(
-                            finalLatest.getPrompt(),
-                            targetWords,
-                            finalLatest.isUpperCase(),
-                            finalLatest.isNumbers(),
-                            finalLatest.isPunctuation(),
-                            finalLatest.isSpecialChars());
-                    }
-                    catch (Exception e) {
-                        e.printStackTrace();
-                        return new com.example.addressbook.lesson.CustomPrompts().current().text();
-                    }
-                })
-                .thenAccept(text -> {
-                    String finalPassage = (text == null || text.isBlank())
-                    ? new com.example.addressbook.lesson.CustomPrompts().current().text()
-                    : text;
-                    javafx.application.Platform.runLater(() -> buildInputSectionAndStart(finalPassage));
-                });
+                    sb.append("Return ONLY the passage text (no headings, quotes, or labels).");
+                    promptToSend = sb.toString();
+                    System.out.println("[AI] PracticeWeakKeyCombos pairs for user " + currentUserId + ": " + joined);
+                }
+                final String promptToUse = promptToSend;  // final for lambdas
+                Lesson finalLatest = latest;
+
+                java.util.concurrent.CompletableFuture
+                        .supplyAsync(() -> {
+                            // 1) Ollama (free, local API)
+                            try {
+                                System.out.println("[AI] Trying Ollama (free/local). prompt='" + promptToUse + "' "
+                                        + "flags: upper=" + finalLatest.isUpperCase()
+                                        + " numbers=" + finalLatest.isNumbers()
+                                        + " punct=" + finalLatest.isPunctuation()
+                                        + " special=" + finalLatest.isSpecialChars());
+                                String t = ollama.generatePassage(
+                                        promptToUse,
+                                        targetWords,
+                                        finalLatest.isUpperCase(),
+                                        finalLatest.isNumbers(),
+                                        finalLatest.isPunctuation(),
+                                        finalLatest.isSpecialChars()
+                                );
+                                System.out.println("[AI] OllamaTextService SUCCESS");
+                                return t;
+                            } catch (Exception ex) {
+                                System.out.println("[AI] OllamaTextService FAILED → " + ex.getMessage());
+                                ex.printStackTrace();
+                                return null;
+                            }
+                        })
+                        .thenApply(text -> {
+                            if (text != null && !text.isBlank()) return text;
+                            // 2) Local fallback (always free)
+                            System.out.println("[AI] Falling back to LocalSimpleTextService");
+                            try {
+                                return local.generatePassage(
+                                        promptToUse,
+                                        targetWords,
+                                        finalLatest.isUpperCase(),
+                                        finalLatest.isNumbers(),
+                                        finalLatest.isPunctuation(),
+                                        finalLatest.isSpecialChars()
+                                );
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                return new com.example.addressbook.lesson.CustomPrompts().current().text();
+                            }
+                        })
+                        .thenAccept(text -> {
+                            String finalPassage = (text == null || text.isBlank())
+                                    ? new com.example.addressbook.lesson.CustomPrompts().current().text()
+                                    : text;
+                            Platform.runLater(() -> buildInputSectionAndStart(finalPassage));
+                        });
+
             }
             else {
                 // 1a…4f fixed placeholders for now

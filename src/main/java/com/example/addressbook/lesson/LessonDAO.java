@@ -64,4 +64,44 @@ public class LessonDAO {
             ps.executeUpdate();
         }
     }
+
+    public java.util.List<String> topWeakPairsForUserFromCompletedCustomLessons(int userId, int k) throws java.sql.SQLException {
+        String sql = """
+        SELECT WeakKeys
+        FROM Lesson
+        WHERE UserID = ?
+          AND LessonType = 'CustomTopic'
+          AND WeakKeys IS NOT NULL AND LENGTH(TRIM(WeakKeys)) > 0
+          AND DateCompleted IS NOT NULL
+    """;
+        java.util.Map<String, Integer> counts = new java.util.HashMap<>();
+        try (java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            try (java.sql.ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String wk = rs.getString(1);
+                    if (wk == null || wk.isBlank()) continue;
+                    for (String token : wk.trim().split("\\s+")) {
+                        if (token.equals("--")) continue;
+                        String pair = token.replace("|", ""); // normalize legacy "C|o" → "Co"
+                        if (pair.length() != 2) continue;
+                        char a = pair.charAt(0), b = pair.charAt(1);
+                        if (!WeakKeyTracker.trackable(a) || !WeakKeyTracker.trackable(b)) continue;
+                        counts.merge(pair, 1, Integer::sum);
+                    }
+                }
+            }
+        }
+        java.util.List<java.util.Map.Entry<String,Integer>> list = new java.util.ArrayList<>(counts.entrySet());
+        list.sort((e1, e2) -> {
+            int c = Integer.compare(e2.getValue(), e1.getValue()); // desc by freq
+            return (c != 0) ? c : e1.getKey().compareTo(e2.getKey());
+        });
+        java.util.List<String> out = new java.util.ArrayList<>(Math.min(k, list.size()));
+        for (int i = 0; i < list.size() && out.size() < k; i++) {
+            out.add(list.get(i).getKey()); // e.g., "Co", "c."
+        }
+        return out; // may be < k (proceed with whatever we have)
+    }
+
 }
