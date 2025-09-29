@@ -135,67 +135,109 @@ public class LessonActivePageController {
             if (isFree) {
                 buildInputSectionAndStart("");
 
-            } else if (isCustom) {
-                AITextService openai = new OpenAITextService();
-                AITextService local = new com.example.addressbook.ai.LocalSimpleTextService();
-                int targetWords = Math.max(60, latest.getDurationMinutes() * 50);
+            }
+            else if (isCustom) {
+                AITextService remote = new com.example.addressbook.ai.OpenAITextService();
+                com.example.addressbook.ai.OllamaTextService ollama = new com.example.addressbook.ai.OllamaTextService();
+                com.example.addressbook.ai.LocalSimpleTextService local = new com.example.addressbook.ai.LocalSimpleTextService();
+                int targetWords = Math.max(60, latest.getDurationMinutes() * 50); // ~50 wpm target
 
                 Lesson finalLatest = latest;
-                CompletableFuture
-                        .supplyAsync(() -> {
-                            try {
-                                // 1) OpenAI
-                                return openai.generatePassage(
-                                        finalLatest.getPrompt(),
-                                        targetWords,
-                                        finalLatest.isUpperCase(),
-                                        finalLatest.isNumbers(),
-                                        finalLatest.isPunctuation(),
-                                        finalLatest.isSpecialChars()
-                                );
-                            } catch (Exception ex) {
-                                // 2) local free generator
-                                try {
-                                    return local.generatePassage(
-                                            finalLatest.getPrompt(),
-                                            targetWords,
-                                            finalLatest.isUpperCase(),
-                                            finalLatest.isNumbers(),
-                                            finalLatest.isPunctuation(),
-                                            finalLatest.isSpecialChars()
-                                    );
-                                } catch (Exception inner) {
-                                    inner.printStackTrace();
-                                    return null;
-                                }
-                            }
-                        })
-                        .thenAccept(text -> {
-                            String finalPassage = (text == null || text.isBlank())
-                                    ? new com.example.addressbook.lesson.CustomPrompts().current().text()
-                                    : text;
-                            Platform.runLater(() -> buildInputSectionAndStart(finalPassage));
-                        });
-
-            } else {
+                java.util.concurrent.CompletableFuture
+                .supplyAsync(() -> {
+                // 1) OpenAI (paid)
+                    try {
+                        System.out.println("[AI] Trying OpenAI for CustomTopic. prompt='" + finalLatest.getPrompt() + "' "
+                        + "flags: upper=" + finalLatest.isUpperCase()
+                        + " numbers=" + finalLatest.isNumbers()
+                        + " punct=" + finalLatest.isPunctuation()
+                        + " special=" + finalLatest.isSpecialChars());
+                        String t = remote.generatePassage(
+                            finalLatest.getPrompt(),
+                            targetWords,
+                            finalLatest.isUpperCase(),
+                            finalLatest.isNumbers(),
+                            finalLatest.isPunctuation(),
+                            finalLatest.isSpecialChars());
+                        System.out.println("[AI] OpenAITextService SUCCESS");
+                        return t;
+                    }
+                    catch (Exception ex)
+                    {
+                        System.out.println("[AI] OpenAITextService FAILED → " + ex.getMessage());
+                        ex.printStackTrace();
+                        return null;
+                    }
+                })
+                .thenCompose(openaiText -> {
+                    if (openaiText != null && !openaiText.isBlank()) {
+                        return java.util.concurrent.CompletableFuture.completedFuture(openaiText);
+                    }
+                    // 2) Ollama (free, local API)
+                    return java.util.concurrent.CompletableFuture.supplyAsync(() -> {
+                        try {
+                            System.out.println("[AI] Trying Ollama local API (free).");
+                            String t = ollama.generatePassage(
+                                finalLatest.getPrompt(),
+                                targetWords,
+                                finalLatest.isUpperCase(),
+                                finalLatest.isNumbers(),
+                                finalLatest.isPunctuation(),
+                                finalLatest.isSpecialChars());
+                            System.out.println("[AI] OllamaTextService SUCCESS");
+                            return t;
+                        }
+                        catch (Exception ex) {
+                            System.out.println("[AI] OllamaTextService FAILED → " + ex.getMessage());
+                            ex.printStackTrace();
+                            return null;
+                        }
+                    });
+                })
+                .thenApply(text -> {
+                    if (text != null && !text.isBlank()) return text;
+                    // 3) Local fallback (always free)
+                    System.out.println("[AI] Falling back to LocalSimpleTextService");
+                    try {
+                        return local.generatePassage(
+                            finalLatest.getPrompt(),
+                            targetWords,
+                            finalLatest.isUpperCase(),
+                            finalLatest.isNumbers(),
+                            finalLatest.isPunctuation(),
+                            finalLatest.isSpecialChars());
+                    }
+                    catch (Exception e) {
+                        e.printStackTrace();
+                        return new com.example.addressbook.lesson.CustomPrompts().current().text();
+                    }
+                })
+                .thenAccept(text -> {
+                    String finalPassage = (text == null || text.isBlank())
+                    ? new com.example.addressbook.lesson.CustomPrompts().current().text()
+                    : text;
+                    javafx.application.Platform.runLater(() -> buildInputSectionAndStart(finalPassage));
+                });
+            }
+            else {
                 // 1a…4f fixed placeholders for now
                 String fixed = com.example.addressbook.lesson.FixedLessons.passageFor(lt);
                 buildInputSectionAndStart(fixed);
             }
         }
 
-    modeChoice.getItems().addAll("Strict (no mistakes allowed)", "Lenient (highlight mistakes)");
-    modeChoice.getSelectionModel().select(0);
-    pauseMenu = new PauseMenu(pauseButton, metrics, hiddenInput);
+        modeChoice.getItems().addAll("Strict (no mistakes allowed)", "Lenient (highlight mistakes)");
+        modeChoice.getSelectionModel().select(0);
+        pauseMenu = new PauseMenu(pauseButton, metrics, hiddenInput);
 
-    StackPane.setAlignment(promptFlow, Pos.TOP_LEFT);
-    StackPane.setAlignment(userFlow, Pos.TOP_LEFT);
-    promptFlow.setLineSpacing(30);
-    userFlow.setLineSpacing(30);
-    promptFlow.prefWidthProperty().bind(readingStack.widthProperty());
-    userFlow.prefWidthProperty().bind(readingStack.widthProperty());
-    userFlow.setTranslateY(26);
-    readingStack.setPadding(new Insets(16));
+        StackPane.setAlignment(promptFlow, Pos.TOP_LEFT);
+        StackPane.setAlignment(userFlow, Pos.TOP_LEFT);
+        promptFlow.setLineSpacing(30);
+        userFlow.setLineSpacing(30);
+        promptFlow.prefWidthProperty().bind(readingStack.widthProperty());
+        userFlow.prefWidthProperty().bind(readingStack.widthProperty());
+        userFlow.setTranslateY(26);
+        readingStack.setPadding(new Insets(16));
 
         metrics.onLessonEnd(() -> {
             inputSection.disable();
@@ -238,5 +280,5 @@ public class LessonActivePageController {
                 a.showAndWait();
             });
         });
-  }
+    }
 }

@@ -22,13 +22,11 @@ public class OpenAITextService implements AITextService {
         if (OPENAI_API_KEY == null || OPENAI_API_KEY.isBlank()) {
             throw new IllegalStateException("Missing OPENAI_API_KEY");
         }
-
         String instructions = buildInstructions(topic, targetWords, includeUpper, includeNumbers, includePunct, includeSpecial);
         JsonObject bodyJson = new JsonObject();
         bodyJson.addProperty("model", MODEL);
         bodyJson.addProperty("input", instructions);
         String body = gson.toJson(bodyJson);
-
         HttpRequest req = HttpRequest.newBuilder()
                 .uri(URI.create(ENDPOINT))
                 .timeout(Duration.ofSeconds(30))
@@ -37,14 +35,48 @@ public class OpenAITextService implements AITextService {
                 .POST(HttpRequest.BodyPublishers.ofString(body))
                 .build();
 
+        System.out.println("[AI] OpenAI request → " + ENDPOINT + " model=" + MODEL);
         HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
+        System.out.println("[AI] OpenAI response status = " + resp.statusCode());
         if (resp.statusCode() / 100 != 2) {
-            throw new RuntimeException("OpenAI error: " + resp.statusCode() + " " + resp.body());
+            // Make sure we SEE why it failed (401/429/etc), so we know why fallback happens
+            throw new RuntimeException("OpenAI error " + resp.statusCode() + ": " + resp.body());
         }
-
-        JsonObject json = JsonParser.parseString(resp.body()).getAsJsonObject();
-        if (json.has("output_text")) return json.get("output_text").getAsString().trim();
-        return json.toString();
+        JsonObject json = gson.fromJson(resp.body(), JsonObject.class);
+        // The Responses API returns a helpful "output_text" — sometimes string, sometimes array.
+        if (json.has("output_text")) {
+            if (json.get("output_text").isJsonArray()) {
+                StringBuilder sb = new StringBuilder();
+                for (JsonElement el : json.getAsJsonArray("output_text")) {
+                    sb.append(el.getAsString());
+                }
+                String out = sb.toString().trim();
+                if (!out.isBlank()) return out;
+            } else {
+                String out = json.get("output_text").getAsString().trim();
+                if (!out.isBlank()) return out;
+            }
+        }
+        // Fallback parse if some variants put text in "output" → [... { content: [ { text: { value } } ] } ...]
+        if (json.has("output") && json.get("output").isJsonArray()) {
+            StringBuilder sb = new StringBuilder();
+            for (JsonElement item : json.getAsJsonArray("output")) {
+                JsonObject obj = item.getAsJsonObject();
+                if (obj.has("content") && obj.get("content").isJsonArray()) {
+                    for (JsonElement c : obj.getAsJsonArray("content")) {
+                        JsonObject co = c.getAsJsonObject();
+                        if (co.has("text")) {
+                            JsonObject t = co.getAsJsonObject("text");
+                            if (t.has("value")) sb.append(t.get("value").getAsString());
+                        }
+                    }
+                }
+            }
+            String out = sb.toString().trim();
+            if (!out.isBlank()) return out;
+        }
+        // Last resort: return raw body (shouldn't normally happen)
+        return resp.body();
     }
 
     private String buildInstructions(String topic, int targetWords,
