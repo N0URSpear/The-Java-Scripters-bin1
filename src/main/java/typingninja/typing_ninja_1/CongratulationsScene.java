@@ -158,6 +158,16 @@ public class CongratulationsScene {
         heat.put("N", 0);
         heat.put("M", 0);
         heat.put(" ", 0);
+        heat.put("1", 0);
+        heat.put("2", 0);
+        heat.put("3", 0);
+        heat.put("4", 0);
+        heat.put("5", 0);
+        heat.put("6", 0);
+        heat.put("7", 0);
+        heat.put("8", 0);
+        heat.put("9", 0);
+        heat.put("0", 0);
 
 // …按需填 0..10
 
