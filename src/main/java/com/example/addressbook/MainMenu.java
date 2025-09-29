@@ -11,13 +11,15 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.*;
-
 import javafx.fxml.FXMLLoader;
 
 public class MainMenu {
 
     private static final double BASE_WIDTH = 1920.0;
     private static final double BASE_HEIGHT = 1080.0;
+
+    // Maximize only the first time we open Main Menu in this run
+    private static boolean FIRST_OPEN = true;
 
     public Scene buildScene(Stage stage) {
         Font.loadFont(getClass().getResourceAsStream("/com/example/addressbook/fonts/Jaro-Regular.ttf"), 10);
@@ -163,7 +165,21 @@ public class MainMenu {
             );
         } catch (Exception ignored) {}
 
-        bindDpiNeutralScale(outer, content);
+        // Bind scaling (scene-based) and listen to stage too
+        bindDpiNeutralScale(outer, content, stage);
+
+        // Maximize on first open
+        if (FIRST_OPEN) {
+            FIRST_OPEN = false;
+            javafx.application.Platform.runLater(() -> {
+                if (!stage.isShowing()) {
+                    javafx.application.Platform.runLater(() -> stage.setMaximized(true));
+                } else {
+                    stage.setMaximized(true);
+                }
+            });
+        }
+
         return scene;
     }
 
@@ -216,8 +232,7 @@ public class MainMenu {
         }
     }
 
-    // ---------- Popups (controllers will handle DB + navigation) ----------
-
+    // ---------- Popups ----------
     private void openSubLesson(Stage owner, String title, String codePrefix, String[] leftTexts) {
         try {
             FXMLLoader fxml = new FXMLLoader(getClass().getResource("/com/example/addressbook/SubLessonSelect.fxml"));
@@ -271,23 +286,63 @@ public class MainMenu {
         }
     }
 
-    // DPI-neutral scaling
-    private void bindDpiNeutralScale(StackPane outer, Region content) {
-        Runnable apply = () -> {
-            double w = outer.getWidth();
-            double h = outer.getHeight();
-            if (w <= 0 || h <= 0) return;
+    // Scene-based DPI-neutral scaling (logical pixels only; no explicit DPI math)
+    private void bindDpiNeutralScale(StackPane outer, Region content, Stage stage) {
+        final double EDGE_MARGIN = 64.0; // logical px on each side
 
-            double dpiScale = javafx.stage.Screen.getPrimary().getDpi() / 96.0;
-            double sx = w / (BASE_WIDTH  * dpiScale);
-            double sy = h / (BASE_HEIGHT * dpiScale);
-            double s = Math.min(sx, sy);
+        Runnable apply = () -> {
+            Scene sc = outer.getScene();
+            double w = (sc != null && sc.getWidth()  > 1) ? sc.getWidth()  : outer.getWidth();
+            double h = (sc != null && sc.getHeight() > 1) ? sc.getHeight() : outer.getHeight();
+            if (w <= 1 || h <= 1) return;
+
+            double wEff = Math.max(0, w - EDGE_MARGIN * 2);
+            double hEff = Math.max(0, h - EDGE_MARGIN * 2);
+
+            double sx = wEff / BASE_WIDTH;
+            double sy = hEff / BASE_HEIGHT;
+            double s  = Math.min(sx, sy);
 
             content.setScaleX(s);
             content.setScaleY(s);
         };
+
+        // Node size/layout changes
         outer.widthProperty().addListener((o, ov, nv) -> apply.run());
         outer.heightProperty().addListener((o, ov, nv) -> apply.run());
-        apply.run();
+        outer.layoutBoundsProperty().addListener((o, ov, nv) -> apply.run());
+
+        // Scene attach & size changes (covers navigation)
+        outer.sceneProperty().addListener((o, oldScene, newScene) -> {
+            if (newScene != null) {
+                newScene.widthProperty().addListener((oo, ov, nv) -> apply.run());
+                newScene.heightProperty().addListener((oo, ov, nv) -> apply.run());
+                newScene.windowProperty().addListener((ooo, oldW, newW) -> {
+                    if (newW instanceof Stage st) {
+                        st.widthProperty().addListener((oooo, ov, nv) -> apply.run());
+                        st.heightProperty().addListener((oooo, ov, nv) -> apply.run());
+                        st.maximizedProperty().addListener((oooo, ov, nv) -> javafx.application.Platform.runLater(apply));
+                        st.fullScreenProperty().addListener((oooo, ov, nv) -> javafx.application.Platform.runLater(apply));
+                        st.showingProperty().addListener((oooo, was, is) -> { if (is) javafx.application.Platform.runLater(apply); });
+                        javafx.application.Platform.runLater(apply);
+                        javafx.application.Platform.runLater(apply);
+                    }
+                });
+                javafx.application.Platform.runLater(apply);
+                javafx.application.Platform.runLater(apply);
+            }
+        });
+
+        if (stage != null) {
+            stage.widthProperty().addListener((o, ov, nv) -> apply.run());
+            stage.heightProperty().addListener((o, ov, nv) -> apply.run());
+            stage.maximizedProperty().addListener((o, ov, nv) -> javafx.application.Platform.runLater(apply));
+            stage.fullScreenProperty().addListener((o, ov, nv) -> javafx.application.Platform.runLater(apply));
+            stage.showingProperty().addListener((o, ov, nv) -> { if (nv) javafx.application.Platform.runLater(apply); });
+        }
+
+        // kick off a couple of pulses immediately
+        javafx.application.Platform.runLater(apply);
+        javafx.application.Platform.runLater(apply);
     }
 }
