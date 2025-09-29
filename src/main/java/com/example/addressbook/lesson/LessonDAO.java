@@ -35,7 +35,6 @@ public class LessonDAO {
         }
     }
 
-    // DateStarted (no param for time)
     public void markStarted(int lessonId, int userId) throws SQLException {
         String sql = "UPDATE Lesson SET DateStarted = datetime('now','localtime') WHERE LessonID = ? AND UserID = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -45,24 +44,24 @@ public class LessonDAO {
         }
     }
 
-    // DateCompleted + outputs (time written by SQLite)
     public void markCompleted(int lessonId, int userId,
-                              double starRating, double wpm, double accuracy, int errors) throws SQLException {
+                              double starRating, double wpm, double accuracy, int errors,
+                              String weakKeys) throws SQLException {
         String sql = """
-    UPDATE Lesson
-    SET DateCompleted = datetime('now','localtime'),
-        StarRating = ?, WPM = ?, Accuracy = ?, ErrorAmount = ?
-    WHERE LessonID = ? AND UserID = ?
-  """;
+      UPDATE Lesson
+      SET DateCompleted = datetime('now','localtime'),
+          StarRating = ?, WPM = ?, Accuracy = ?, ErrorAmount = ?, WeakKeys = ?
+      WHERE LessonID = ? AND UserID = ?
+    """;
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setDouble(1, starRating);
             ps.setDouble(2, wpm);
             ps.setDouble(3, accuracy);
             ps.setInt(4, errors);
-            ps.setInt(5, lessonId);
-            ps.setInt(6, userId);
+            ps.setString(5, weakKeys);
+            ps.setInt(6, lessonId);
+            ps.setInt(7, userId);
             ps.executeUpdate();
         }
     }
-
 }

@@ -1,6 +1,5 @@
 package com.example.addressbook.controllers;
 
-import com.example.addressbook.lesson.*;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -10,17 +9,17 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
-import javafx.scene.text.TextFlow;
+import javafx.scene.input.*;
+import javafx.scene.text.*;
+import javafx.scene.layout.*;
+
+import com.example.addressbook.lesson.*;
 import com.example.addressbook.auth.Session;
 import com.example.addressbook.ai.AITextService;
 import com.example.addressbook.ai.OpenAITextService;
+import com.example.addressbook.lesson.WeakKeyTracker;
 import java.util.concurrent.CompletableFuture;
+
 
 public class LessonActivePageController {
     @FXML private HBox buttonBar;
@@ -52,17 +51,17 @@ public class LessonActivePageController {
     private PauseMenu pauseMenu;
     private KeyboardHands keyboardHands;
     private InputSection inputSection;
+    private final WeakKeyTracker weakKeyTracker = new WeakKeyTracker();
     private Integer currentLessonId;
     private int currentUserId;
     private final LessonDAO lessonDAO = new LessonDAO(); // reuse the same DAO
 
     private void buildInputSectionAndStart(String passage) {
         inputSection = new InputSection(
-                promptFlow, userFlow, hiddenInput, keyboardHands, metrics, passage
+                promptFlow, userFlow, hiddenInput, keyboardHands, metrics, passage, weakKeyTracker
         );
         keyboardHands.highlightExpected(inputSection.peekExpected());
 
-        // These filters already exist below your old InputSection line; keep only one set
         hiddenInput.addEventFilter(KeyEvent.KEY_TYPED, inputSection::onKeyTyped);
         hiddenInput.addEventFilter(KeyEvent.KEY_PRESSED, inputSection::onKeyPressed);
 
@@ -76,7 +75,6 @@ public class LessonActivePageController {
         modeChoice.getSelectionModel().selectedIndexProperty()
                 .addListener((obs, o, n) -> inputSection.setStrictMode(n.intValue() == 0));
 
-
         Platform.runLater(() -> {
             hiddenInput.setText("");
             hiddenInput.requestFocus();
@@ -85,7 +83,6 @@ public class LessonActivePageController {
             if (currentLessonId != null) {
                 try { lessonDAO.markStarted(currentLessonId, currentUserId); } catch (Exception ex) { ex.printStackTrace(); }
             }
-
             keyboardHands.highlightExpected(inputSection.peekExpected());
         });
     }
@@ -104,11 +101,9 @@ public class LessonActivePageController {
         progressFeature = new ProgressBar(timeProgress);
         progressFeature.bindTo(metrics.timeRemainingProperty(), metrics.lessonSeconds());
 
-
         keyboardHands = new KeyboardHands(keyboardGrid, handsRegion, handsLabel);
         keyboardHands.buildQwerty();
 
-        // Decide passage based on latest Lesson for the current user
         currentUserId = Session.getCurrentUserId();
         Lesson latest = null;
 
@@ -118,17 +113,14 @@ public class LessonActivePageController {
             e.printStackTrace();
         }
 
-// Rebind metrics for the real lesson if we have one; otherwise keep your fallback from CustomPrompts
         if (latest == null) {
-            // Fallback to the existing p.* values you already set above
             buildInputSectionAndStart(p.text());
-        } else {
-            currentLessonId = latest.getLessonId();   // cache for later DB writes
-            // Set labels based on DB
+        }
+        else {
+            currentLessonId = latest.getLessonId();
             lessonTitleLabel.setText(latest.getLessonType());
             int durationSeconds = Math.max(10, latest.getDurationMinutes() * 60);
 
-            // Recreate metrics and rebind UI to it (overriding the earlier p.durationSeconds binding)
             metrics = new Metrics(durationSeconds);
             metrics.bindTimerLabel(timerLabel);
             metrics.bindStats(wpmLabel, errorsLabel, accuracyLabel);
@@ -141,11 +133,9 @@ public class LessonActivePageController {
             boolean isFree = (lt != null && lt.toLowerCase().startsWith("free")); // matches your FreeTypeSelectController ("FreeWeakKeys", "FreeAnything")
 
             if (isFree) {
-                // Free typing → no fixed passage
                 buildInputSectionAndStart("");
 
             } else if (isCustom) {
-                // CustomTopic → try OpenAI; on failure, fall back to local generator
                 AITextService openai = new OpenAITextService();
                 AITextService local = new com.example.addressbook.ai.LocalSimpleTextService();
                 int targetWords = Math.max(60, latest.getDurationMinutes() * 50);
@@ -154,7 +144,7 @@ public class LessonActivePageController {
                 CompletableFuture
                         .supplyAsync(() -> {
                             try {
-                                // 1) Try OpenAI
+                                // 1) OpenAI
                                 return openai.generatePassage(
                                         finalLatest.getPrompt(),
                                         targetWords,
@@ -164,7 +154,7 @@ public class LessonActivePageController {
                                         finalLatest.isSpecialChars()
                                 );
                             } catch (Exception ex) {
-                                // 2) Any failure (e.g., 429 insufficient_quota) → local free generator
+                                // 2) local free generator
                                 try {
                                     return local.generatePassage(
                                             finalLatest.getPrompt(),
@@ -188,7 +178,7 @@ public class LessonActivePageController {
                         });
 
             } else {
-                // 1a…4f → fixed placeholders for now
+                // 1a…4f fixed placeholders for now
                 String fixed = com.example.addressbook.lesson.FixedLessons.passageFor(lt);
                 buildInputSectionAndStart(fixed);
             }
@@ -211,24 +201,35 @@ public class LessonActivePageController {
             inputSection.disable();
             keyboardHands.dim();
 
-            // gather stats from Metrics
             double wpmVal;
             double accuracyVal;
             int errorCount;
 
-            // Preferred: if Metrics exposes getters, use them:
-            // (If not, see "If Metrics lacks getters" just below)
             wpmVal      = metrics.getWpm();
             accuracyVal = metrics.getAccuracyPercent(); // 0..100
             errorCount  = metrics.getErrors();
-
             double star = StarRating.compute(wpmVal, accuracyVal, errorCount); // 0.0 .. 5.0
+            String weakPairs = weakKeyTracker.topPrevExpectedPairsString(5); // e.g. "aC d4 e2 a1 B#" or with "--" pads
+
+            // --- DEBUG: print full weak-keys structure to terminal ---
+            System.out.println("\n----- WEAK KEYS DEBUG DUMP -----");
+            System.out.println(weakKeyTracker.debugDump());
+            System.out.println("Top-5 pairs stored to DB: " + weakPairs);
+            System.out.println("--------------------------------\n");
 
             if (currentLessonId != null) {
-                try { lessonDAO.markCompleted(currentLessonId, currentUserId, star, wpmVal, accuracyVal, errorCount); }
+                try { lessonDAO.markCompleted(
+                        currentLessonId,
+                        currentUserId,
+                        star,
+                        wpmVal,
+                        accuracyVal,
+                        errorCount,
+                        weakPairs
+                );
+                }
                 catch (Exception ex) { ex.printStackTrace(); }
             }
-
 
             Platform.runLater(() -> {
                 Alert a = new Alert(Alert.AlertType.INFORMATION, "You won! Lesson complete.");

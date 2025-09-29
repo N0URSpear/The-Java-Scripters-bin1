@@ -1,4 +1,3 @@
-// AITextService.java
 package com.example.addressbook.ai;
 
 public interface AITextService {

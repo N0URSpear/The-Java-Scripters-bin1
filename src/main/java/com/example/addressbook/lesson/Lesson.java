@@ -3,9 +3,9 @@ package com.example.addressbook.lesson;
 public class Lesson {
     private final int lessonId;
     private final int userId;
-    private final String lessonType;   // "1a"…"4f", "CustomTopic", "FreeWeakKeys", "FreeAnything"
-    private final String prompt;       // only used when lessonType == CustomTopic (<=50 chars per DB)
-    private final int durationMinutes; // from LessonDuration (minutes)
+    private final String lessonType;
+    private final String prompt;
+    private final int durationMinutes;
     private final boolean upperCase;
     private final boolean numbers;
     private final boolean punctuation;
