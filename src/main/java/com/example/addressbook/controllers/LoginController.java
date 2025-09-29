@@ -1,5 +1,6 @@
 package com.example.addressbook.controllers;
 
+import com.example.addressbook.SessionManager;
 import com.example.addressbook.INinjaContactDAO;
 import com.example.addressbook.SqliteContactDAO;
 import com.example.addressbook.NinjaUser;
@@ -48,6 +49,8 @@ public class LoginController {
 
         showAlert(Alert.AlertType.INFORMATION,"Login Successful","Welcome, " + ninja.getUserName() + "!"  );
         loginSuccessful = true;
+
+        SessionManager.setUser(ninja.getId(), ninja.getUserName());
 
         // Close popup after login
         if (usernameField != null && usernameField.getScene() != null) {

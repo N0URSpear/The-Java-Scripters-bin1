@@ -3,6 +3,7 @@ package com.example.addressbook.controllers;
 import com.example.addressbook.INinjaContactDAO;
 import com.example.addressbook.SqliteContactDAO;
 import com.example.addressbook.NinjaUser;
+import com.example.addressbook.SessionManager; // ✅ 引入 SessionManager
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -24,9 +25,12 @@ public class CreateAccountController {
     private boolean isCreateAccountSuccessful = false;
     private boolean testMode = false;
     private final INinjaContactDAO NinjaDAO;
-    public CreateAccountController() {this.NinjaDAO = new SqliteContactDAO();}
 
-    public CreateAccountController (INinjaContactDAO mockDao) {
+    public CreateAccountController() {
+        this.NinjaDAO = new SqliteContactDAO();
+    }
+
+    public CreateAccountController(INinjaContactDAO mockDao) {
         this.NinjaDAO = mockDao;
     }
 
@@ -84,7 +88,7 @@ public class CreateAccountController {
         String answer1 = SecretQuestion1Answer.getText().trim();
         String answer2 = SecretQuestion2Answer.getText().trim();
 
-        doCreateAccount(username,password,repeatPassword,secretQ1,secretQ2,answer1,answer2);
+        doCreateAccount(username, password, repeatPassword, secretQ1, secretQ2, answer1, answer2);
     }
 
     void doCreateAccount(String username, String password, String repeatPassword, String secretQ1, String secretQ2, String answer1, String answer2) {
@@ -114,8 +118,7 @@ public class CreateAccountController {
             return;
         }
 
-        if (answer1 == null || answer1.isEmpty() ||
-                answer2 == null || answer2.isEmpty()) {
+        if (answer1 == null || answer1.isEmpty() || answer2 == null || answer2.isEmpty()) {
             showError("Both secret question answers must be filled.");
             return;
         }
@@ -141,6 +144,18 @@ public class CreateAccountController {
 
         NinjaDAO.addNinjaUser(newUser);
 
+        // ✅ 获取刚刚插入的用户 ID
+        int newUserId = ((SqliteContactDAO)NinjaDAO).getUserIdByUsername(username);
+        System.out.println("DEBUG: Created new userId = " + newUserId);
+
+        // ✅ 初始化 Goals & Statistics（全部默认 0）S
+        ((SqliteContactDAO)NinjaDAO).initUserData(newUserId);
+        System.out.println("DEBUG: Init data for userId = " + newUserId);
+
+        // ✅ 设置当前会话用户，保证 ProfilePage 能拿到正确的 userId 和 username
+        SessionManager.setUser(newUserId, username);
+        System.out.println("DEBUG: Session set with userId = " + newUserId + ", username = " + username);
+
         showSuccess();
 
         isCreateAccountSuccessful = true;
@@ -153,7 +168,6 @@ public class CreateAccountController {
 
     private void showError(String message) {
         if (testMode) {
-            // Don’t show alerts while testing
             return;
         }
         Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -165,7 +179,6 @@ public class CreateAccountController {
 
     private void showSuccess() {
         if (testMode) {
-            // Don’t show alerts while testing
             return;
         }
         Alert alert = new Alert(Alert.AlertType.INFORMATION);

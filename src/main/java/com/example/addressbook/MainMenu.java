@@ -87,6 +87,14 @@ public class MainMenu {
         bottomMenu.setAlignment(Pos.CENTER);
         VBox.setMargin(bottomMenu, new Insets(40, 0, 20, 0));
 
+        // 🔹 点击跳转 Profile
+        profile.setOnMouseClicked(e -> {
+            int userId = SessionManager.getCurrentUserId(); // 从 session 获取当前用户
+            ProfilePage profilePage = new ProfilePage(userId);
+            Scene profileScene = new Scene(profilePage, stage.getWidth(), stage.getHeight());
+            stage.setScene(profileScene);
+        });
+
         // ----- MAIN CONTENT -----
         VBox content = new VBox(40, topBar, grid, bottomMenu);
         content.setPadding(new Insets(20));
