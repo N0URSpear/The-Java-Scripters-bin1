@@ -8,6 +8,7 @@ module com.example.addressbook {
 
     requires com.google.gson;
     requires java.net.http;
+    requires org.apache.pdfbox;
 
     opens com.example.addressbook to javafx.fxml;
     exports com.example.addressbook;
