@@ -15,7 +15,7 @@ public class OllamaTextService implements AITextService {
     private static final String BASE =
             System.getenv("OLLAMA_BASE_URL") != null ? System.getenv("OLLAMA_BASE_URL") : "http://localhost:11434";
     private static final String MODEL =
-            System.getenv("OLLAMA_MODEL") != null ? System.getenv("OLLAMA_MODEL") : "phi3:3.8b"; // small, fast
+            System.getenv("OLLAMA_MODEL") != null ? System.getenv("OLLAMA_MODEL") : "gemma3:1b"; // small, fast
 
     private final HttpClient http = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(10))
