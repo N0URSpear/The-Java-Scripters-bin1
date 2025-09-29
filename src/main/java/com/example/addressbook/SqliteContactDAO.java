@@ -10,19 +10,23 @@ public class SqliteContactDAO implements INinjaContactDAO {
     public SqliteContactDAO() {
         connection = SqliteConnection.getInstance();
         createTable();
+        ensureUsersPlainColumns(); // 迁移：为旧库补齐明文字段
     }
 
     private void createTable() {
         try (Statement statement = connection.createStatement()) {
-            // Users 表
+            // Users 表（含明文字段，用于回显）
             statement.execute("CREATE TABLE IF NOT EXISTS Users (" +
                     "UserID INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     "Username TEXT NOT NULL UNIQUE, " +
                     "PasswordHash TEXT NOT NULL, " +
+                    "PasswordPlain TEXT, " + // ✅ 新增
                     "SecretQuestion1 TEXT NOT NULL, " +
                     "SecretQuestion2 TEXT NOT NULL, " +
                     "SecretQuestion1Answer TEXT NOT NULL, " +
-                    "SecretQuestion2Answer TEXT NOT NULL" +
+                    "SecretQuestion2Answer TEXT NOT NULL, " +
+                    "SecretAnswer1Plain TEXT, " + // ✅ 新增
+                    "SecretAnswer2Plain TEXT" +  // ✅ 新增
                     ")");
 
             // Goals 表
@@ -53,17 +57,35 @@ public class SqliteContactDAO implements INinjaContactDAO {
         }
     }
 
+    // 为旧版本 Users 表补齐明文字段（忽略重复列错误）
+    private void ensureUsersPlainColumns() {
+        try (Statement s = connection.createStatement()) {
+            try { s.execute("ALTER TABLE Users ADD COLUMN PasswordPlain TEXT"); } catch (SQLException ignored) {}
+            try { s.execute("ALTER TABLE Users ADD COLUMN SecretAnswer1Plain TEXT"); } catch (SQLException ignored) {}
+            try { s.execute("ALTER TABLE Users ADD COLUMN SecretAnswer2Plain TEXT"); } catch (SQLException ignored) {}
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     // === Users CRUD ===
     @Override
     public void addNinjaUser(NinjaUser ninjaUser) {
-        String sql = "INSERT INTO Users (Username, PasswordHash, SecretQuestion1, SecretQuestion2, SecretQuestion1Answer, SecretQuestion2Answer) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Users (Username, PasswordHash, PasswordPlain, " +
+                "SecretQuestion1, SecretQuestion2, " +
+                "SecretQuestion1Answer, SecretQuestion2Answer, " +
+                "SecretAnswer1Plain, SecretAnswer2Plain) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, ninjaUser.getUserName());
             ps.setString(2, ninjaUser.getPasswordHash());
-            ps.setString(3, ninjaUser.getSecretQuestion1());
-            ps.setString(4, ninjaUser.getSecretQuestion2());
-            ps.setString(5, ninjaUser.getSecretQuestion1Answer());
-            ps.setString(6, ninjaUser.getSecretQuestion2Answer());
+            ps.setString(3, ninjaUser.getPasswordPlain()); // ✅ 保存明文
+            ps.setString(4, ninjaUser.getSecretQuestion1());
+            ps.setString(5, ninjaUser.getSecretQuestion2());
+            ps.setString(6, ninjaUser.getSecretQuestion1Answer());
+            ps.setString(7, ninjaUser.getSecretQuestion2Answer());
+            ps.setString(8, ninjaUser.getSecretAnswer1Plain()); // ✅ 保存明文
+            ps.setString(9, ninjaUser.getSecretAnswer2Plain()); // ✅ 保存明文
             ps.executeUpdate();
             try (ResultSet rs = ps.getGeneratedKeys()) {
                 if (rs.next()) {
@@ -77,7 +99,11 @@ public class SqliteContactDAO implements INinjaContactDAO {
 
     @Override
     public NinjaUser getNinjaUser(String userName) {
-        String sql = "SELECT UserID, Username, PasswordHash, SecretQuestion1, SecretQuestion2, SecretQuestion1Answer, SecretQuestion2Answer FROM Users WHERE Username = ?";
+        String sql = "SELECT UserID, Username, PasswordHash, PasswordPlain, " +
+                "SecretQuestion1, SecretQuestion2, " +
+                "SecretQuestion1Answer, SecretQuestion2Answer, " +
+                "SecretAnswer1Plain, SecretAnswer2Plain " +
+                "FROM Users WHERE Username = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, userName);
             try (ResultSet rs = ps.executeQuery()) {
@@ -85,10 +111,13 @@ public class SqliteContactDAO implements INinjaContactDAO {
                     NinjaUser user = new NinjaUser(
                             rs.getString("Username"),
                             rs.getString("PasswordHash"),
+                            rs.getString("PasswordPlain"), // ✅ 返回明文
                             rs.getString("SecretQuestion1"),
                             rs.getString("SecretQuestion2"),
                             rs.getString("SecretQuestion1Answer"),
-                            rs.getString("SecretQuestion2Answer")
+                            rs.getString("SecretQuestion2Answer"),
+                            rs.getString("SecretAnswer1Plain"), // ✅ 返回明文
+                            rs.getString("SecretAnswer2Plain")  // ✅ 返回明文
                     );
                     user.setId(rs.getInt("UserID"));
                     return user;
@@ -103,16 +132,22 @@ public class SqliteContactDAO implements INinjaContactDAO {
     @Override
     public List<NinjaUser> getAllNinjas() {
         List<NinjaUser> users = new ArrayList<>();
-        String sql = "SELECT * FROM Users";
+        String sql = "SELECT UserID, Username, PasswordHash, PasswordPlain, " +
+                "SecretQuestion1, SecretQuestion2, " +
+                "SecretQuestion1Answer, SecretQuestion2Answer, " +
+                "SecretAnswer1Plain, SecretAnswer2Plain FROM Users";
         try (Statement stmt = connection.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 NinjaUser user = new NinjaUser(
                         rs.getString("Username"),
                         rs.getString("PasswordHash"),
+                        rs.getString("PasswordPlain"), // ✅ 返回明文
                         rs.getString("SecretQuestion1"),
                         rs.getString("SecretQuestion2"),
                         rs.getString("SecretQuestion1Answer"),
-                        rs.getString("SecretQuestion2Answer")
+                        rs.getString("SecretQuestion2Answer"),
+                        rs.getString("SecretAnswer1Plain"), // ✅ 返回明文
+                        rs.getString("SecretAnswer2Plain")  // ✅ 返回明文
                 );
                 user.setId(rs.getInt("UserID"));
                 users.add(user);
@@ -125,15 +160,22 @@ public class SqliteContactDAO implements INinjaContactDAO {
 
     @Override
     public void updateNinjaUser(NinjaUser ninjaUser) {
-        String sql = "UPDATE Users SET Username=?, PasswordHash=?, SecretQuestion1=?, SecretQuestion2=?, SecretQuestion1Answer=?, SecretQuestion2Answer=? WHERE UserID=?";
+        String sql = "UPDATE Users SET Username=?, PasswordHash=?, PasswordPlain=?, " +
+                "SecretQuestion1=?, SecretQuestion2=?, " +
+                "SecretQuestion1Answer=?, SecretQuestion2Answer=?, " +
+                "SecretAnswer1Plain=?, SecretAnswer2Plain=? " +
+                "WHERE UserID=?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, ninjaUser.getUserName());
             ps.setString(2, ninjaUser.getPasswordHash());
-            ps.setString(3, ninjaUser.getSecretQuestion1());
-            ps.setString(4, ninjaUser.getSecretQuestion2());
-            ps.setString(5, ninjaUser.getSecretQuestion1Answer());
-            ps.setString(6, ninjaUser.getSecretQuestion2Answer());
-            ps.setInt(7, ninjaUser.getId());
+            ps.setString(3, ninjaUser.getPasswordPlain()); // ✅ 保存明文
+            ps.setString(4, ninjaUser.getSecretQuestion1());
+            ps.setString(5, ninjaUser.getSecretQuestion2());
+            ps.setString(6, ninjaUser.getSecretQuestion1Answer());
+            ps.setString(7, ninjaUser.getSecretQuestion2Answer());
+            ps.setString(8, ninjaUser.getSecretAnswer1Plain()); // ✅ 保存明文
+            ps.setString(9, ninjaUser.getSecretAnswer2Plain()); // ✅ 保存明文
+            ps.setInt(10, ninjaUser.getId());
             ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -175,7 +217,6 @@ public class SqliteContactDAO implements INinjaContactDAO {
             this.totalStars = totalStars;
         }
 
-        // === Getter 方法 ===
         public String getEstHours() { return estHours; }
         public String getEstWPM() { return estWPM; }
         public String getEstAccuracy() { return estAccuracy; }
@@ -189,7 +230,6 @@ public class SqliteContactDAO implements INinjaContactDAO {
         public String getAvgRating() { return avgRating; }
         public String getTotalStars() { return totalStars; }
     }
-
 
     // === 查询 Goals + Statistics ===
     public ProfileStats getUserGoalsAndStats(int userId) {
@@ -229,6 +269,7 @@ public class SqliteContactDAO implements INinjaContactDAO {
         }
         return null;
     }
+
     // 通过用户名获取 UserID
     public int getUserIdByUsername(String username) {
         String sql = "SELECT UserID FROM Users WHERE Username = ?";
@@ -242,45 +283,38 @@ public class SqliteContactDAO implements INinjaContactDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return -1; // 没找到返回 -1
+        return -1;
     }
 
     // 初始化 Goals 和 Statistics 表的数据
     public void initUserData(int userId) {
         try {
-            // Goals
             String insertGoals = """
             INSERT OR IGNORE INTO Goals (UserID, EstHours, EstWPM, EstAccuracy)
             VALUES (?, 0, 0, 0)
-        """;
+            """;
             try (PreparedStatement ps = connection.prepareStatement(insertGoals)) {
                 ps.setInt(1, userId);
                 ps.executeUpdate();
             }
 
-            // Statistics
             String insertStats = """
             INSERT OR IGNORE INTO Statistics (UserID, TimeActiveWeek, TotalWPMWeek, TotalAccuracyWeek,
                                               Belt, TotalLessons, AvgWPM, HighestRating, AvgRating, TotalStars)
             VALUES (?, 0, 0, 0, 'White', 0, 0, 0, 0, 0)
-        """;
+            """;
             try (PreparedStatement ps = connection.prepareStatement(insertStats)) {
                 ps.setInt(1, userId);
                 ps.executeUpdate();
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-
-
-
-    // === 初始化 Goals + Statistics ===
+    // 安全初始化（存在即忽略）
     public void safeInitUserData(int userId) {
         try {
-            // Goals
             String checkGoals = "SELECT COUNT(*) FROM Goals WHERE UserID = ?";
             try (PreparedStatement ps = connection.prepareStatement(checkGoals)) {
                 ps.setInt(1, userId);
@@ -294,7 +328,6 @@ public class SqliteContactDAO implements INinjaContactDAO {
                 }
             }
 
-            // Statistics
             String checkStats = "SELECT COUNT(*) FROM Statistics WHERE UserID = ?";
             try (PreparedStatement ps = connection.prepareStatement(checkStats)) {
                 ps.setInt(1, userId);
@@ -316,4 +349,68 @@ public class SqliteContactDAO implements INinjaContactDAO {
         }
     }
 
+    // ⚡ 重新计算并更新 Statistics 表数据
+    public void recalcUserStatistics(int userId) {
+        try {
+            int totalLessons = 0;
+            try (PreparedStatement ps = connection.prepareStatement("SELECT COUNT(*) FROM Lesson WHERE UserID = ?")) {
+                ps.setInt(1, userId);
+                ResultSet rs = ps.executeQuery();
+                if (rs.next()) totalLessons = rs.getInt(1);
+            }
+
+            double avgWPM = 0;
+            try (PreparedStatement ps = connection.prepareStatement("SELECT AVG(WPM) FROM Lesson WHERE UserID = ?")) {
+                ps.setInt(1, userId);
+                ResultSet rs = ps.executeQuery();
+                if (rs.next()) avgWPM = rs.getDouble(1);
+            }
+
+            double highestRating = 0;
+            try (PreparedStatement ps = connection.prepareStatement("SELECT MAX(StarRating) FROM Lesson WHERE UserID = ?")) {
+                ps.setInt(1, userId);
+                ResultSet rs = ps.executeQuery();
+                if (rs.next()) highestRating = rs.getDouble(1);
+            }
+
+            double avgRating = 0;
+            try (PreparedStatement ps = connection.prepareStatement("SELECT AVG(StarRating) FROM Lesson WHERE UserID = ?")) {
+                ps.setInt(1, userId);
+                ResultSet rs = ps.executeQuery();
+                if (rs.next()) avgRating = rs.getDouble(1);
+            }
+
+            int totalStars = 0;
+            try (PreparedStatement ps = connection.prepareStatement("SELECT SUM(CAST(StarRating AS INT)) FROM Lesson WHERE UserID = ?")) {
+                ps.setInt(1, userId);
+                ResultSet rs = ps.executeQuery();
+                if (rs.next()) totalStars = rs.getInt(1);
+            }
+
+            String update = """
+            UPDATE Statistics
+            SET TotalLessons = ?, AvgWPM = ?, HighestRating = ?, AvgRating = ?, TotalStars = ?
+            WHERE UserID = ?
+            """;
+            try (PreparedStatement ps = connection.prepareStatement(update)) {
+                ps.setInt(1, totalLessons);
+                ps.setDouble(2, avgWPM);
+                ps.setDouble(3, highestRating);
+                ps.setDouble(4, avgRating);
+                ps.setInt(5, totalStars);
+                ps.setInt(6, userId);
+                ps.executeUpdate();
+            }
+
+            System.out.println("DEBUG: Recalculated statistics for userId=" + userId +
+                    " Lessons=" + totalLessons +
+                    " AvgWPM=" + avgWPM +
+                    " HighestRating=" + highestRating +
+                    " AvgRating=" + avgRating +
+                    " TotalStars=" + totalStars);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

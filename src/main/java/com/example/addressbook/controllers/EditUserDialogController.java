@@ -1,7 +1,11 @@
-package com.example.addressbook;
+package com.example.addressbook.controllers;
 
+import com.example.addressbook.NinjaUser;
+import com.example.addressbook.SessionManager;
+import com.example.addressbook.SqliteContactDAO;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -9,72 +13,140 @@ public class EditUserDialogController {
 
     @FXML private TextField usernameField;
     @FXML private PasswordField passwordField;
-    @FXML private ComboBox<String> q1Box;
-    @FXML private ComboBox<String> q2Box;
-    @FXML private TextField answer1Field;
-    @FXML private TextField answer2Field;
+    @FXML private ComboBox<String> secretQ1ComboBox;
+    @FXML private PasswordField secretQ1Answer;
+    @FXML private ComboBox<String> secretQ2ComboBox;
+    @FXML private PasswordField secretQ2Answer;
 
-    private SqliteContactDAO dao;
+    @FXML private Button editUsernameBtn;
+    @FXML private Button editPasswordBtn;
+    @FXML private Button editAnswer1Btn;
+    @FXML private Button editAnswer2Btn;
+
+    @FXML private Button saveBtn;
+    @FXML private Button cancelBtn;
+
+    // 临时存储切换后的 TextField（明文）
+    private TextField passwordVisibleField;
+    private TextField answer1VisibleField;
+    private TextField answer2VisibleField;
+
     private NinjaUser currentUser;
 
     @FXML
-    public void initialize() {
-        dao = new SqliteContactDAO();
-        int userId = SessionManager.getCurrentUserId();
+    private void initialize() {
+        // 加载当前用户
+        SqliteContactDAO dao = new SqliteContactDAO();
         currentUser = dao.getNinjaUser(SessionManager.getCurrentUsername());
-
-        // 初始化问题选项
-        q1Box.getItems().addAll("City of Birth", "Mother's Maiden Name", "Favorite Teacher", "Pet's Name", "First School");
-        q2Box.getItems().addAll("Favorite Color", "Favorite Movie", "First Car", "Best Friend", "Dream Job");
 
         if (currentUser != null) {
             usernameField.setText(currentUser.getUserName());
-            q1Box.setValue(currentUser.getSecretQuestion1());
-            q2Box.setValue(currentUser.getSecretQuestion2());
-            answer1Field.setText(currentUser.getSecretQuestion1Answer());
-            answer2Field.setText(currentUser.getSecretQuestion2Answer());
+            passwordField.setText(currentUser.getPasswordPlain());
+            secretQ1ComboBox.setValue(currentUser.getSecretQuestion1());
+            secretQ1Answer.setText(currentUser.getSecretAnswer1Plain());
+            secretQ2ComboBox.setValue(currentUser.getSecretQuestion2());
+            secretQ2Answer.setText(currentUser.getSecretAnswer2Plain());
         }
+
+        // 默认禁用用户名
+        usernameField.setDisable(true);
+        editUsernameBtn.setOnAction(e -> usernameField.setDisable(false));
+
+        // 切换明文显示
+        editPasswordBtn.setOnAction(e -> toggleVisibility(passwordField, 0));
+        editAnswer1Btn.setOnAction(e -> toggleVisibility(secretQ1Answer, 1));
+        editAnswer2Btn.setOnAction(e -> toggleVisibility(secretQ2Answer, 2));
+
+        cancelBtn.setOnAction(e -> closeWindow());
+        saveBtn.setOnAction(e -> saveUser());
     }
 
-    @FXML
-    private void onSaveClicked() {
+    /**
+     * 切换 PasswordField <-> TextField
+     */
+    private void toggleVisibility(PasswordField pwField, int index) {
+        TextField visibleField = new TextField(pwField.getText());
+        visibleField.setPrefWidth(pwField.getPrefWidth());
+
+        Integer rowObj = GridPane.getRowIndex(pwField);
+        Integer colObj = GridPane.getColumnIndex(pwField);
+
+        final int row = (rowObj == null ? 0 : rowObj);
+        final int col = (colObj == null ? 0 : colObj);
+
+        GridPane parent = (GridPane) pwField.getParent();
+        parent.getChildren().remove(pwField);
+        parent.add(visibleField, col, row);
+
+        if (index == 0) {
+            passwordVisibleField = visibleField;
+        } else if (index == 1) {
+            answer1VisibleField = visibleField;
+        } else {
+            answer2VisibleField = visibleField;
+        }
+
+        // 回车切回 PasswordField
+        visibleField.setOnAction(e -> {
+            PasswordField newPwField = new PasswordField();
+            newPwField.setText(visibleField.getText());
+            newPwField.setPrefWidth(visibleField.getPrefWidth());
+
+            parent.getChildren().remove(visibleField);
+            parent.add(newPwField, col, row);
+
+            if (index == 0) {
+                this.passwordField = newPwField;
+                this.passwordVisibleField = null;
+            } else if (index == 1) {
+                this.secretQ1Answer = newPwField;
+                this.answer1VisibleField = null;
+            } else {
+                this.secretQ2Answer = newPwField;
+                this.answer2VisibleField = null;
+            }
+        });
+    }
+
+    /**
+     * 保存用户修改
+     */
+    private void saveUser() {
         if (currentUser == null) return;
 
-        String newUsername = usernameField.getText().trim();
-        String newPassword = passwordField.getText().trim();
-        String newQ1 = q1Box.getValue();
-        String newQ2 = q2Box.getValue();
-        String newAnswer1 = answer1Field.getText().trim();
-        String newAnswer2 = answer2Field.getText().trim();
+        String username = usernameField.getText();
+        String password = (passwordVisibleField != null)
+                ? passwordVisibleField.getText() : passwordField.getText();
+        String q1 = secretQ1ComboBox.getValue();
+        String q1Answer = (answer1VisibleField != null)
+                ? answer1VisibleField.getText() : secretQ1Answer.getText();
+        String q2 = secretQ2ComboBox.getValue();
+        String q2Answer = (answer2VisibleField != null)
+                ? answer2VisibleField.getText() : secretQ2Answer.getText();
 
-        if (!newUsername.isEmpty()) {
-            currentUser.setUserName(newUsername);
-        }
-        if (!newPassword.isEmpty()) {
-            currentUser.setPasswordHash(BCrypt.hashpw(newPassword, BCrypt.gensalt()));
-        }
-        if (newQ1 != null) {
-            currentUser.setSecretQuestion1(newQ1);
-        }
-        if (newQ2 != null) {
-            currentUser.setSecretQuestion2(newQ2);
-        }
-        if (!newAnswer1.isEmpty()) {
-            currentUser.setSecretQuestion1Answer(BCrypt.hashpw(newAnswer1, BCrypt.gensalt()));
-        }
-        if (!newAnswer2.isEmpty()) {
-            currentUser.setSecretQuestion2Answer(BCrypt.hashpw(newAnswer2, BCrypt.gensalt()));
-        }
+        // 更新 currentUser
+        currentUser.setUserName(username);
 
+        // 存明文 → 仅用于 EditUserDialog 回显
+        currentUser.setPasswordPlain(password);
+        currentUser.setSecretAnswer1Plain(q1Answer);
+        currentUser.setSecretAnswer2Plain(q2Answer);
+
+        // 存哈希 → 用于登录验证
+        currentUser.setPasswordHash(BCrypt.hashpw(password, BCrypt.gensalt()));
+        currentUser.setSecretQuestion1(q1);
+        currentUser.setSecretQuestion2(q2);
+        currentUser.setSecretQuestion1Answer(BCrypt.hashpw(q1Answer, BCrypt.gensalt()));
+        currentUser.setSecretQuestion2Answer(BCrypt.hashpw(q2Answer, BCrypt.gensalt()));
+
+        SqliteContactDAO dao = new SqliteContactDAO();
         dao.updateNinjaUser(currentUser);
 
-        Stage stage = (Stage) usernameField.getScene().getWindow();
-        stage.close();
+        closeWindow();
     }
 
-    @FXML
-    private void onCancelClicked() {
-        Stage stage = (Stage) usernameField.getScene().getWindow();
+    private void closeWindow() {
+        Stage stage = (Stage) cancelBtn.getScene().getWindow();
         stage.close();
     }
 }

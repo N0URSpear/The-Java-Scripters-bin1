@@ -1,42 +1,76 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.text.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
 
-<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.example.addressbook.EditUserDialogController"
-      spacing="15" alignment="CENTER"
-      style="-fx-background-color: #DDDDDD; -fx-padding: 20; -fx-background-radius: 15;"
-      prefWidth="500" prefHeight="400">
+<GridPane xmlns="http://javafx.com/javafx"
+          xmlns:fx="http://javafx.com/fxml"
+          fx:controller="com.example.addressbook.controllers.EditUserDialogController"
+          hgap="10" vgap="15" alignment="CENTER"
+          style="-fx-background-color: #DDDDDD; -fx-padding: 30; -fx-background-radius: 15;">
 
-    <Label text="Edit User" style="-fx-font-size: 24px; -fx-font-weight: bold;" />
+    <columnConstraints>
+        <ColumnConstraints halignment="RIGHT" minWidth="120"/>
+        <ColumnConstraints hgrow="ALWAYS"/>
+        <ColumnConstraints halignment="LEFT" minWidth="40"/>
+    </columnConstraints>
 
-    <HBox spacing="10">
-        <Label text="Username:"/>
-        <TextField fx:id="usernameField"/>
+    <Label text="Edit User" style="-fx-font-size: 22px; -fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="3" GridPane.halignment="CENTER"/>
+
+    <!-- Username -->
+    <Label text="Username:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+    <TextField fx:id="usernameField" disable="true" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+    <Button fx:id="editUsernameBtn" style="-fx-background-color: transparent;" GridPane.rowIndex="1" GridPane.columnIndex="2">
+        <graphic>
+            <ImageView fitWidth="20" fitHeight="20" preserveRatio="true">
+                <Image url="@pencil-write-tool-icon.png"/>
+            </ImageView>
+        </graphic>
+    </Button>
+
+    <!-- Password -->
+    <Label text="Password:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+    <PasswordField fx:id="passwordField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+    <Button fx:id="editPasswordBtn" style="-fx-background-color: transparent;" GridPane.rowIndex="2" GridPane.columnIndex="2">
+        <graphic>
+            <ImageView fitWidth="20" fitHeight="20" preserveRatio="true">
+                <Image url="@pencil-write-tool-icon.png"/>
+            </ImageView>
+        </graphic>
+    </Button>
+
+    <!-- Secret Q1 -->
+    <Label text="Secret Q1:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+    <ComboBox fx:id="secretQ1ComboBox" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+    <Button fx:id="editAnswer1Btn" style="-fx-background-color: transparent;" GridPane.rowIndex="3" GridPane.columnIndex="2">
+        <graphic>
+            <ImageView fitWidth="20" fitHeight="20" preserveRatio="true">
+                <Image url="@pencil-write-tool-icon.png"/>
+            </ImageView>
+        </graphic>
+    </Button>
+
+    <PasswordField fx:id="secretQ1Answer" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+    <!-- Secret Q2 -->
+    <Label text="Secret Q2:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+    <ComboBox fx:id="secretQ2ComboBox" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+    <Button fx:id="editAnswer2Btn" style="-fx-background-color: transparent;" GridPane.rowIndex="5" GridPane.columnIndex="2">
+        <graphic>
+            <ImageView fitWidth="20" fitHeight="20" preserveRatio="true">
+                <Image url="@pencil-write-tool-icon.png"/>
+            </ImageView>
+        </graphic>
+    </Button>
+
+    <PasswordField fx:id="secretQ2Answer" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+
+    <!-- Buttons -->
+    <HBox spacing="15" alignment="CENTER" GridPane.rowIndex="7" GridPane.columnIndex="0" GridPane.columnSpan="3">
+        <Button fx:id="saveBtn" text="Save" style="-fx-background-color: #4CAF50; -fx-text-fill: white;"/>
+        <Button fx:id="cancelBtn" text="Cancel"/>
     </HBox>
-
-    <HBox spacing="10">
-        <Label text="Password:"/>
-        <PasswordField fx:id="passwordField"/>
-    </HBox>
-
-    <HBox spacing="10">
-        <Label text="Secret Q1:"/>
-        <ComboBox fx:id="q1Box" prefWidth="200"/>
-        <TextField fx:id="answer1Field"/>
-    </HBox>
-
-    <HBox spacing="10">
-        <Label text="Secret Q2:"/>
-        <ComboBox fx:id="q2Box" prefWidth="200"/>
-        <TextField fx:id="answer2Field"/>
-    </HBox>
-
-    <HBox spacing="20">
-        <Button text="Save" onAction="#onSaveClicked"/>
-        <Button text="Cancel" onAction="#onCancelClicked"/>
-    </HBox>
-</VBox>
+</GridPane>
