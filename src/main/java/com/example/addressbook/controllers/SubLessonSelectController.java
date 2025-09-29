@@ -69,7 +69,7 @@ public class SubLessonSelectController {
             Stage popup = (Stage) backButton.getScene().getWindow();
             Stage owner = (Stage) popup.getOwner();
 
-            Parent root = FXMLLoader.load(getClass().getResource("/com/example/addressbook/Typing.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource("/com/example/addressbook/LessonActivePage.fxml"));
             owner.getScene().setRoot(root);
             owner.setTitle("Typing - Typing Ninja");
             owner.centerOnScreen();
