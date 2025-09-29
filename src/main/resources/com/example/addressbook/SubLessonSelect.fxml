@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane xmlns="http://javafx.com/javafx/21"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.example.addressbook.controllers.SubLessonSelectController"
+           prefWidth="980" prefHeight="640"
+           alignment="CENTER"
+           style="-fx-background-color: transparent;">
+
+    <VBox fx:id="card"
+          maxWidth="920" prefWidth="900"
+          spacing="18" alignment="TOP_CENTER"
+          style="-fx-background-color:#D9D9D9; -fx-border-color:#2EFF04; -fx-border-width:3;
+                 -fx-background-radius:20; -fx-border-radius:20;">
+        <padding>
+            <Insets top="18" right="18" bottom="18" left="18"/>
+        </padding>
+
+        <!-- Header -->
+        <HBox alignment="CENTER_RIGHT" spacing="12">
+            <Label fx:id="titleLabel"
+                   text="Lesson 1 - The Home Row"
+                   style="-fx-font-family:'Jaro'; -fx-font-size:40; -fx-text-fill:black;"
+                   HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+            <Button fx:id="backButton" text="Back"
+                    style="-fx-font-family:'Jaro'; -fx-font-size:30;
+                           -fx-background-color:#2EFF04; -fx-text-fill:black;
+                           -fx-background-radius:12; -fx-padding:6 18 6 18;"/>
+        </HBox>
+
+        <!-- Rows -->
+        <GridPane fx:id="rows" alignment="CENTER" hgap="22" vgap="16" prefWidth="864" maxWidth="864">
+            <columnConstraints>
+                <ColumnConstraints percentWidth="62" halignment="CENTER" hgrow="SOMETIMES"/>
+                <ColumnConstraints percentWidth="38" halignment="LEFT"   hgrow="SOMETIMES"/>
+            </columnConstraints>
+
+            <rowConstraints>
+                <RowConstraints prefHeight="68" minHeight="68" maxHeight="68"/>
+                <RowConstraints prefHeight="68" minHeight="68" maxHeight="68"/>
+                <RowConstraints prefHeight="68" minHeight="68" maxHeight="68"/>
+                <RowConstraints prefHeight="68" minHeight="68" maxHeight="68"/>
+                <RowConstraints prefHeight="68" minHeight="68" maxHeight="68"/>
+                <RowConstraints prefHeight="68" minHeight="68" maxHeight="68"/>
+            </rowConstraints>
+
+            <!-- 1a..1f buttons; controller will change labels/prefix -->
+            <Button fx:id="btn1a" GridPane.rowIndex="0" GridPane.columnIndex="0"
+                    text="Lesson 1a - f, j and space keys" prefWidth="560" prefHeight="68"
+                    style="-fx-font-family:'Jaro'; -fx-font-size:30; -fx-background-color:white;
+                           -fx-text-fill:black; -fx-background-radius:18; -fx-border-radius:18;
+                           -fx-border-color:black; -fx-border-width:3;"/>
+
+            <BorderPane GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="300" prefHeight="68" maxWidth="300">
+                <top>
+                    <Label text="Best time: 85 seconds"
+                           style="-fx-font-family:'Jaro'; -fx-font-size:30; -fx-text-fill:black;"/>
+                </top>
+                <bottom>
+                    <Label text="Completed 09/09/2025"
+                           style="-fx-font-family:'Jaro'; -fx-font-size:30; -fx-text-fill:black;"/>
+                </bottom>
+                <padding><Insets top="2" bottom="2"/></padding>
+            </BorderPane>
+
+            <Button fx:id="btn1b" GridPane.rowIndex="1" GridPane.columnIndex="0"
+                    text="Lesson 1b - g, and h keys" prefWidth="560" prefHeight="68"
+                    style="-fx-font-family:'Jaro'; -fx-font-size:30; -fx-background-color:white;
+                           -fx-text-fill:black; -fx-background-radius:18; -fx-border-radius:18;
+                           -fx-border-color:black; -fx-border-width:3;"/>
+
+            <BorderPane GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="300" prefHeight="68" maxWidth="300">
+                <top>
+                    <Label text="Best time: 132 seconds"
+                           style="-fx-font-family:'Jaro'; -fx-font-size:30; -fx-text-fill:black;"/>
+                </top>
+                <bottom>
+                    <Label text="Completed 09/09/2025"
+                           style="-fx-font-family:'Jaro'; -fx-font-size:30; -fx-text-fill:black;"/>
+                </bottom>
+                <padding><Insets top="2" bottom="2"/></padding>
+            </BorderPane>
+
+            <Button fx:id="btn1c" GridPane.rowIndex="2" GridPane.columnIndex="0"
+                    text="Lesson 1c - d and k keys" prefWidth="560" prefHeight="68"
+                    style="-fx-font-family:'Jaro'; -fx-font-size:30; -fx-background-color:white;
+                           -fx-text-fill:black; -fx-background-radius:18; -fx-border-radius:18;
+                           -fx-border-color:black; -fx-border-width:3;"/>
+
+            <Label GridPane.rowIndex="2" GridPane.columnIndex="1" text="Not Yet Completed"
+                   style="-fx-font-family:'Jaro'; -fx-font-size:30; -fx-text-fill:black;"/>
+
+            <Button fx:id="btn1d" GridPane.rowIndex="3" GridPane.columnIndex="0"
+                    text="Lesson 1d - s and l keys" prefWidth="560" prefHeight="68"
+                    style="-fx-font-family:'Jaro'; -fx-font-size:30; -fx-background-color:white;
+                           -fx-text-fill:black; -fx-background-radius:18; -fx-border-radius:18;
+                           -fx-border-color:black; -fx-border-width:3;"/>
+
+            <Label GridPane.rowIndex="3" GridPane.columnIndex="1" text="Not Yet Completed"
+                   style="-fx-font-family:'Jaro'; -fx-font-size:30; -fx-text-fill:black;"/>
+
+            <Button fx:id="btn1e" GridPane.rowIndex="4" GridPane.columnIndex="0"
+                    text="Lesson 1e - a and ; keys" prefWidth="560" prefHeight="68"
+                    style="-fx-font-family:'Jaro'; -fx-font-size:30; -fx-background-color:white;
+                           -fx-text-fill:black; -fx-background-radius:18; -fx-border-radius:18;
+                           -fx-border-color:black; -fx-border-width:3;"/>
+
+            <Label GridPane.rowIndex="4" GridPane.columnIndex="1" text="Not Yet Completed"
+                   style="-fx-font-family:'Jaro'; -fx-font-size:30; -fx-text-fill:black;"/>
+
+            <Button fx:id="btn1f" GridPane.rowIndex="5" GridPane.columnIndex="0"
+                    text="Lesson 1f - The whole home row" prefWidth="560" prefHeight="68"
+                    style="-fx-font-family:'Jaro'; -fx-font-size:30; -fx-background-color:white;
+                           -fx-text-fill:black; -fx-background-radius:18; -fx-border-radius:18;
+                           -fx-border-color:black; -fx-border-width:3;"/>
+
+            <Label GridPane.rowIndex="5" GridPane.columnIndex="1" text="Not Yet Completed"
+                   style="-fx-font-family:'Jaro'; -fx-font-size:30; -fx-text-fill:black;"/>
+        </GridPane>
+    </VBox>
+</StackPane>
