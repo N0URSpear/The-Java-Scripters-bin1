@@ -70,9 +70,8 @@ public class CertificatesScene {
         Label settings = navLabel("SETTINGS",  false);
 
         // 点击行为（复制 MainMenu 的跳转方式）
-        asButton(mainMenu, () -> switchTo(stage,
-                "/com/example/addressbook/MainMenu.fxml",
-                "Typing Ninja - Main Menu"));
+        asButton(mainMenu, () -> stage.setScene(new MainMenu().buildScene(stage)));
+
         asButton(profile, () -> switchTo(stage,
                 "/com/example/addressbook/Profile.fxml",
                 "Profile - Typing Ninja"));
@@ -164,27 +163,6 @@ public class CertificatesScene {
 
         // 底部 3 个文字按钮
         design.getChildren().add(buildBottomNav(stage, design));
-        // 想办法把这些替换掉上面这三个按钮。
-        //        Label mainMenu = new Label("MAIN MENU");
-        //        Label sep1 = new Label("|");
-        //        Label profile = new Label("PROFILE");
-        //        Label sep2 = new Label("|");
-        //        Label settings = new Label("SETTINGS");
-        //
-        //        mainMenu.setTextFill(Color.web("#2EFF04"));
-        //        profile.setTextFill(Color.WHITE);
-        //        settings.setTextFill(Color.WHITE);
-        //        sep1.setTextFill(Color.WHITE);
-        //        sep2.setTextFill(Color.WHITE);
-        //
-        //        mainMenu.setFont(Font.font("Jaro", 40));
-        //        profile.setFont(Font.font("Jaro", 40));
-        //        settings.setFont(Font.font("Jaro", 40));
-        //        sep1.setFont(Font.font("Jaro", 40));
-        //        sep2.setFont(Font.font("Jaro", 40));
-        //
-        //        asButton(profile, () -> switchTo(stage, "/com/example/addressbook/Profile.fxml", "Profile - Typing Ninja"));
-        //        asButton(settings, () -> switchTo(stage, "/com/example/addressbook/Settings.fxml", "Settings - Typing Ninja"));
 
         design.getChildren().addAll(title, sp, backBtn);
 

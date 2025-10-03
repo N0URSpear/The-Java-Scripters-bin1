@@ -135,8 +135,8 @@ public class CongratulationsScene {
         heat.put("W", 0);
         heat.put("E", 0);
         heat.put("R", 6);
-        heat.put("T", 0);
-        heat.put("Y", 0);
+        heat.put("T", 50);
+        heat.put("Y", 20);
         heat.put("U", 0);
         heat.put("I", 0);
         heat.put("O", 0);
@@ -158,7 +158,16 @@ public class CongratulationsScene {
         heat.put("N", 0);
         heat.put("M", 0);
         heat.put(" ", 0);
-
+        heat.put("1", 0);
+        heat.put("2", 0);
+        heat.put("3", 0);
+        heat.put("4", 0);
+        heat.put("5", 0);
+        heat.put("6", 0);
+        heat.put("7", 0);
+        heat.put("8", 0);
+        heat.put("9", 0);
+        heat.put("0", 0);
 // …按需填 0..10
 
         Node keyboard = Keyboard.create(KEY_W, KEY_H, heat);
