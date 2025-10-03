@@ -93,6 +93,7 @@ public class CongratulationsScene {
         Button printBtn = greenButton("Print Certificate button", PRINT_X, PRINT_Y);
         Button backBtn  = greenButton("Return to Main Menu button", BACK_X, BACK_Y);
         printBtn.setOnAction(e -> stage.setScene(CertificatesScene.createScene(stage)));
+        backBtn.setOnAction(e -> stage.setScene(new MainMenu().buildScene(stage)));
 
 
 // 数据10次
