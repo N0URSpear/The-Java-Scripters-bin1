@@ -14,6 +14,15 @@ import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+
+import javafx.scene.Cursor;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.fxml.FXMLLoader;
+import java.io.IOException;
+
 import java.io.File;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -42,6 +51,65 @@ public class CertificatesScene {
     // 底部 3 个文字按钮
     private static final double NAV_Y = 1000, NAV_FONT = 40;
     private static final double NAV_MM_X = 600, NAV_PF_X = 900, NAV_ST_X = 1150;
+
+    // 创建带高亮的文本标签
+    private static Label navLabel(String text, boolean active) {
+        Label l = new Label(text);
+        l.setFont(Font.font("Jaro", 40)); // 与 MainMenu 一致
+        l.setTextFill(active ? Color.web("#2EFF04") : Color.WHITE); // 绿色高亮当前页
+        return l;
+    }
+
+    // 构建底部栏（贴底居中）
+    private static Node buildBottomNav(Stage stage, Pane root) {
+        // Certificates 页面常见是 PROFILE 高亮；如需 MAIN MENU 高亮，把 true 改到 mainMenu
+        Label mainMenu = navLabel("MAIN MENU", false);
+        Label sep1     = navLabel("|", false);
+        Label profile  = navLabel("PROFILE",   true);
+        Label sep2     = navLabel("|", false);
+        Label settings = navLabel("SETTINGS",  false);
+
+        // 点击行为（复制 MainMenu 的跳转方式）
+        asButton(mainMenu, () -> switchTo(stage,
+                "/com/example/addressbook/MainMenu.fxml",
+                "Typing Ninja - Main Menu"));
+        asButton(profile, () -> switchTo(stage,
+                "/com/example/addressbook/Profile.fxml",
+                "Profile - Typing Ninja"));
+        asButton(settings, () -> switchTo(stage,
+                "/com/example/addressbook/Settings.fxml",
+                "Settings - Typing Ninja"));
+
+        // 水平排布 + 居中 + 贴底
+        HBox box = new HBox(12, mainMenu, sep1, profile, sep2, settings);
+        box.setAlignment(Pos.CENTER);
+        box.prefWidthProperty().bind(root.widthProperty());
+        box.layoutYProperty().bind(root.heightProperty().subtract(60)); // 距底约 60px，可微调
+        return box;
+    }
+
+    // 若项目里暂无 asButton，这里给一个本地最小实现（已有就删掉这段）
+    private static void asButton(Label l, Runnable action) {
+        l.setOnMouseEntered(e -> l.setUnderline(true));
+        l.setOnMouseExited(e -> l.setUnderline(false));
+        l.setOnMouseClicked(e -> action.run());
+        l.setCursor(Cursor.HAND);
+    }
+
+    // 若项目里暂无 switchTo，这里给一个本地最小实现（已有就删掉这段）
+    private static void switchTo(Stage stage, String fxml, String title) {
+        try {
+            Parent root = FXMLLoader.load(CertificatesScene.class.getResource(fxml));
+
+            Scene sc = new Scene(root, stage.getScene() != null ? stage.getScene().getWidth() : 1280,
+                    stage.getScene() != null ? stage.getScene().getHeight() : 720);
+            stage.setTitle(title);
+            stage.setScene(sc);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
 
     public static Scene createScene(Stage stage) {
         // 设计层
@@ -94,12 +162,32 @@ public class CertificatesScene {
         backBtn.setStyle("-fx-background-color: " + GREEN + "; -fx-background-radius: 10;");
         backBtn.setOnAction(e -> stage.setScene(CongratulationsScene.createScene(stage)));
 
-        // 底部 3 个文字按钮（保留原样）
-        Label mainMenu = label("MAIN MENU", Font.font("System", NAV_FONT), Color.WHITE, NAV_MM_X, NAV_Y);
-        Label profile  = label("PROFILE",    Font.font("System", NAV_FONT), Color.LIME,  NAV_PF_X, NAV_Y);
-        Label settings = label("SETTINGS",   Font.font("System", NAV_FONT), Color.WHITE, NAV_ST_X, NAV_Y);
+        // 底部 3 个文字按钮
+        design.getChildren().add(buildBottomNav(stage, design));
+        // 想办法把这些替换掉上面这三个按钮。
+        //        Label mainMenu = new Label("MAIN MENU");
+        //        Label sep1 = new Label("|");
+        //        Label profile = new Label("PROFILE");
+        //        Label sep2 = new Label("|");
+        //        Label settings = new Label("SETTINGS");
+        //
+        //        mainMenu.setTextFill(Color.web("#2EFF04"));
+        //        profile.setTextFill(Color.WHITE);
+        //        settings.setTextFill(Color.WHITE);
+        //        sep1.setTextFill(Color.WHITE);
+        //        sep2.setTextFill(Color.WHITE);
+        //
+        //        mainMenu.setFont(Font.font("Jaro", 40));
+        //        profile.setFont(Font.font("Jaro", 40));
+        //        settings.setFont(Font.font("Jaro", 40));
+        //        sep1.setFont(Font.font("Jaro", 40));
+        //        sep2.setFont(Font.font("Jaro", 40));
+        //
+        //        asButton(profile, () -> switchTo(stage, "/com/example/addressbook/Profile.fxml", "Profile - Typing Ninja"));
+        //        asButton(settings, () -> switchTo(stage, "/com/example/addressbook/Settings.fxml", "Settings - Typing Ninja"));
 
-        design.getChildren().addAll(title, sp, backBtn, mainMenu, profile, settings);
+        design.getChildren().addAll(title, sp, backBtn);
+
 
         //缩放容器：等比缩放 + 居中 + 背景
         Group scalable = new Group(design);
