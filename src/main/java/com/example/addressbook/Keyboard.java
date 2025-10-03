@@ -18,29 +18,23 @@ public final class Keyboard {
 
     // 简化的 QWERTY 布局（等宽键）
     private static final String[][] ROWS = new String[][]{
-            {"0","1","2","3","4","5","6","7","8","9"} ,
+            {"0","1","2","3","4","5","6","7","8","9"} ,// 顶部数字行（按 0..9 顺序）
             {"Q","W","E","R","T","Y","U","I","O","P"},
             {"A","S","D","F","G","H","J","K","L", ";"},
             {"Z","X","C","V","B","N","M", ",", "."},
-            {" "}
+            {" "} // Space // 空格（宽度与其他键相同；如需加宽可另说）
     };
 
-    // 行的水平偏移（让布局更像真实键盘的错列；单位：一个键宽的比例）
+    // 行的水平偏移（全 0 = 不错列，整齐对齐）
     private static final double[] ROW_OFFSET_IN_KEYW = new double[]{
-            0.0,   // 第一行不偏移
-            0.0,  // 第二行稍右
-            0.0,  // 第三行更多
-            0.0   // 第四行最多
+            0.0, 0.0, 0.0, 0.0
     };
-
-    private static final int MAX_COUNT = 10; // 0..10
-
 
     public static Node create(double width, double height, Map<String, Integer> counts) {
-        // 背板：圆角浅灰，风格与其他面板一致
+        // 背板
         Rectangle bg = new Rectangle(width, height);
-        bg.setArcWidth(16 * 2);
-        bg.setArcHeight(16 * 2);
+        bg.setArcWidth(32);
+        bg.setArcHeight(32);
         bg.setFill(Color.web("#D9D9D9"));
 
         Pane keysLayer = new Pane();
@@ -50,10 +44,19 @@ public final class Keyboard {
         keysLayer.setMaxSize(width, height);
 
         // 布局参数
-        double pad = 14;           // 外边距
-        double gapX = 6;           // 键之间横向间距
-        double gapY = 8;           // 行间距
+        double pad  = 14;  // 外边距
+        double gapX = 6;   // 列间距
+        double gapY = 8;   // 行间距
         int rows = ROWS.length;
+
+        // 统计总错误数（用于百分比）。对 null 做保护。
+        int total = 0;
+        if (counts != null) {
+            for (Integer v : counts.values()) {
+                total += (v == null ? 0 : Math.max(0, v));
+            }
+        }
+        final int totalErrors = total; // 防止闭包修改
 
         // 每行键高
         double keyH = (height - pad * 2 - gapY * (rows - 1)) / rows;
@@ -64,42 +67,45 @@ public final class Keyboard {
             String[] rowKeys = ROWS[r];
             int cols = rowKeys.length;
 
-            // 先用“未偏移”的可用宽度估算键宽
+            // 本行可用宽度 & 键宽（等宽）
             double rowW = (width - pad * 2);
             double keyW = (rowW - gapX * (cols - 1)) / cols;
 
-            // 根据该行偏移量，重新计算 X 起点
+            // 行偏移
             double offset = (r < ROW_OFFSET_IN_KEYW.length ? ROW_OFFSET_IN_KEYW[r] : 0.0) * keyW;
             double x = pad + offset;
 
             for (int c = 0; c < cols; c++) {
                 String k = rowKeys[c];
 
-                // 取 0..10 的计数
+                // 当前键的“错误次数”
                 int count = 0;
                 if (counts != null) {
                     Integer v = counts.get(k);
                     if (v == null) v = counts.get(k.toLowerCase());
                     if (v == null) v = counts.get(k.toUpperCase());
-                    count = (v == null) ? 0 : clampCount(v);
+                    // 也兼容 "SPACE" 作为空格键名
+                    if (v == null && " ".equals(k)) v = counts.get("SPACE");
+                    count = (v == null) ? 0 : Math.max(0, v);
                 }
 
-                double t = (double) count / MAX_COUNT; // 归一化到 0..1
+                // —— 关键变化：按“百分比”着色 —— //
+                double t = (totalErrors > 0) ? (count / (double) totalErrors) : 0.0; // 0.0 ~ 1.0
 
-                // 键帽矩形
+                // 键帽
                 Rectangle keyRect = new Rectangle(keyW, keyH);
                 keyRect.setArcWidth(10);
                 keyRect.setArcHeight(10);
-                keyRect.setFill(colorFor(t));               // 白→红
+                keyRect.setFill(colorFor(t));               // 白→红（按百分比）
                 keyRect.setStroke(Color.web("#B3B3B3"));
                 keyRect.setStrokeWidth(1.0);
 
-                // 字符标签
+                // 标签
                 Text label = new Text(k);
                 label.setFill(Color.BLACK);
                 label.setFont(Font.font(12));
 
-                // 用 StackPane 居中，不用手算文本宽高
+                // 居中容器
                 StackPane keyPane = new StackPane(keyRect, label);
                 keyPane.setAlignment(Pos.CENTER);
                 keyPane.setLayoutX(x);
@@ -117,7 +123,7 @@ public final class Keyboard {
         return new StackPane(bg, keysLayer);
     }
 
-    //  颜色映射：0..1 → 白(#FFFFFF) → 淡红(#FF6B6B) → 深红(#D80000)
+    // 颜色映射（保持你原来的两段渐变风格）
     private static Color colorFor(double t) {
         t = clamp01(t);
         if (t < 0.5) {
@@ -140,5 +146,4 @@ public final class Keyboard {
     }
 
     private static double clamp01(double v) { return Math.max(0.0, Math.min(1.0, v)); }
-    private static int clampCount(int c)     { return Math.max(0, Math.min(MAX_COUNT, c)); }
 }
