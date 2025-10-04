@@ -102,8 +102,9 @@ public class CongratulationsScene {
 
 // 左侧标签显示最新一条（当次）
         ResultsBridge.getLatest().ifPresent(latest -> {
-            int latestWpm = latest[0];
-            int latestAcc = latest[1];
+            // 允许 latest[] 来自小数，统一四舍五入
+            int latestWpm = (int) Math.round(latest[0]);
+            int latestAcc = (int) Math.round(latest[1]);
             wpmLabel.setText("Words per minute: " + latestWpm);
             accLabel.setText("Accuracy: " + latestAcc + "%");
         });
