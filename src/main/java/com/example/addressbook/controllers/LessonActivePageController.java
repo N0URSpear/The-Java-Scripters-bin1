@@ -13,6 +13,9 @@ import javafx.scene.input.*;
 import javafx.scene.text.*;
 import javafx.scene.layout.*;
 
+import com.example.addressbook.CongratulationsScene;
+import javafx.stage.Stage;
+
 import com.example.addressbook.lesson.*;
 import com.example.addressbook.auth.Session;
 import com.example.addressbook.ai.AITextService;
@@ -273,12 +276,16 @@ public class LessonActivePageController {
                 }
                 catch (Exception ex) { ex.printStackTrace(); }
             }
-
             Platform.runLater(() -> {
                 Alert a = new Alert(Alert.AlertType.INFORMATION, "You won! Lesson complete.");
                 a.setHeaderText(null);
                 a.setTitle("Lesson");
                 a.showAndWait();
+
+                // 完成后统一跳转到 CongratulationsScene
+                Stage stage = (Stage) lessonTitleLabel.getScene().getWindow();  // lessonTitleLabel 是本控制器已有的 @FXML Label
+                stage.setScene(CongratulationsScene.createScene(stage));
+                stage.centerOnScreen();  // 可选
             });
         });
     }

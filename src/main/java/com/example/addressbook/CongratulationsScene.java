@@ -21,8 +21,6 @@ import java.util.List;
 import java.util.Map;
 
 
-
-
 public class CongratulationsScene {
 
     // 设计基准
@@ -84,10 +82,10 @@ public class CongratulationsScene {
 
         // 白框 + 文案
         Rectangle wpmBox = whiteBox(WPM_X, WPM_Y);
-        Label wpmLabel   = label("Words per minute section", Font.font("System", 28), Color.BLACK, WPM_X + 19, WPM_Y + 10);
+        Label wpmLabel   = label("Words per minute", Font.font("System", 28), Color.BLACK, WPM_X + 19, WPM_Y + 10);
 
         Rectangle accBox = whiteBox(ACC_X, ACC_Y);
-        Label accLabel   = label("Accuracy section", Font.font("System", 28), Color.BLACK, ACC_X + 19, ACC_Y + 10);
+        Label accLabel   = label("Accuracy", Font.font("System", 28), Color.BLACK, ACC_X + 19, ACC_Y + 10);
 
         // 绿色按钮（示例：都跳到 Certificates）
         Button printBtn = greenButton("Print Certificate button", PRINT_X, PRINT_Y);
@@ -169,7 +167,10 @@ public class CongratulationsScene {
         heat.put("8", 0);
         heat.put("9", 0);
         heat.put("0", 0);
-// …按需填 0..10
+        heat.put(";", 0);
+        heat.put(",", 0);
+        heat.put(".", 0);
+
 
         Node keyboard = Keyboard.create(KEY_W, KEY_H, heat);
         keyboard.setLayoutX(KEY_X);
