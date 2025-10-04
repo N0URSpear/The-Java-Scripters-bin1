@@ -88,8 +88,8 @@ public class CongratulationsScene {
         Label accLabel   = label("Accuracy", Font.font("System", 28), Color.BLACK, ACC_X + 19, ACC_Y + 10);
 
         // 绿色按钮（示例：都跳到 Certificates）
-        Button printBtn = greenButton("Print Certificate button", PRINT_X, PRINT_Y);
-        Button backBtn  = greenButton("Return to Main Menu button", BACK_X, BACK_Y);
+        Button printBtn = greenButton("Print Certificate", PRINT_X, PRINT_Y);
+        Button backBtn  = greenButton("Return to Main Menu", BACK_X, BACK_Y);
         printBtn.setOnAction(e -> stage.setScene(CertificatesScene.createScene(stage)));
         backBtn.setOnAction(e -> stage.setScene(new MainMenu().buildScene(stage)));
 
