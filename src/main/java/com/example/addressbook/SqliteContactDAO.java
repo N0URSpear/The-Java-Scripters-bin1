@@ -349,6 +349,27 @@ public class SqliteContactDAO implements INinjaContactDAO {
         }
     }
 
+    // 只更新传入的字段，null 表示保持原值
+    public void updateGoals(int userId, Integer estHours, Integer estWPM, Integer estAccuracy) {
+        String sql = """
+        UPDATE Goals
+        SET EstHours   = COALESCE(?, EstHours),
+            EstWPM     = COALESCE(?, EstWPM),
+            EstAccuracy= COALESCE(?, EstAccuracy)
+        WHERE UserID = ?
+        """;
+        try (java.sql.PreparedStatement ps = connection.prepareStatement(sql)) {
+            if (estHours == null) ps.setObject(1, null); else ps.setInt(1, estHours);
+            if (estWPM   == null) ps.setObject(2, null); else ps.setInt(2, estWPM);
+            if (estAccuracy == null) ps.setObject(3, null); else ps.setInt(3, estAccuracy);
+            ps.setInt(4, userId);
+            ps.executeUpdate();
+        } catch (java.sql.SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     // ⚡ 重新计算并更新 Statistics 表数据
     public void recalcUserStatistics(int userId) {
         try {

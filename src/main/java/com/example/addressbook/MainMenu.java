@@ -90,10 +90,25 @@ public class MainMenu {
         // 🔹 点击跳转 Profile
         profile.setOnMouseClicked(e -> {
             int userId = SessionManager.getCurrentUserId(); // 从 session 获取当前用户
+
+            // 创建 ProfilePage 实例（它本身就是 BorderPane）
             ProfilePage profilePage = new ProfilePage(userId);
-            Scene profileScene = new Scene(profilePage, stage.getWidth(), stage.getHeight());
+
+            // 获取屏幕大小并设置 75%
+            javafx.geometry.Rectangle2D screenBounds = javafx.stage.Screen.getPrimary().getVisualBounds();
+            double WIDTH = screenBounds.getWidth() * 0.75;
+            double HEIGHT = screenBounds.getHeight() * 0.75;
+
+            // 创建场景
+            Scene profileScene = new Scene(profilePage.getRoot(), WIDTH, HEIGHT);
             stage.setScene(profileScene);
+
+            // 居中窗口
+            stage.setX((screenBounds.getWidth() - WIDTH) / 2);
+            stage.setY((screenBounds.getHeight() - HEIGHT) / 2);
         });
+
+
 
         // ----- MAIN CONTENT -----
         VBox content = new VBox(40, topBar, grid, bottomMenu);
