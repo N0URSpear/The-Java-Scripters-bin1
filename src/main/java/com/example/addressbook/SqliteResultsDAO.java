@@ -2,6 +2,9 @@ package com.example.addressbook;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import com.example.addressbook.auth.Session;
+
+
 
 /** Results DAO that reuses the main Lesson table; NEVER creates/changes schema. */
 public class SqliteResultsDAO implements IResultsDAO {
@@ -27,7 +30,7 @@ public class SqliteResultsDAO implements IResultsDAO {
 
     @Override
     public long addResult(int wpm, int acc) throws Exception {
-        int userId = resolveCurrentUserId();
+        int userId = resolveCurrentUserId(connection);
 
         // 1) Try to UPDATE the latest "in-progress" lesson (no DateCompleted yet)
         long updatedId = updateLatestInProgress(userId, wpm, acc);
@@ -52,7 +55,10 @@ public class SqliteResultsDAO implements IResultsDAO {
 
     @Override
     public List<Result> getLastN(int n) throws Exception {
-        int userId = resolveCurrentUserId();
+        // 原来可能是：int userId = resolveCurrentUserId();
+        Integer userId = resolveCurrentUserId(connection);
+        if (userId == null) return java.util.Collections.emptyList();
+
         final String sql =
                 "SELECT " + COL_ID + " AS id, " + COL_WPM + " AS wpm, " + COL_ACC + " AS acc, " + COL_DONE + " AS createdAt " +
                         "FROM " + TBL + " " +
@@ -79,7 +85,9 @@ public class SqliteResultsDAO implements IResultsDAO {
 
     @Override
     public List<Result> getAll() throws Exception {
-        int userId = resolveCurrentUserId();
+        Integer userId = resolveCurrentUserId(connection);
+        if (userId == null) return java.util.Collections.emptyList();
+
         final String sql =
                 "SELECT " + COL_ID + " AS id, " + COL_WPM + " AS wpm, " + COL_ACC + " AS acc, " + COL_DONE + " AS createdAt " +
                         "FROM " + TBL + " " +
@@ -105,7 +113,9 @@ public class SqliteResultsDAO implements IResultsDAO {
 
     @Override
     public int count() throws Exception {
-        int userId = resolveCurrentUserId();
+        Integer userId = resolveCurrentUserId(connection);
+        if (userId == null) return 0;
+
         final String sql = "SELECT COUNT(*) FROM " + TBL + " WHERE " + COL_UID + "=? AND " + COL_DONE + " IS NOT NULL";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, userId);
@@ -117,7 +127,7 @@ public class SqliteResultsDAO implements IResultsDAO {
 
     @Override
     public void deleteAll() throws Exception {
-        int userId = resolveCurrentUserId();
+        int userId = resolveCurrentUserId(connection);
         final String sql = "DELETE FROM " + TBL + " WHERE " + COL_UID + "=? AND " + COL_DONE + " IS NOT NULL";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, userId);
@@ -128,13 +138,20 @@ public class SqliteResultsDAO implements IResultsDAO {
     // ---------- helpers ----------
 
     /** Return the latest (max UserID) user; adjust if you have a proper current-user context. */
-    private int resolveCurrentUserId() throws SQLException {
-        try (Statement st = connection.createStatement();
-             ResultSet rs = st.executeQuery("SELECT UserID FROM Users ORDER BY UserID DESC LIMIT 1")) {
-            if (rs.next()) return rs.getInt(1);
+// 需要：import com.example.addressbook.auth.Session;
+    private Integer resolveCurrentUserId(Connection c) throws SQLException {
+        // ① 优先使用登录会话里的用户ID
+        Integer sid = com.example.addressbook.auth.Session.getCurrentUserId(); // 若方法名不同，改成你的
+        if (sid != null) return sid;
+
+        // ② 无会话时回退到 Users 表里“最新”的用户（也可改成直接 return null 更严格）
+        try (PreparedStatement ps = c.prepareStatement(
+                "SELECT UserID FROM Users ORDER BY UserID DESC LIMIT 1");
+             ResultSet rs = ps.executeQuery()) {
+            return rs.next() ? rs.getInt(1) : null;
         }
-        throw new IllegalStateException("No user found in Users table.");
     }
+
 
     /** Try to update the most recent in-progress lesson; return its id if updated, or 0 if none. */
     private long updateLatestInProgress(int userId, int wpm, int acc) throws SQLException {
