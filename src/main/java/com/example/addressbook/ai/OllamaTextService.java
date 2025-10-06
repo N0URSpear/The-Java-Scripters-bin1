@@ -66,7 +66,7 @@ public class OllamaTextService implements AITextService {
                                      boolean includeUpper, boolean includeNumbers,
                                      boolean includePunct, boolean includeSpecial) {
         StringBuilder sb = new StringBuilder();
-        sb.append("Generate a typing practice passage only. No headings.\n");
+        sb.append("Generate a typing practice passage only. No headings or introductions, straight into the lesson text.\n");
         if (topic != null && !topic.isBlank()) sb.append("Topic: ").append(topic).append(".\n");
         else sb.append("Topic: everyday life / general knowledge.\n");
         sb.append("Length: about ").append(targetWords).append(" words.\n");
