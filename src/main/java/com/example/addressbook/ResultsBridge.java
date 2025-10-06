@@ -3,26 +3,17 @@ package com.example.addressbook;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Thin wrapper around ResultsRepository for UI layers.
- * - 不直接持有 JDBC / SqliteConnection
- * - 统一从 ResultsRepository（-> SqliteResultsDAO -> Lesson 表）取数
- * - 返回给 UI 的类型保持 wpm()/acc() 接口一致
- */
 public final class ResultsBridge {
-
     /**
      * UI-facing metrics bundle holding parallel lists of WPM and accuracy.
      *
      * @param wpm list of typing speeds (words per minute), newest-first
      * @param acc list of accuracy percentages (0–100), aligned with {@code wpm}
      */
-    /** UI 层使用的返回体（旧 → 新） */
     public static record Metrics(List<Integer> wpm, List<Integer> acc) {}
 
     private ResultsBridge() {}
 
-    /** 确保数据表存在（转发） */
     public static void ensureTable() {
         ResultsRepository.ensureTable();
     }
@@ -52,7 +43,6 @@ public final class ResultsBridge {
      *
      * @return metrics containing all available rows, newest-first
      */
-    /** 取全部（便捷方法）：内部用极大 LIMIT 实现 */
     public static Metrics loadAll() {
         return loadLastN(Integer.MAX_VALUE);
     }
@@ -62,7 +52,6 @@ public final class ResultsBridge {
      *
      * @return an Optional containing {@code new int[]{wpm, acc}} when present; empty otherwise
      */
-    /** 最新一条（给 CongratulationsScene 用） */
     public static Optional<int[]> getLatest() {
         var r = ResultsRepository.loadLastN(1);
         if (r.wpm().isEmpty()) return Optional.empty();
