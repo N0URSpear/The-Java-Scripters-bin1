@@ -22,10 +22,18 @@ public class LoginController {
         this.NinjaDAO = mockDAO;
     }
 
+    /**
+     * Sets test mode for unit tests.
+     *
+     * @param testMode sets test mode
+     */
     public void setTestMode(boolean testMode) {
         this.testMode = testMode;
     }
 
+    /**
+     * Logic for when the login button is clicked.
+     */
     @FXML
     private void onLoginClicked() {
         String username = usernameField.getText().trim();
@@ -33,6 +41,12 @@ public class LoginController {
         doLogin(username, password);
     }
 
+    /**
+     * Takes a username and password and validates them.
+     *
+     * @param username provided username
+     * @param password provided password
+     */
     void doLogin(String username, String password) {
 
         //check credentials
@@ -49,13 +63,20 @@ public class LoginController {
         showAlert(Alert.AlertType.INFORMATION,"Login Successful","Welcome, " + ninja.getUserName() + "!"  );
         loginSuccessful = true;
 
-        // Close popup after login
+        //close popup after login
         if (usernameField != null && usernameField.getScene() != null) {
             Stage stage = (Stage) usernameField.getScene().getWindow();
             stage.close();
         }
     }
 
+    /**
+     * Method to show alert popups. Has a test mode check for unit testing.
+     *
+     * @param type the type of alert to be shown
+     * @param title the title text for the alert popup
+     * @param message the message the alert popup should display
+     */
     private void showAlert(Alert.AlertType type, String title, String message) {
         if (testMode) {
             // Don’t show alerts while testing
@@ -69,6 +90,9 @@ public class LoginController {
         alert.showAndWait();
     }
 
+    /**
+     * Logic for when the cancel button is clicked.
+     */
     @FXML
     private void onCancelClicked() {
         if (usernameField != null && usernameField.getScene() != null) {
@@ -77,11 +101,17 @@ public class LoginController {
         }
     }
 
+    /**
+     * Logic for when the forgot password button is clicked.
+     */
     @FXML
     private void onForgotPasswordClicked() {
         ForgotPassword();
     }
 
+    /**
+     * Functionality when the forgot password button is clicked.
+     */
     void ForgotPassword() {
         forgotPassword = true;
         if (usernameField != null && usernameField.getScene() != null) {
@@ -90,10 +120,20 @@ public class LoginController {
         }
     }
 
+    /**
+     * Helper method for external functionality.
+     *
+     * @return returns whether login was successful or not
+     */
     public boolean isLoginSuccessful() {
         return loginSuccessful;
     }
 
+    /**
+     * Helper method for external functionality.
+     *
+     * @return returns whether forgot password was clicked or not
+     */
     public boolean isForgotPassword() {
         return forgotPassword;
     }

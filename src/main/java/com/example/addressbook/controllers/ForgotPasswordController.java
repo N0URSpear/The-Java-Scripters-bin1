@@ -57,7 +57,12 @@ public class ForgotPasswordController {
         };
     }
 
-    // --- Validation methods for unit tests ---
+    /**
+     * Stage 1 logic for forgot password; validating the input username.
+     *
+     * @param username the input username
+     * @return an enum representing the result of the validation
+     */
     public ForgotPasswordResult validateStage1(String username) {
         if (username == null || username.isBlank()) {
             return ForgotPasswordResult.EMPTY_USERNAME;
@@ -69,6 +74,13 @@ public class ForgotPasswordController {
         return ForgotPasswordResult.SUCCESS;
     }
 
+    /**
+     * Stage 2 logic for forgot password; validating secret question answers.
+     *
+     * @param answer1 answer for secret question 1
+     * @param answer2 answer for secret question 2
+     * @return an enum representing the result of the validation
+     */
     public ForgotPasswordResult validateStage2(String answer1, String answer2) {
         if (answer1 == null || answer1.isBlank() || answer2 == null || answer2.isBlank()) {
             return ForgotPasswordResult.EMPTY_SECRET_ANSWERS;
@@ -80,6 +92,13 @@ public class ForgotPasswordController {
         return ForgotPasswordResult.SUCCESS;
     }
 
+    /**
+     * Stage 3 logic for forgot password; validating the new password. Updates the password if all logic passes.
+     *
+     * @param password the new password
+     * @param confirmPassword confirmation of the new password
+     * @return an enum representing the result of the validation
+     */
     public ForgotPasswordResult validateStage3(String password, String confirmPassword) {
         if (password == null || password.isBlank()) {
             return ForgotPasswordResult.EMPTY_PASSWORD;
@@ -96,6 +115,11 @@ public class ForgotPasswordController {
         return ForgotPasswordResult.SUCCESS;
     }
 
+    /**
+     * Support method for unit tests.
+     *
+     * @param testMode set to true when running unit tests
+     */
     public void setTestMode(boolean testMode) {
         this.testMode = testMode;
     }
@@ -104,6 +128,9 @@ public class ForgotPasswordController {
         getStage(stageNumber);
     }
 
+    /**
+     * Logic for when the confirm button is clicked.
+     */
     @FXML
     private void onConfirmClicked() {
         ForgotPasswordResult result;
@@ -111,7 +138,7 @@ public class ForgotPasswordController {
             case 1:
                 result = validateStage1(usernameField.getText().trim());
                 if (result == ForgotPasswordResult.SUCCESS) {
-                    setSecretMessage(ninja.getSecretQuestion1(), ninja.getSecretQuestion2());
+                    setSecretQuestion(ninja.getSecretQuestion1(), ninja.getSecretQuestion2());
                 }
                 break;
 
@@ -128,12 +155,10 @@ public class ForgotPasswordController {
         }
 
         if (result != ForgotPasswordResult.SUCCESS) {
-            // Show readable error message
             showAlert(Alert.AlertType.ERROR,"Forgot Password Error!",getMessageForResult(result));
             return;
         }
 
-        // If successful and on stage 3, finish flow and close
         if (stageNumber == 3) {
             showAlert(Alert.AlertType.INFORMATION,"Forgot Password","Password changed successfully!");
 
@@ -144,11 +169,13 @@ public class ForgotPasswordController {
             return;
         }
 
-        // advance to next stage and update UI
         stageNumber++;
         getStage(stageNumber);
     }
 
+    /**
+     * Logic for when the cancel button is clicked.
+     */
     @FXML
     private void onCancelClicked() {
         if (usernameField != null && usernameField.getScene() != null) {
@@ -157,11 +184,24 @@ public class ForgotPasswordController {
         }
     }
 
-    private void setSecretMessage(String message1, String message2) {
-        secretQuestion1.setText(message1);
-        secretQuestion2.setText(message2);
+    /**
+     * Helper method to set the secret questions.
+     *
+     * @param question1 secret question 1
+     * @param question2 secret question 2
+     */
+    private void setSecretQuestion(String question1, String question2) {
+        secretQuestion1.setText(question1);
+        secretQuestion2.setText(question2);
     }
 
+    /**
+     * Method to show alert popups. Has a test mode check for unit testing.
+     *
+     * @param type the type of alert to be shown
+     * @param title the title text for the alert popup
+     * @param message the message the alert popup should display
+     */
     private void showAlert(Alert.AlertType type, String title, String message) {
         if (testMode) {
             // Don’t show alerts while testing
@@ -175,6 +215,11 @@ public class ForgotPasswordController {
         alert.showAndWait();
     }
 
+    /**
+     * Visual and functional control for the elements within three stages of forgot password.
+     *
+     * @param number the stage number to display
+     */
     private void getStage(int number) {
         switch (number) {
             case 1:

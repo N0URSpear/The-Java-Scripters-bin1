@@ -23,6 +23,9 @@ public class NinjaController {
     @FXML private StackPane backgroundPane;
     @FXML private Button loginButton, createAccountButton, helpButton;
 
+    /**
+     * Set up the initial screen.
+     */
     @FXML
     public void initialize() {
         backgroundPane.sceneProperty().addListener((obs, oldScene, newScene) -> {
@@ -81,6 +84,11 @@ public class NinjaController {
         });
     }
 
+    /**
+     * Opens a login popup when the login button is clicked. transitions to the main meno, or to the forgot password popup depending on user inputs.
+     *
+     * @throws IOException if inputs or outputs are invalid
+     */
     public void onloginClicked() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/example/addressbook/Login-view.fxml"));
         Stage loginPopup = new Stage();
@@ -114,6 +122,11 @@ public class NinjaController {
         }
     }
 
+    /**
+     * Opens the account creation popup. If successful, transitions to the main menu.
+     *
+     * @throws IOException if inputs or outputs are invalid
+     */
     public void onCreateAccountClicked() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/example/addressbook/AccountCreation-view.fxml"));
         Stage AccountCreation = new Stage();
@@ -135,6 +148,11 @@ public class NinjaController {
         }
     }
 
+    /**
+     * Loads the help popup when clicked.
+     *
+     * @throws IOException if input or output is invalid
+     */
     public void onHelpClicked() throws IOException{
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/example/addressbook/Help-view.fxml"));
         Stage HelpPopup = new Stage();

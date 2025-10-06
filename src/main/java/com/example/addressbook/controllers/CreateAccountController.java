@@ -30,50 +30,57 @@ public class CreateAccountController {
         this.NinjaDAO = mockDao;
     }
 
+
     public void setTestMode(boolean testMode) {
         this.testMode = testMode;
     }
 
     @FXML
     public void initialize() {
-        ObservableList<String> questions = FXCollections.observableArrayList(
+        ObservableList<String> secretQuestions = FXCollections.observableArrayList(
                 "What is your birth city?",
                 "What is your mother's maiden name?",
                 "What high school did you attend?",
                 "Where is the first place that you travelled to overseas?"
         );
 
-        SecretQuestion1ComboBox.setItems(questions);
-        SecretQuestion2ComboBox.setItems(FXCollections.observableArrayList(questions));
+        SecretQuestion1ComboBox.setItems(secretQuestions);
+        SecretQuestion2ComboBox.setItems(FXCollections.observableArrayList(secretQuestions));
 
         SecretQuestion1ComboBox.getSelectionModel().selectFirst();
         SecretQuestion2ComboBox.getSelectionModel().select(1);
 
-        SecretQuestion1ComboBox.valueProperty().addListener((obs, oldVal, newVal) -> {
-            enforceUniqueSelection(SecretQuestion1ComboBox, SecretQuestion2ComboBox, questions);
-        });
+        SecretQuestion1ComboBox.valueProperty().addListener((obs, oldVal, newVal) -> enforceUniqueSelection(SecretQuestion1ComboBox, SecretQuestion2ComboBox, secretQuestions));
 
-        SecretQuestion2ComboBox.valueProperty().addListener((obs, oldVal, newVal) -> {
-            enforceUniqueSelection(SecretQuestion2ComboBox, SecretQuestion1ComboBox, questions);
-        });
+        SecretQuestion2ComboBox.valueProperty().addListener((obs, oldVal, newVal) -> enforceUniqueSelection(SecretQuestion2ComboBox, SecretQuestion1ComboBox, secretQuestions));
     }
 
-    private void enforceUniqueSelection(ComboBox<String> source, ComboBox<String> other, ObservableList<String> allQuestions) {
-        String sourceSelection = source.getValue();
-        String otherSelection = other.getValue();
+    /**
+     * Ensure that the secret question options are not repeated.
+     *
+     * @param comboBox1 the value within combo box 1
+     * @param comboBox2 the value within combo box 2
+     * @param allSecretQuestions the secret questions available to choose from
+     */
+    private void enforceUniqueSelection(ComboBox<String> comboBox1, ComboBox<String> comboBox2, ObservableList<String> allSecretQuestions) {
+        String sourceSelection = comboBox1.getValue();
+        String otherSelection = comboBox2.getValue();
 
-        ObservableList<String> newOptions = FXCollections.observableArrayList(allQuestions);
+        ObservableList<String> newOptions = FXCollections.observableArrayList(allSecretQuestions);
         newOptions.remove(sourceSelection);
-        other.setItems(newOptions);
+        comboBox2.setItems(newOptions);
 
         if (sourceSelection != null && sourceSelection.equals(otherSelection)) {
-            other.getSelectionModel().clearSelection();
+            comboBox2.getSelectionModel().clearSelection();
             if (!newOptions.isEmpty()) {
-                other.setValue(newOptions.getFirst());
+                comboBox2.setValue(newOptions.getFirst());
             }
         }
     }
 
+    /**
+     * Logic for once the create account button is clicked.
+     */
     @FXML
     public void onCreateAccountClicked() {
         String username = usernameField.getText().trim();
@@ -87,6 +94,17 @@ public class CreateAccountController {
         doCreateAccount(username,password,repeatPassword,secretQ1,secretQ2,answer1,answer2);
     }
 
+    /**
+     * Underlying logic for account creation. Ensures a unique username and has password confirmation.
+     *
+     * @param username the provided username
+     * @param password the provided password
+     * @param repeatPassword password confirmation
+     * @param secretQ1 the first selected secret question
+     * @param secretQ2 the second selected secret question
+     * @param answer1 the provided answer to the first question
+     * @param answer2 the provided answer to the second question
+     */
     void doCreateAccount(String username, String password, String repeatPassword, String secretQ1, String secretQ2, String answer1, String answer2) {
         isCreateAccountSuccessful = false;
         if (username == null || username.isEmpty()) {
@@ -151,6 +169,11 @@ public class CreateAccountController {
         }
     }
 
+    /**
+     * Creates an error alert popup.
+     *
+     * @param message the message that should be displayed
+     */
     private void showError(String message) {
         if (testMode) {
             // Don’t show alerts while testing
@@ -163,6 +186,9 @@ public class CreateAccountController {
         alert.showAndWait();
     }
 
+    /**
+     *  Creates a success alert popup.
+     */
     private void showSuccess() {
         if (testMode) {
             // Don’t show alerts while testing
@@ -175,6 +201,9 @@ public class CreateAccountController {
         alert.showAndWait();
     }
 
+    /**
+     * Logic for when the cancel button is clicked.
+     */
     @FXML
     public void onCancelClicked() {
         if (usernameField != null && usernameField.getScene() != null) {
@@ -183,6 +212,9 @@ public class CreateAccountController {
         }
     }
 
+    /**
+     * @return a boolean to the controller indicating whether account creation was successful or not.
+     */
     public boolean isCreateAccountSuccessful() {
         return isCreateAccountSuccessful;
     }
