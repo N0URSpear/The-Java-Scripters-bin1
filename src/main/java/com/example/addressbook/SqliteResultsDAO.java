@@ -57,7 +57,8 @@ public class SqliteResultsDAO implements IResultsDAO {
                 "SELECT " + COL_ID + " AS id, " + COL_WPM + " AS wpm, " + COL_ACC + " AS acc, " + COL_DONE + " AS createdAt " +
                         "FROM " + TBL + " " +
                         "WHERE " + COL_UID + "=? AND " + COL_DONE + " IS NOT NULL " +
-                        "ORDER BY " + COL_ID + " DESC LIMIT ?";
+                        "ORDER BY datetime(" + COL_DONE + ") DESC, " + COL_ID + " DESC LIMIT ?";
+
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, userId);
             ps.setInt(2, n);
@@ -83,7 +84,8 @@ public class SqliteResultsDAO implements IResultsDAO {
                 "SELECT " + COL_ID + " AS id, " + COL_WPM + " AS wpm, " + COL_ACC + " AS acc, " + COL_DONE + " AS createdAt " +
                         "FROM " + TBL + " " +
                         "WHERE " + COL_UID + "=? AND " + COL_DONE + " IS NOT NULL " +
-                        "ORDER BY " + COL_ID + " ASC";
+                        "ORDER BY datetime(" + COL_DONE + ") ASC, " + COL_ID + " ASC";
+
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, userId);
             try (ResultSet rs = ps.executeQuery()) {

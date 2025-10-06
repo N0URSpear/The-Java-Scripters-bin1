@@ -87,6 +87,13 @@ public class CongratulationsScene {
         Rectangle accBox = whiteBox(ACC_X, ACC_Y);
         Label accLabel   = label("Accuracy", Font.font("System", 28), Color.BLACK, ACC_X + 19, ACC_Y + 10);
 
+        // 读取数据库最新成绩，覆盖初始文案
+        ResultsBridge.getLatest().ifPresent(latest -> {
+            wpmLabel.setText("Words per minute: " + latest[0]);
+            accLabel.setText("Accuracy: " + latest[1] + "%");
+        });
+
+
         // 绿色按钮（示例：都跳到 Certificates）
         Button printBtn = greenButton("Print Certificate", PRINT_X, PRINT_Y);
         Button backBtn  = greenButton("Return to Main Menu", BACK_X, BACK_Y);
