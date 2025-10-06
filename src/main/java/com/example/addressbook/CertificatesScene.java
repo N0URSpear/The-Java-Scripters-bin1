@@ -52,6 +52,14 @@ public class CertificatesScene {
     private static final double NAV_Y = 1000, NAV_FONT = 40;
     private static final double NAV_MM_X = 600, NAV_PF_X = 900, NAV_ST_X = 1150;
 
+
+    /**
+     * Create a navigation label with active/inactive styling.
+     *
+     * @param text   the label text
+     * @param active whether the label should be styled as the active (selected) item
+     * @return the configured Label
+     */
     // 创建带高亮的文本标签
     private static Label navLabel(String text, boolean active) {
         Label l = new Label(text);
@@ -60,6 +68,14 @@ public class CertificatesScene {
         return l;
     }
 
+
+    /**
+     * Build the bottom navigation bar node for the Certificates screen.
+     *
+     * @param stage the Stage used for scene switching
+     * @param root  the root Pane to which the navigation may be attached/aligned
+     * @return the navigation Node
+     */
     // 构建底部栏（贴底居中）
     private static Node buildBottomNav(Stage stage, Pane root) {
         // Certificates 页面常见是 PROFILE 高亮；如需 MAIN MENU 高亮，把 true 改到 mainMenu
@@ -87,6 +103,13 @@ public class CertificatesScene {
         return box;
     }
 
+
+    /**
+     * Make the given label behave like a button (hover/click handlers) and bind an action.
+     *
+     * @param l      the Label to decorate with button-like behavior
+     * @param action the action to run when the label is activated
+     */
     // 若项目里暂无 asButton，这里给一个本地最小实现（已有就删掉这段）
     private static void asButton(Label l, Runnable action) {
         l.setOnMouseEntered(e -> l.setUnderline(true));
@@ -95,6 +118,14 @@ public class CertificatesScene {
         l.setCursor(Cursor.HAND);
     }
 
+
+    /**
+     * Switch the current Stage to a new scene loaded from an FXML resource and set the window title.
+     *
+     * @param stage the Stage to switch
+     * @param fxml  the classpath path of the FXML resource
+     * @param title the window title for the new scene
+     */
     // 若项目里暂无 switchTo，这里给一个本地最小实现（已有就删掉这段）
     private static void switchTo(Stage stage, String fxml, String title) {
         try {
@@ -110,6 +141,12 @@ public class CertificatesScene {
     }
 
 
+    /**
+     * Build and return the main Certificates scene.
+     *
+     * @param stage the Stage used to size and host the scene
+     * @return the Scene for the Certificates screen
+     */
     public static Scene createScene(Stage stage) {
         // 设计层
         Pane design = new Pane();
@@ -192,6 +229,11 @@ public class CertificatesScene {
         Row(int index, int wpm, int acc) { this.index = index; this.wpm = wpm; this.acc = acc; }
     }
 
+    /**
+     * Populate the certificates list UI from the database.
+     *
+     * @param listBox the VBox container to fill with certificate rows/items
+     */
     private static void populateListFromDb(VBox listBox) {
         listBox.getChildren().clear();
 
@@ -275,6 +317,16 @@ public class CertificatesScene {
         parent.setMaxHeight(Math.max(CONTENT_H, estimatedHeight));
     }
 
+    /**
+     * Create a label with specified text, font, color, and position.
+     *
+     * @param text  the label text content
+     * @param font  the Font to apply
+     * @param color the text Color
+     * @param x     the x-coordinate of the label layout position
+     * @param y     the y-coordinate of the label layout position
+     * @return the Label node
+     */
     // 小工具
     private static Label label(String text, Font font, Color color, double x, double y) {
         Label l = new Label(text);
@@ -285,6 +337,15 @@ public class CertificatesScene {
         return l;
     }
 
+
+    /**
+     * Load a font resource from the classpath; return the fallback if loading fails.
+     *
+     * @param path     the font resource path within the classpath
+     * @param size     the requested font size
+     * @param fallback the Font to use when the resource is unavailable
+     * @return the loaded Font or the fallback when loading fails
+     */
     private static Font loadFont(String path, double size, Font fallback) {
         Font f = Font.loadFont(CertificatesScene.class.getResourceAsStream(path), size);
         return f != null ? f : fallback;

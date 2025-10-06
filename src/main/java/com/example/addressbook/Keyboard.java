@@ -30,6 +30,15 @@ public final class Keyboard {
             0.0, 0.0, 0.0, 0.0
     };
 
+    /**
+     * Build a keyboard heatmap node sized to the given width/height and colored by key hit counts.
+     *
+     * @param width  the desired width of the keyboard node in pixels
+     * @param height the desired height of the keyboard node in pixels
+     * @param counts a map from key label (e.g., "A","B","Space") to hit count used for coloring
+     * @return the assembled Node representing the keyboard heatmap
+     */
+
     public static Node create(double width, double height, Map<String, Integer> counts) {
         // 背板
         Rectangle bg = new Rectangle(width, height);
@@ -123,6 +132,13 @@ public final class Keyboard {
         return new StackPane(bg, keysLayer);
     }
 
+
+    /**
+     * Map a normalized intensity value to a heatmap color.
+     *
+     * @param t normalized intensity in [0, 1]
+     * @return the Color corresponding to the intensity
+     */
     // 颜色映射（保持你原来的两段渐变风格）
     private static Color colorFor(double t) {
         t = clamp01(t);
@@ -135,6 +151,14 @@ public final class Keyboard {
         }
     }
 
+    /**
+     * Linearly interpolate between two colors.
+     *
+     * @param a the start color
+     * @param b the end color
+     * @param t interpolation factor in [0, 1]
+     * @return the interpolated Color
+     */
     private static Color lerp(Color a, Color b, double t) {
         t = clamp01(t);
         return new Color(
@@ -144,6 +168,11 @@ public final class Keyboard {
                 1.0
         );
     }
-
+    /**
+     * Clamp a value into the closed interval [0, 1].
+     *
+     * @param v the input value
+     * @return 0 if v < 0, 1 if v > 1, otherwise v
+     */
     private static double clamp01(double v) { return Math.max(0.0, Math.min(1.0, v)); }
 }

@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
+
 public final class CertificatePdfUtil {
 
     private CertificatePdfUtil() {}
@@ -22,6 +23,17 @@ public final class CertificatePdfUtil {
     private static final PDFont FONT_REG  = new PDType1Font(Standard14Fonts.FontName.HELVETICA);
     private static final PDFont FONT_BOLD = new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD);
 
+    /**
+     * Generate a simple certificate PDF and save it to the specified path.
+     *
+     * @param outPath         the destination file path for the generated PDF
+     * @param name            the recipient/student name to display on the certificate
+     * @param typingSpeedWpm  typing speed in words per minute (WPM)
+     * @param accuracyPercent accuracy percentage in the range 0–100
+     * @param dateCompleted   the completion date to print on the certificate
+     * @param lesson          the lesson title or identifier to include
+     * @throws IOException if writing the PDF fails
+     */
     public static void saveSimpleCertificate(
             Path outPath,
             String name,
@@ -93,7 +105,17 @@ public final class CertificatePdfUtil {
             doc.save(outPath.toFile());
         }
     }
-
+    /**
+     * Write a single line of text into the PDF content stream at the given coordinates.
+     *
+     * @param cs        the PDF content stream to draw into
+     * @param text      the text content to render
+     * @param x         the x-coordinate (user space units)
+     * @param y         the y-coordinate (user space units)
+     * @param fontSize  the font size in points
+     * @param bold      whether to render the text using a bold font
+     * @throws IOException if the content stream cannot be written
+     */
     private static void writeLine(PDPageContentStream cs, String text,
                                   float x, float y, float fontSize, boolean bold) throws IOException {
         cs.beginText();
@@ -103,12 +125,4 @@ public final class CertificatePdfUtil {
         cs.endText();
     }
 
-    // 可选：保存完自动打开
-    public static void openWithDesktop(Path path) {
-        try {
-            if (Desktop.isDesktopSupported()) {
-                Desktop.getDesktop().open(path.toFile());
-            }
-        } catch (Exception ignored) {}
-    }
 }

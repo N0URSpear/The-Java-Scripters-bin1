@@ -15,6 +15,15 @@ public final class Table {
 
     private Table() {}
 
+    /**
+     * Build a compact results table node with two columns (WPM and Accuracy).
+     *
+     * @param width    the desired table width in pixels
+     * @param height   the desired table height in pixels
+     * @param wpm      the list of WPM (words per minute) values to display (one per row)
+     * @param accuracy the list of accuracy values (0–100) aligned to the WPM list
+     * @return the assembled Node representing the table
+     */
     public static Node create(double width, double height,
                               List<Integer> wpm, List<Integer> accuracy) {
 

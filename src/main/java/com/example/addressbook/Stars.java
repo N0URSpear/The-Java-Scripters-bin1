@@ -10,6 +10,12 @@ public class Stars {
     private static final String STAR_ON  = "/images/star_on.png";
     private static final String STAR_OFF = "/images/star_off.png";
 
+    /**
+     * Convert a percentage value into a star count (e.g., 0–100% → 0–5 stars).
+     *
+     * @param p the percentage in the range 0–100
+     * @return the computed star count (typically 0–5)
+     */
     // 百分比 》 星数
     private static int percentToStars(double p) {
         if (p >= 90) return 5;
@@ -19,6 +25,14 @@ public class Stars {
         return 1;
     }
 
+    /**
+     * Build a horizontal row of star icons sized and spaced as specified.
+     *
+     * @param percent    the percentage used to determine how many stars are filled
+     * @param starHeight the height of each star icon in pixels
+     * @param gap        the horizontal gap between adjacent stars in pixels
+     * @return an HBox containing the star nodes
+     */
     //生成星星组件
     public static HBox create(double percent, double starHeight, double gap) {
         int stars = percentToStars(percent);

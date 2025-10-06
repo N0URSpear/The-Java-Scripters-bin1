@@ -65,7 +65,12 @@ public class CongratulationsScene {
     private static final double KEY_W = 521;
     private static final double KEY_H = 223;
 
-
+    /**
+     * Build and return the "Congratulations" scene.
+     *
+     * @param stage the JavaFX Stage used to size the UI and navigate between scenes
+     * @return the Scene for the Congratulations screen
+     */
     public static Scene createScene(Stage stage) {
         Pane design = new Pane();
         design.setPrefSize(DESIGN_W, DESIGN_H);
@@ -212,6 +217,13 @@ public class CongratulationsScene {
         return scene;
     }
 
+    /**
+     * Create the white rounded rectangle background used as the statistics box.
+     *
+     * @param x the x-coordinate of the box layout position
+     * @param y the y-coordinate of the box layout position
+     * @return the Rectangle node
+     */
     private static Rectangle whiteBox(double x, double y) {
         Rectangle r = new Rectangle(BOX_W, BOX_H);
         r.setArcWidth(BOX_R * 2);
@@ -221,6 +233,15 @@ public class CongratulationsScene {
         r.setLayoutY(y);
         return r;
     }
+
+    /**
+     * Create a styled green button positioned at the given coordinates.
+     *
+     * @param text the button label text
+     * @param x the x-coordinate of the button layout position
+     * @param y the y-coordinate of the button layout position
+     * @return the Button node
+     */
     private static Button greenButton(String text, double x, double y) {
         Button b = new Button(text);
         b.setLayoutX(x);
@@ -231,6 +252,17 @@ public class CongratulationsScene {
                 "-fx-border-radius: " + BTN_R + ";");
         return b;
     }
+
+    /**
+     * Create a label with specified text, font, color, and position.
+     *
+     * @param text the label text content
+     * @param font the Font applied to the label
+     * @param color the text Color
+     * @param x the x-coordinate of the label layout position
+     * @param y the y-coordinate of the label layout position
+     * @return the Label node
+     */
     private static Label label(String text, Font font, Color color, double x, double y) {
         Label l = new Label(text);
         l.setFont(font);
@@ -239,6 +271,16 @@ public class CongratulationsScene {
         l.setLayoutY(y);
         return l;
     }
+
+
+    /**
+     * Load a font resource from the classpath; return the fallback when unavailable.
+     *
+     * @param path the resource path of the font within the classpath
+     * @param size the requested font size
+     * @param fallback the Font to use if loading fails
+     * @return the loaded Font or the fallback when the resource is missing
+     */
     private static Font loadFont(String path, double size, Font fallback) {
         Font f = Font.loadFont(CongratulationsScene.class.getResourceAsStream(path), size);
         return f != null ? f : fallback;
