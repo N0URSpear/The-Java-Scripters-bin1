@@ -86,7 +86,9 @@ public class LocalSimpleTextService implements AITextService {
                 afterPunct = false;
             }
         }
-        return sb.toString();
+        String raw = sb.toString();
+        return PassageConstraintEnforcer.enforce(
+                raw, includeUpper, includeNumbers, includePunct, includeSpecial);
     }
 
     private static String cap(String s) {

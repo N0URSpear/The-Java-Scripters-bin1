@@ -1,7 +1,6 @@
 package typingNinja.ai;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import java.net.URI;
@@ -57,9 +56,13 @@ public class OllamaTextService implements AITextService {
         JsonObject json = gson.fromJson(resp.body(), JsonObject.class);
         if (json.has("response")) {
             String out = json.get("response").getAsString().trim();
-            if (!out.isBlank()) return out;
+            if (!out.isBlank()) {
+                return PassageConstraintEnforcer.enforce(
+                        out, includeUpper, includeNumbers, includePunct, includeSpecial);
+            }
         }
-        return resp.body();
+        return PassageConstraintEnforcer.enforce(
+                resp.body(), includeUpper, includeNumbers, includePunct, includeSpecial);
     }
 
     private String buildInstructions(String topic, int targetWords,
@@ -75,25 +78,25 @@ public class OllamaTextService implements AITextService {
             sb.append("Include a mix of UPPERCASE words where natural.\n");
         }
         else {
-            sb.append("Do NOT include any uppercase characters in the entire passage.\n");
+            sb.append("Do NOT include ANY uppercase characters in the passage. Every letter must be lowercase.\n");
         }
         if (includeNumbers) {
             sb.append("Include some numerals naturally.\n");
         }
         else {
-            sb.append("Do NOT include any number characters anywhere in the entire passage.\n");
+            sb.append("Do NOT include any number digits (0-9) anywhere in the passage.\n");
         }
         if (includePunct) {
             sb.append("Use varied punctuation naturally.\n");
         }
         else {
-            sb.append("Do NOT use any punctuation characters anywhere across the entire passage\n");
+            sb.append("Do NOT use any punctuation characters (.,;:!?\"'-).\n");
         }
         if (includeSpecial) {
-            sb.append("Include occasional safe special characters like #, @, %, &, ().\n");
+            sb.append("Include occasional special characters like #, @, %, &, (), +, = when it feels natural.\n");
         }
         else {
-            sb.append("Do NOT user any special charcaters across the entire passage\n");
+            sb.append("Do NOT use any special characters such as #, @, %, &, (), +, =, /, _.\n");
         }
         sb.append("Return only the passage text (no quotes or labels).");
         return sb.toString();
