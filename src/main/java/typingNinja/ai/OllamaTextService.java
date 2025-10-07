@@ -71,10 +71,30 @@ public class OllamaTextService implements AITextService {
         else sb.append("Topic: everyday life / general knowledge.\n");
         sb.append("Length: about ").append(targetWords).append(" words.\n");
         sb.append("Style: clear, readable, coherent. Avoid rare/unicode characters.\n");
-        if (includeUpper) sb.append("Include a mix of UPPERCASE words where natural.\n");
-        if (includeNumbers) sb.append("Include some numerals naturally.\n");
-        if (includePunct) sb.append("Use varied punctuation naturally.\n");
-        if (includeSpecial) sb.append("Include occasional safe special characters like #, @, %, &, ().\n");
+        if (includeUpper) {
+            sb.append("Include a mix of UPPERCASE words where natural.\n");
+        }
+        else {
+            sb.append("Do NOT include any uppercase characters in the entire passage.\n");
+        }
+        if (includeNumbers) {
+            sb.append("Include some numerals naturally.\n");
+        }
+        else {
+            sb.append("Do NOT include any number characters anywhere in the entire passage.\n");
+        }
+        if (includePunct) {
+            sb.append("Use varied punctuation naturally.\n");
+        }
+        else {
+            sb.append("Do NOT use any punctuation characters anywhere across the entire passage\n");
+        }
+        if (includeSpecial) {
+            sb.append("Include occasional safe special characters like #, @, %, &, ().\n");
+        }
+        else {
+            sb.append("Do NOT user any special charcaters across the entire passage\n");
+        }
         sb.append("Return only the passage text (no quotes or labels).");
         return sb.toString();
     }
