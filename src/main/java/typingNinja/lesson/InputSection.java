@@ -96,7 +96,7 @@ public class InputSection {
             metrics.incTyped(match);
             keyboard.highlightExpected(peekExpected());
         }
-        if (index >= passage.length()) hiddenInput.setDisable(true);
+        handleCompletionIfNeeded();
         updateCursor();
         e.consume();
     }
@@ -131,7 +131,7 @@ public class InputSection {
                 metrics.incTyped(true);
                         keyboard.highlightExpected(peekExpected());
                         keyboard.highlightExpected(peekExpected());
-                if (index >= passage.length()) hiddenInput.setDisable(true);
+                handleCompletionIfNeeded();
             }
             else if (strictMode) {
                 keyboard.lightForChar('\n');
@@ -147,7 +147,7 @@ public class InputSection {
                 index++;
                 metrics.incTyped(false);
                         keyboard.highlightExpected(peekExpected());
-                if (index >= passage.length()) hiddenInput.setDisable(true);
+                handleCompletionIfNeeded();
             }
             updateCursor();
             e.consume();
@@ -212,6 +212,13 @@ public class InputSection {
     private void notifyCursorListener() {
         if (cursorListener != null) {
             cursorListener.accept(cursor);
+        }
+    }
+
+    private void handleCompletionIfNeeded() {
+        if (index >= passage.length()) {
+            hiddenInput.setDisable(true);
+            metrics.endLessonNow();
         }
     }
 }

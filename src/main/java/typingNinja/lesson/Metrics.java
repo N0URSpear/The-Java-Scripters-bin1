@@ -16,6 +16,7 @@ public class Metrics {
     private final IntegerProperty wpm = new SimpleIntegerProperty(0);
     private final IntegerProperty errorRatePercent = new SimpleIntegerProperty(0);
     private Timeline timer;
+    private boolean ended = false;
     private Runnable onEnd = () -> {};
 
     public Metrics(int lessonSeconds) {
@@ -31,6 +32,7 @@ public class Metrics {
             recomputeDerived(lessonSeconds - t);
             if (t <= 0) {
                 timer.stop();
+                ended = true;
                 onEnd.run();
             }
         }));
@@ -39,19 +41,21 @@ public class Metrics {
 
     public void start() {
         if (timeRemaining.get() <= 0) reset();
+        ended = false;
         timer.playFromStart();
     }
 
     public void pause() {
-    timer.pause();
+        timer.pause();
     }
 
     public void resume() {
-    timer.play();
+        timer.play();
     }
 
     public void reset() {
         timer.stop();
+        ended = false;
         timeRemaining.set(lessonSeconds);
         charsTyped.set(0);
         errors.set(0);
@@ -95,23 +99,33 @@ public class Metrics {
     }
 
     public void onLessonEnd(Runnable r) {
-    this.onEnd = (r != null) ? r : () -> {};
+        this.onEnd = (r != null) ? r : () -> {};
+    }
+
+    public void endLessonNow() {
+        if (ended) return;
+        ended = true;
+        if (timer != null) {
+            timer.stop();
+        }
+        timeRemaining.set(0);
+        onEnd.run();
     }
 
     public int lessonSeconds() {
-    return lessonSeconds;
+        return lessonSeconds;
     }
 
     public IntegerProperty timeRemainingProperty() {
-    return timeRemaining;
+        return timeRemaining;
     }
 
     public ReadOnlyIntegerProperty charsTypedProperty() {
-    return charsTyped;
+        return charsTyped;
     }
 
     public ReadOnlyIntegerProperty errorsProperty() {
-    return errors;
+        return errors;
     }
 
     public int getWpm() { return wpm.get(); }
