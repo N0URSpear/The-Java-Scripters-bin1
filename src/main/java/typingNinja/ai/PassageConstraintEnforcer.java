@@ -36,7 +36,7 @@ final class PassageConstraintEnforcer {
         boolean hasSpecial = false;
 
         for (int i = 0; i < text.length(); i++) {
-            char ch = text.charAt(i);
+            char ch = normalizeChar(text.charAt(i));
             char out = ch;
 
             if (Character.isUpperCase(ch)) {
@@ -115,6 +115,21 @@ final class PassageConstraintEnforcer {
 
     private static boolean isSpecial(char ch) {
         return SPECIALS.contains(ch);
+    }
+
+    private static char normalizeChar(char ch) {
+        switch (ch) {
+            case '\u2018': case '\u2019': case '\u201A': case '\u201B': case '\u2032': case '\u2035': case '\u02BC':
+            case '\u275B': case '\u275C':
+                return '\'';
+            case '\u201C': case '\u201D': case '\u201E': case '\u201F': case '\u2033': case '\u2036':
+            case '\u275D': case '\u275E':
+                return '"';
+            case '\u2010': case '\u2011': case '\u2012': case '\u2013': case '\u2014': case '\u2015':
+                return '-';
+            default:
+                return ch;
+        }
     }
 
     private static String ensureUppercase(String text) {

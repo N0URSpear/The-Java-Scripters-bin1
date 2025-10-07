@@ -37,6 +37,8 @@ public class LocalSimpleTextService implements AITextService {
         words.add("this");
         words.add("typing");
         words.add("practice");
+        addSentence(words, "This lesson explores " + theTopic + " with a focus on practical understanding and core terminology.");
+        addSentence(words, "As you progress, note the definitions, historical context, and everyday relevance described here.");
 
         while (words.size() < targetWords) {
             String w;
@@ -94,5 +96,12 @@ public class LocalSimpleTextService implements AITextService {
     private static String cap(String s) {
         if (s == null || s.isEmpty()) return s;
         return Character.toUpperCase(s.charAt(0)) + (s.length() > 1 ? s.substring(1) : "");
+    }
+
+    private static void addSentence(List<String> words, String sentence) {
+        if (sentence == null || sentence.isBlank()) return;
+        for (String token : sentence.trim().split("\\s+")) {
+            words.add(token);
+        }
     }
 }

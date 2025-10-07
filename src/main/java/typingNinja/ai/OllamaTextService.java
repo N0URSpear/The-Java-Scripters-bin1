@@ -74,6 +74,8 @@ public class OllamaTextService implements AITextService {
         else sb.append("Topic: everyday life / general knowledge.\n");
         sb.append("Length: about ").append(targetWords).append(" words.\n");
         sb.append("Style: clear, readable, coherent. Avoid rare/unicode characters.\n");
+        sb.append("Write as a concise instructional overview that teaches the reader about the topic while they type.\n");
+        sb.append("Explain key concepts, practical applications, and interesting facts to keep the passage educational.\n");
         if (includeUpper) {
             sb.append("Include a mix of UPPERCASE words where natural.\n");
         }
