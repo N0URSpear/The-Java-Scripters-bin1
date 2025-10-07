@@ -138,6 +138,7 @@ public class KeyboardHands {
             case '!': case '@': case '#': case '$': case '%': case '^': case '&': case '*':
             case '(': case ')': case '_': case '+': case '{': case '}': case '|':
             case ':': case '\"': case '<': case '>': case '?':
+            case '~':
                 return true;
             default: return false;
         }
@@ -150,6 +151,7 @@ public class KeyboardHands {
             case '^': return '6'; case '&': return '7'; case '*': return '8'; case '(': return '9'; case ')': return '0';
             case '_': return '-'; case '+': return '='; case '{': return '['; case '}': return ']'; case '|': return '\\';
             case ':': return ';'; case '\"': return '\''; case '<': return ','; case '>': return '.'; case '?': return '/';
+            case '~': return '`';
             default: return ch;
         }
     }

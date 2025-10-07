@@ -56,6 +56,9 @@ public class InputSection {
         // keyboard highlight handled by highlightExpected
         if (index >= passage.length()) { e.consume(); return; }
         removeCursor();
+        if (e.isShiftDown()) {
+            c = applyShiftChar(c);
+        }
         char expected = passage.charAt(index);
         boolean match = (c == expected);
         // --- WEAK KEYS: record only the first mistake for this expected position ---
@@ -162,6 +165,34 @@ public class InputSection {
         t.getStyleClass().addAll(correct ? "user-correct" : "user-wrong", "mono");
         if (index <= userFlow.getChildren().size()) userFlow.getChildren().add(index, t);
         else userFlow.getChildren().add(t);
+    }
+
+    private char applyShiftChar(char c) {
+        if (Character.isLetter(c)) return Character.toUpperCase(c);
+        switch (c) {
+            case '1': return '!';
+            case '2': return '@';
+            case '3': return '#';
+            case '4': return '$';
+            case '5': return '%';
+            case '6': return '^';
+            case '7': return '&';
+            case '8': return '*';
+            case '9': return '(';
+            case '0': return ')';
+            case '-': return '_';
+            case '=': return '+';
+            case '[': return '{';
+            case ']': return '}';
+            case '\\': return '|';
+            case ';': return ':';
+            case '\'': return '"';
+            case ',': return '<';
+            case '.': return '>';
+            case '/': return '?';
+            case '`': return '~';
+            default: return c;
+        }
     }
 
     private void removeCursor() {
