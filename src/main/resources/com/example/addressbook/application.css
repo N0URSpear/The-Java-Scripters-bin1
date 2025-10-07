@@ -10,6 +10,7 @@
 .user-correct { -fx-fill: #84e175; -fx-font-weight: 800; }
 .user-wrong { -fx-fill: #d93025; -fx-font-weight: 800; }
 .cursor { -fx-fill: #3d3565; -fx-font-weight: 800; -fx-opacity: 0.85; }
+.timer-overlay { -fx-text-fill: #ffffff; -fx-font-weight: bold; }
 .progress-bar > .bar { -fx-background-insets: 0; -fx-background-radius: 10; }
 .progress-bar > .track { -fx-background-color: #2a2555; -fx-background-radius: 10; }
 .stats-card { -fx-background-color: #eaeaea; -fx-padding: 10; -fx-background-radius: 12; }

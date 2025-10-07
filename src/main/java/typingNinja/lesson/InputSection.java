@@ -5,6 +5,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
+import java.util.function.Consumer;
 
 public class InputSection {
     private final TextFlow promptFlow;
@@ -18,12 +19,13 @@ public class InputSection {
     private final Text cursor;
     private final WeakKeyTracker weakKeys;
     private final boolean[] errorCounted;
+    private final Consumer<Text> cursorListener;
 
     public char peekExpected() { return index < passage.length() ? passage.charAt(index) : '\0'; }
 
     public InputSection(TextFlow promptFlow, TextFlow userFlow, TextArea hiddenInput,
                         KeyboardHands keyboard, Metrics metrics, String passage,
-                        WeakKeyTracker weakKeys) {
+                        WeakKeyTracker weakKeys, Consumer<Text> cursorListener) {
         this.promptFlow = promptFlow;
         this.userFlow = userFlow;
         this.hiddenInput = hiddenInput;
@@ -34,6 +36,7 @@ public class InputSection {
         this.errorCounted = new boolean[passage.length()];
         this.cursor = new Text("_");
         this.cursor.getStyleClass().addAll("cursor", "mono");
+        this.cursorListener = cursorListener;
         buildPrompt();
         userFlow.getChildren().clear();
         updateCursor();
@@ -203,5 +206,12 @@ public class InputSection {
         removeCursor();
         int insertionIndex = Math.min(index, userFlow.getChildren().size());
         userFlow.getChildren().add(insertionIndex, cursor);
+        notifyCursorListener();
+    }
+
+    private void notifyCursorListener() {
+        if (cursorListener != null) {
+            cursorListener.accept(cursor);
+        }
     }
 }

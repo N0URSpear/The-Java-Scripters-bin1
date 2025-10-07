@@ -2,28 +2,36 @@ package typingNinja.controllers;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
-import javafx.scene.input.*;
-import javafx.scene.text.*;
-import javafx.scene.layout.*;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 
 import typingNinja.lesson.*;
 import typingNinja.auth.Session;
 import typingNinja.lesson.WeakKeyTracker;
+import typingNinja.SettingsDAO;
+import typingNinja.SettingsDAO.SettingsRecord;
 
 
 public class LessonActivePageController {
     @FXML private HBox buttonBar;
     @FXML private Button pauseButton;
-    @FXML private ChoiceBox<String> modeChoice;
     @FXML private Label timerLabel;
 
+    @FXML private ScrollPane readingScroll;
     @FXML private StackPane readingStack;
     @FXML private TextFlow promptFlow;
     @FXML private TextFlow userFlow;
@@ -52,25 +60,26 @@ public class LessonActivePageController {
     private Integer currentLessonId;
     private int currentUserId;
     private final LessonDAO lessonDAO = new LessonDAO(); // reuse the same DAO
+    private final SettingsDAO settingsDAO = new SettingsDAO();
+    private boolean strictModePreferred = true;
 
     private void buildInputSectionAndStart(String passage) {
         inputSection = new InputSection(
-                promptFlow, userFlow, hiddenInput, keyboardHands, metrics, passage, weakKeyTracker
+                promptFlow, userFlow, hiddenInput, keyboardHands, metrics, passage, weakKeyTracker,
+                this::ensureCursorVisible
         );
         keyboardHands.highlightExpected(inputSection.peekExpected());
 
         hiddenInput.addEventFilter(KeyEvent.KEY_TYPED, inputSection::onKeyTyped);
         hiddenInput.addEventFilter(KeyEvent.KEY_PRESSED, inputSection::onKeyPressed);
 
+        readingScroll.setOnMouseClicked(e -> hiddenInput.requestFocus());
         readingStack.setOnMouseClicked(e -> hiddenInput.requestFocus());
         promptFlow.setOnMouseClicked(e -> hiddenInput.requestFocus());
         userFlow.setOnMouseClicked(e -> hiddenInput.requestFocus());
         keyboardGrid.setOnMouseClicked(e -> hiddenInput.requestFocus());
 
-        boolean strict = modeChoice.getSelectionModel().getSelectedIndex() == 0;
-        inputSection.setStrictMode(strict);
-        modeChoice.getSelectionModel().selectedIndexProperty()
-                .addListener((obs, o, n) -> inputSection.setStrictMode(n.intValue() == 0));
+        inputSection.setStrictMode(strictModePreferred);
 
         Platform.runLater(() -> {
             hiddenInput.setText("");
@@ -81,6 +90,43 @@ public class LessonActivePageController {
                 try { lessonDAO.markStarted(currentLessonId, currentUserId); } catch (Exception ex) { ex.printStackTrace(); }
             }
             keyboardHands.highlightExpected(inputSection.peekExpected());
+        });
+    }
+
+    private void ensureCursorVisible(Text cursorNode) {
+        if (cursorNode == null) return;
+        Platform.runLater(() -> {
+            Bounds viewportBounds = readingScroll.getViewportBounds();
+            Bounds contentBounds = readingStack.getBoundsInLocal();
+            Bounds cursorSceneBounds = cursorNode.localToScene(cursorNode.getBoundsInLocal());
+            Bounds contentSceneBounds = readingStack.localToScene(contentBounds);
+
+            double cursorY = cursorSceneBounds.getMinY() - contentSceneBounds.getMinY();
+            double cursorHeight = cursorSceneBounds.getHeight();
+            double viewportHeight = viewportBounds.getHeight();
+            double contentHeight = contentBounds.getHeight();
+
+            if (contentHeight <= viewportHeight) {
+                readingScroll.setVvalue(0);
+                return;
+            }
+
+            double minVisible = readingScroll.getVvalue() * (contentHeight - viewportHeight);
+            double maxVisible = minVisible + viewportHeight;
+
+            double desiredTop = Math.max(0, cursorY - viewportHeight * 0.25);
+            double desiredBottom = cursorY + cursorHeight + viewportHeight * 0.25;
+
+            double newMin = minVisible;
+
+            if (cursorY < minVisible) {
+                newMin = desiredTop;
+            } else if (cursorY + cursorHeight > maxVisible) {
+                newMin = desiredBottom - viewportHeight;
+            }
+
+            double vValue = newMin / (contentHeight - viewportHeight);
+            readingScroll.setVvalue(Math.max(0, Math.min(1, vValue)));
         });
     }
 
@@ -102,6 +148,28 @@ public class LessonActivePageController {
         keyboardHands.buildQwerty();
 
         currentUserId = Session.getCurrentUserId();
+        SettingsRecord settings = settingsDAO.fetch(currentUserId);
+        strictModePreferred = settings.typingErrors;
+
+        readingScroll.setFitToWidth(true);
+        readingScroll.setPannable(false);
+        readingScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        readingScroll.viewportBoundsProperty().addListener((obs, oldBounds, newBounds) -> {
+            double width = Math.max(newBounds.getWidth() - 24, 0);
+            promptFlow.setPrefWidth(width);
+            userFlow.setPrefWidth(width);
+            readingStack.setMinWidth(width);
+            readingStack.setPrefWidth(width);
+        });
+        Platform.runLater(() -> {
+            Bounds viewportBounds = readingScroll.getViewportBounds();
+            double width = Math.max(viewportBounds.getWidth() - 24, 0);
+            promptFlow.setPrefWidth(width);
+            userFlow.setPrefWidth(width);
+            readingStack.setMinWidth(width);
+            readingStack.setPrefWidth(width);
+        });
+
         Lesson latest = null;
 
         try {
@@ -226,16 +294,12 @@ public class LessonActivePageController {
             }
         }
 
-        modeChoice.getItems().addAll("Strict (no mistakes allowed)", "Lenient (highlight mistakes)");
-        modeChoice.getSelectionModel().select(0);
         pauseMenu = new PauseMenu(pauseButton, metrics, hiddenInput);
 
         StackPane.setAlignment(promptFlow, Pos.TOP_LEFT);
         StackPane.setAlignment(userFlow, Pos.TOP_LEFT);
         promptFlow.setLineSpacing(30);
         userFlow.setLineSpacing(30);
-        promptFlow.prefWidthProperty().bind(readingStack.widthProperty());
-        userFlow.prefWidthProperty().bind(readingStack.widthProperty());
         userFlow.setTranslateY(26);
         readingStack.setPadding(new Insets(16));
 
