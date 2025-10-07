@@ -15,6 +15,7 @@ public class InputSection {
     private final String passage;
     private int index = 0;
     private boolean strictMode = true;
+    private final Text cursor;
     private final WeakKeyTracker weakKeys;
     private final boolean[] errorCounted;
 
@@ -31,8 +32,11 @@ public class InputSection {
         this.passage = passage;
         this.weakKeys = weakKeys;
         this.errorCounted = new boolean[passage.length()];
+        this.cursor = new Text("_");
+        this.cursor.getStyleClass().addAll("cursor", "mono");
         buildPrompt();
         userFlow.getChildren().clear();
+        updateCursor();
     }
 
     public void setStrictMode(boolean strict) {
@@ -51,6 +55,7 @@ public class InputSection {
         if (c < 32 && c != '\n') { e.consume(); return; }
         // keyboard highlight handled by highlightExpected
         if (index >= passage.length()) { e.consume(); return; }
+        removeCursor();
         char expected = passage.charAt(index);
         boolean match = (c == expected);
         // --- WEAK KEYS: record only the first mistake for this expected position ---
@@ -86,6 +91,7 @@ public class InputSection {
             keyboard.highlightExpected(peekExpected());
         }
         if (index >= passage.length()) hiddenInput.setDisable(true);
+        updateCursor();
         e.consume();
     }
 
@@ -93,6 +99,7 @@ public class InputSection {
         KeyCode code = e.getCode();
         if (code == KeyCode.BACK_SPACE) {
             if (index > 0) {
+                removeCursor();
                 index--;
                 if (userFlow.getChildren().size() > index) {
                     javafx.scene.Node removed = userFlow.getChildren().remove(index);
@@ -105,10 +112,12 @@ public class InputSection {
                 keyboard.highlightExpected(peekExpected());
                 keyboard.highlightExpected(peekExpected());
             }
+            updateCursor();
             keyboard.dim();
             e.consume();
         }
         else if (code == KeyCode.ENTER) {
+            removeCursor();
             if (index < passage.length() && passage.charAt(index) == '\n') {
                 keyboard.lightForChar('\n');
                 pushUserChar('\n', true);
@@ -134,6 +143,7 @@ public class InputSection {
                         keyboard.highlightExpected(peekExpected());
                 if (index >= passage.length()) hiddenInput.setDisable(true);
             }
+            updateCursor();
             e.consume();
         }
     }
@@ -152,5 +162,15 @@ public class InputSection {
         t.getStyleClass().addAll(correct ? "user-correct" : "user-wrong", "mono");
         if (index <= userFlow.getChildren().size()) userFlow.getChildren().add(index, t);
         else userFlow.getChildren().add(t);
+    }
+
+    private void removeCursor() {
+        userFlow.getChildren().remove(cursor);
+    }
+
+    private void updateCursor() {
+        removeCursor();
+        int insertionIndex = Math.min(index, userFlow.getChildren().size());
+        userFlow.getChildren().add(insertionIndex, cursor);
     }
 }
