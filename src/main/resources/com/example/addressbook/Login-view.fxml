@@ -7,7 +7,7 @@
 <VBox style="-fx-background-color: #D9D9D9; -fx-padding: 10 20 20 20;"
       xmlns="http://javafx.com/javafx/17.0.12"
       xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.example.addressbook.controllers.LoginController"
+      fx:controller="typingNinja.controllers.LoginController"
       stylesheets="@LoginStyles.css" >
 
     <Label style="-fx-text-fill: black; -fx-font-size: 24; -fx-font-family: 'Jaro';" text="Login" prefWidth="340" alignment="CENTER">

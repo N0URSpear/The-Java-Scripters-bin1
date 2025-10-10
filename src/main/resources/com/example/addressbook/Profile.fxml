@@ -7,7 +7,7 @@
 
 <VBox xmlns="http://javafx.com/javafx/21"
       xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.example.addressbook.controllers.ProfileController"
+      fx:controller="typingNinja.controllers.ProfileController"
       alignment="CENTER"
       spacing="20"
       style="-fx-background-color: #140B38; -fx-padding: 40;">

@@ -1,4 +1,4 @@
-module com.example.addressbook {
+module typingNinja {
     requires javafx.controls;
     requires javafx.fxml;
     requires java.desktop;
@@ -10,8 +10,8 @@ module com.example.addressbook {
     requires java.net.http;
     requires org.apache.pdfbox;
 
-    opens com.example.addressbook to javafx.fxml;
-    exports com.example.addressbook;
-    exports com.example.addressbook.controllers;
-    opens com.example.addressbook.controllers to javafx.fxml;
+    opens typingNinja to javafx.fxml;
+    exports typingNinja;
+    exports typingNinja.controllers;
+    opens typingNinja.controllers to javafx.fxml;
 }

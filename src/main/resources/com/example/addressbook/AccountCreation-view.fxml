@@ -6,7 +6,7 @@
 <?import javafx.geometry.Insets?>
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.example.addressbook.controllers.CreateAccountController"
+      fx:controller="typingNinja.controllers.CreateAccountController"
       style="-fx-background-color: #D9D9D9; -fx-padding: 10 20 20 20;"
       prefWidth="500" >
 

@@ -4,17 +4,13 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 <BorderPane xmlns="http://javafx.com/javafx/21.0.3" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.example.addressbook.controllers.LessonActivePageController"
+            fx:controller="typingNinja.controllers.LessonActivePageController"
             stylesheets="@application.css">
   <top>
-    <HBox fx:id="buttonBar" spacing="12" alignment="CENTER_LEFT" styleClass="toolbar">
+    <HBox fx:id="buttonBar" spacing="12" alignment="CENTER_RIGHT" styleClass="toolbar">
       <children>
-        <Button fx:id="pauseButton" text="⏯ Pause"/>
-        <Label text="Mode:"/>
-        <ChoiceBox fx:id="modeChoice"/>
         <Region HBox.hgrow="ALWAYS"/>
-        <Label text="Time:"/>
-        <Label fx:id="timerLabel" styleClass="timer"/>
+        <Button fx:id="pauseButton" text="⏯ Pause"/>
       </children>
       <padding><Insets top="8" right="12" bottom="8" left="12"/></padding>
     </HBox>
@@ -31,14 +27,23 @@
       <VBox GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.hgrow="ALWAYS" spacing="10" fillWidth="true" maxWidth="Infinity">
         <padding><Insets top="8" right="12" bottom="6" left="12"/></padding>
         <children>
-          <StackPane fx:id="readingStack" VBox.vgrow="ALWAYS" styleClass="reading-pane">
+          <ScrollPane fx:id="readingScroll" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" VBox.vgrow="ALWAYS" styleClass="reading-scroll">
+            <content>
+              <StackPane fx:id="readingStack" styleClass="reading-pane">
+                <children>
+                  <TextFlow fx:id="promptFlow" lineSpacing="30"/>
+                  <TextFlow fx:id="userFlow" lineSpacing="30"/>
+                </children>
+                <padding><Insets top="12" right="12" bottom="12" left="12"/></padding>
+              </StackPane>
+            </content>
+          </ScrollPane>
+          <StackPane maxWidth="Infinity">
             <children>
-              <TextFlow fx:id="promptFlow" lineSpacing="30"/>
-              <TextFlow fx:id="userFlow" lineSpacing="30"/>
+              <ProgressBar fx:id="timeProgress" maxWidth="Infinity" prefHeight="18"/>
+              <Label fx:id="timerLabel" styleClass="timer-overlay"/>
             </children>
-            <padding><Insets top="12" right="12" bottom="12" left="12"/></padding>
           </StackPane>
-          <ProgressBar fx:id="timeProgress" maxWidth="Infinity" prefHeight="10"/>
         </children>
       </VBox>
       <GridPane fx:id="helpGrid" GridPane.rowIndex="1" GridPane.columnIndex="0" GridPane.hgrow="ALWAYS" maxWidth="Infinity" hgap="16" vgap="8">
@@ -60,14 +65,16 @@
                 <children>
                   <Label text="Lesson:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
                   <Label fx:id="lessonTitleLabel" text="—" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
-                  <Label text="Duration:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                  <Label fx:id="lessonDurationLabel" text="—" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
-                  <Label text="WPM:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                  <Label fx:id="wpmLabel" text="0" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
-                  <Label text="Errors:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-                  <Label fx:id="errorsLabel" text="0" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
-                  <Label text="Error rate:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
-                  <Label fx:id="accuracyLabel" text="100%" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+                  <Label fx:id="promptTitleLabel" text="Prompt:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                  <Label fx:id="promptDisplayLabel" text="—" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                  <Label text="Duration:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                  <Label fx:id="lessonDurationLabel" text="—" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                  <Label text="WPM:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                  <Label fx:id="wpmLabel" text="0" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                  <Label fx:id="errorsTitleLabel" text="Errors:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                  <Label fx:id="errorsLabel" text="0" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+                  <Label fx:id="accuracyTitleLabel" text="Error rate:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                  <Label fx:id="accuracyLabel" text="100%" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
                 </children>
               </GridPane>
             </children>
