@@ -3,6 +3,7 @@ package typingNinja.controllers;
 import typingNinja.INinjaContactDAO;
 import typingNinja.SqliteContactDAO;
 import typingNinja.NinjaUser;
+import typingNinja.auth.Session;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.PasswordField;
@@ -62,6 +63,7 @@ public class LoginController {
 
         showAlert(Alert.AlertType.INFORMATION,"Login Successful","Welcome, " + ninja.getUserName() + "!"  );
         loginSuccessful = true;
+        Session.setCurrentUserId(ninja.getId());
 
         //close popup after login
         if (usernameField != null && usernameField.getScene() != null) {
