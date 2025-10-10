@@ -33,5 +33,8 @@ jobs:
           java-version: '21'    
 
       # builds and runs the tests with maven
+      - name: Make Maven Wrapper executable
+        run: chmod +x mvnw
+        
       - name: Build and test
         run: ./mvnw clean test
