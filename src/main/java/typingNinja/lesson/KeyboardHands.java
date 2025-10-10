@@ -29,13 +29,16 @@ public class KeyboardHands {
 
     /** neat, proportional keyboard that grows to fill its column */
     public void buildQwerty() {
+        grid.setMinSize(0, 0);
+        grid.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        grid.setPrefWidth(Double.MAX_VALUE);
         grid.getChildren().clear();
         grid.getColumnConstraints().clear();
         grid.getRowConstraints().clear();
         shiftKeys.clear();
         keyMap.clear();
 
-        final int COLS = 60;
+        final int COLS = 64;
         for (int i = 0; i < COLS; i++) {
             ColumnConstraints cc = new ColumnConstraints();
             cc.setPercentWidth(100.0 / COLS);
@@ -45,23 +48,24 @@ public class KeyboardHands {
         for (int r = 0; r < 5; r++) {
             RowConstraints rc = new RowConstraints();
             rc.setVgrow(Priority.ALWAYS);
+            rc.setPercentHeight(100.0 / 5);
             grid.getRowConstraints().add(rc);
         }
 
         addRow(0, new String[][]{
-                {"`","3"},{"1","3"},{"2","3"},{"3","3"},{"4","3"},{"5","3"},{"6","3"},{"7","3"},{"8","3"},{"9","3"},{"0","3"},{"-","3"},{"=","3"},{"Backspace","9"}
+                {"`","4"},{"1","4"},{"2","4"},{"3","4"},{"4","4"},{"5","4"},{"6","4"},{"7","4"},{"8","4"},{"9","4"},{"0","4"},{"-","4"},{"=","4"},{"Backspace","12"}
         });
         addRow(1, new String[][]{
-                {"Tab","7"},{"Q","3"},{"W","3"},{"E","3"},{"R","3"},{"T","3"},{"Y","3"},{"U","3"},{"I","3"},{"O","3"},{"P","3"},{"[","3"},{"]","3"},{"\\\\","5"}
+                {"Tab","6"},{"Q","4"},{"W","4"},{"E","4"},{"R","4"},{"T","4"},{"Y","4"},{"U","4"},{"I","4"},{"O","4"},{"P","4"},{"[","4"},{"]","4"},{"\\\\","10"}
         });
         addRow(2, new String[][]{
-                {"Caps","8"},{"A","3"},{"S","3"},{"D","3"},{"F","3"},{"G","3"},{"H","3"},{"J","3"},{"K","3"},{"L","3"},{";","3"},{"'","3"},{"Enter","8"}
+                {"Caps","7"},{"A","4"},{"S","4"},{"D","4"},{"F","4"},{"G","4"},{"H","4"},{"J","4"},{"K","4"},{"L","4"},{";","4"},{"'","4"},{"Enter","13"}
         });
         addRow(3, new String[][]{
-                {"Shift","10"},{"Z","3"},{"X","3"},{"C","3"},{"V","3"},{"B","3"},{"N","3"},{"M","3"},{",","3"},{".","3"},{"/","3"},{"Shift","11"}
+                {"Shift","12"},{"Z","4"},{"X","4"},{"C","4"},{"V","4"},{"B","4"},{"N","4"},{"M","4"},{",","4"},{".","4"},{"/","4"},{"Shift","12"}
         });
         addRow(4, new String[][]{
-                {"Ctrl","6"},{"fn","4"},{"Alt","6"},{"Space","20"},{"Control","8"},{"Alt","8"}
+                {"Ctrl","7"},{"fn","6"},{"Alt","7"},{"Space","24"},{"Control","10"},{"Alt","10"}
         });
     }
 

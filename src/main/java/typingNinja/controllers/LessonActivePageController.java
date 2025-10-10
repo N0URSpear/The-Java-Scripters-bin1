@@ -25,6 +25,7 @@ import typingNinja.lesson.WeakKeyTracker;
 import typingNinja.SettingsDAO;
 import typingNinja.SettingsDAO.SettingsRecord;
 
+import javafx.scene.text.Text;
 
 public class LessonActivePageController {
     @FXML private HBox buttonBar;
@@ -130,8 +131,25 @@ public class LessonActivePageController {
         });
     }
 
+    private void showLoadingPlaceholder() {
+        Text promptPlaceholder = new Text("LOADING ...");
+        promptPlaceholder.getStyleClass().addAll("loading-placeholder", "mono");
+        promptFlow.getChildren().setAll(promptPlaceholder);
+
+        Text userPlaceholder = new Text("LOADING ...");
+        userPlaceholder.getStyleClass().addAll("loading-placeholder", "mono");
+        userFlow.getChildren().setAll(userPlaceholder);
+    }
+
     @FXML
     private void initialize() {
+        promptFlow.setMinWidth(0);
+        promptFlow.setMaxWidth(Double.MAX_VALUE);
+        userFlow.setMinWidth(0);
+        userFlow.setMaxWidth(Double.MAX_VALUE);
+        readingStack.setMinSize(0, 0);
+        readingStack.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+
         prompts = new CustomPrompts();
         CustomPrompts.Prompt p = prompts.current();
         lessonTitleLabel.setText(p.title());
@@ -147,6 +165,8 @@ public class LessonActivePageController {
         keyboardHands = new KeyboardHands(keyboardGrid, handsRegion, handsLabel);
         keyboardHands.buildQwerty();
 
+        showLoadingPlaceholder();
+
         currentUserId = Session.getCurrentUserId();
         SettingsRecord settings = settingsDAO.fetch(currentUserId);
         strictModePreferred = settings.typingErrors;
@@ -160,6 +180,7 @@ public class LessonActivePageController {
             userFlow.setPrefWidth(width);
             readingStack.setMinWidth(width);
             readingStack.setPrefWidth(width);
+            readingStack.setMinHeight(newBounds.getHeight());
         });
         Platform.runLater(() -> {
             Bounds viewportBounds = readingScroll.getViewportBounds();
@@ -168,6 +189,7 @@ public class LessonActivePageController {
             userFlow.setPrefWidth(width);
             readingStack.setMinWidth(width);
             readingStack.setPrefWidth(width);
+            readingStack.setMinHeight(viewportBounds.getHeight());
         });
 
         Lesson latest = null;

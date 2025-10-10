@@ -19,3 +19,4 @@
 .keycap-lit { -fx-background-color: #9ad0ff; }
 .hands-placeholder { -fx-background-color: #f0f0f0; -fx-background-radius: 12; -fx-border-color: #ccc; -fx-border-radius: 12; }
 .mono { -fx-font-family: "Menlo", "Consolas", "Monaco", monospace; -fx-font-size: 26px; -fx-line-spacing: 6px; }
+.loading-placeholder { -fx-fill: #555; -fx-font-style: italic; }
