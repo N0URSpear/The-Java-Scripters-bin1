@@ -1,6 +1,7 @@
 package typingNinja.controllers;
 
 import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
@@ -18,14 +19,12 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
+import javafx.scene.text.TextAlignment;
 
 import typingNinja.lesson.*;
 import typingNinja.auth.Session;
-import typingNinja.lesson.WeakKeyTracker;
 import typingNinja.SettingsDAO;
 import typingNinja.SettingsDAO.SettingsRecord;
-
-import javafx.scene.text.Text;
 
 public class LessonActivePageController {
     @FXML private HBox buttonBar;
@@ -50,6 +49,10 @@ public class LessonActivePageController {
     @FXML private Label accuracyLabel;
     @FXML private Label lessonTitleLabel;
     @FXML private Label lessonDurationLabel;
+    @FXML private Label errorsTitleLabel;
+    @FXML private Label accuracyTitleLabel;
+    @FXML private Label promptTitleLabel;
+    @FXML private Label promptDisplayLabel;
 
     private Metrics metrics;
     private CustomPrompts prompts;
@@ -57,30 +60,62 @@ public class LessonActivePageController {
     private PauseMenu pauseMenu;
     private KeyboardHands keyboardHands;
     private InputSection inputSection;
+    private FreeTypingInput freeTypingInput;
     private final WeakKeyTracker weakKeyTracker = new WeakKeyTracker();
     private Integer currentLessonId;
     private int currentUserId;
     private final LessonDAO lessonDAO = new LessonDAO(); // reuse the same DAO
     private final SettingsDAO settingsDAO = new SettingsDAO();
     private boolean strictModePreferred = true;
+    private boolean freeMode = false;
+    private EventHandler<KeyEvent> keyTypedHandler;
+    private EventHandler<KeyEvent> keyPressedHandler;
+    private static final double DEFAULT_CHARS_PER_WORD = 5.0;
+    private static final double FREE_MODE_CHARS_PER_WORD = 6.5;
 
     private void buildInputSectionAndStart(String passage) {
-        inputSection = new InputSection(
-                promptFlow, userFlow, hiddenInput, keyboardHands, metrics, passage, weakKeyTracker,
-                this::ensureCursorVisible
-        );
-        keyboardHands.highlightExpected(inputSection.peekExpected());
+        if (keyTypedHandler != null) {
+            hiddenInput.removeEventFilter(KeyEvent.KEY_TYPED, keyTypedHandler);
+            keyTypedHandler = null;
+        }
+        if (keyPressedHandler != null) {
+            hiddenInput.removeEventFilter(KeyEvent.KEY_PRESSED, keyPressedHandler);
+            keyPressedHandler = null;
+        }
 
-        hiddenInput.addEventFilter(KeyEvent.KEY_TYPED, inputSection::onKeyTyped);
-        hiddenInput.addEventFilter(KeyEvent.KEY_PRESSED, inputSection::onKeyPressed);
+        hiddenInput.clear();
+        hiddenInput.setDisable(false);
+
+        if (freeMode) {
+            Text message = new Text("Free typing mode — type anything you like.");
+            message.getStyleClass().addAll("prompt-char", "mono");
+            promptFlow.getChildren().setAll(message);
+            freeTypingInput = new FreeTypingInput(userFlow, hiddenInput, keyboardHands, metrics, this::ensureCursorVisible);
+            keyTypedHandler = freeTypingInput::onKeyTyped;
+            keyPressedHandler = freeTypingInput::onKeyPressed;
+            promptFlow.setTextAlignment(TextAlignment.LEFT);
+            userFlow.setTextAlignment(TextAlignment.LEFT);
+        } else {
+            inputSection = new InputSection(
+                    promptFlow, userFlow, hiddenInput, keyboardHands, metrics, passage, weakKeyTracker,
+                    this::ensureCursorVisible
+            );
+            inputSection.setStrictMode(strictModePreferred);
+            keyboardHands.highlightExpected(inputSection.peekExpected());
+            keyTypedHandler = inputSection::onKeyTyped;
+            keyPressedHandler = inputSection::onKeyPressed;
+            promptFlow.setTextAlignment(TextAlignment.LEFT);
+            userFlow.setTextAlignment(TextAlignment.LEFT);
+        }
+
+        hiddenInput.addEventFilter(KeyEvent.KEY_TYPED, keyTypedHandler);
+        hiddenInput.addEventFilter(KeyEvent.KEY_PRESSED, keyPressedHandler);
 
         readingScroll.setOnMouseClicked(e -> hiddenInput.requestFocus());
         readingStack.setOnMouseClicked(e -> hiddenInput.requestFocus());
         promptFlow.setOnMouseClicked(e -> hiddenInput.requestFocus());
         userFlow.setOnMouseClicked(e -> hiddenInput.requestFocus());
         keyboardGrid.setOnMouseClicked(e -> hiddenInput.requestFocus());
-
-        inputSection.setStrictMode(strictModePreferred);
 
         Platform.runLater(() -> {
             hiddenInput.setText("");
@@ -90,7 +125,11 @@ public class LessonActivePageController {
             if (currentLessonId != null) {
                 try { lessonDAO.markStarted(currentLessonId, currentUserId); } catch (Exception ex) { ex.printStackTrace(); }
             }
-            keyboardHands.highlightExpected(inputSection.peekExpected());
+            if (!freeMode && inputSection != null) {
+                keyboardHands.highlightExpected(inputSection.peekExpected());
+            } else {
+                keyboardHands.dim();
+            }
         });
     }
 
@@ -134,11 +173,82 @@ public class LessonActivePageController {
     private void showLoadingPlaceholder() {
         Text promptPlaceholder = new Text("LOADING ...");
         promptPlaceholder.getStyleClass().addAll("loading-placeholder", "mono");
+        promptFlow.setTextAlignment(TextAlignment.CENTER);
         promptFlow.getChildren().setAll(promptPlaceholder);
 
-        Text userPlaceholder = new Text("LOADING ...");
-        userPlaceholder.getStyleClass().addAll("loading-placeholder", "mono");
-        userFlow.getChildren().setAll(userPlaceholder);
+        userFlow.getChildren().clear();
+        userFlow.setTextAlignment(TextAlignment.LEFT);
+    }
+
+    private void configureStatsForFreeMode() {
+        if (errorsTitleLabel != null) {
+            errorsTitleLabel.setVisible(false);
+            errorsTitleLabel.setManaged(false);
+        }
+        if (errorsLabel != null) {
+            errorsLabel.setVisible(false);
+            errorsLabel.setManaged(false);
+        }
+        if (accuracyTitleLabel != null) {
+            accuracyTitleLabel.setVisible(false);
+            accuracyTitleLabel.setManaged(false);
+        }
+        if (accuracyLabel != null) {
+            accuracyLabel.setVisible(false);
+            accuracyLabel.setManaged(false);
+        }
+        if (promptTitleLabel != null) {
+            promptTitleLabel.setVisible(false);
+            promptTitleLabel.setManaged(false);
+        }
+        if (promptDisplayLabel != null) {
+            promptDisplayLabel.setVisible(false);
+            promptDisplayLabel.setManaged(false);
+        }
+    }
+
+    private void restoreStatsForStandardMode() {
+        if (errorsTitleLabel != null) {
+            errorsTitleLabel.setVisible(true);
+            errorsTitleLabel.setManaged(true);
+        }
+        if (errorsLabel != null) {
+            errorsLabel.setVisible(true);
+            errorsLabel.setManaged(true);
+        }
+        if (accuracyTitleLabel != null) {
+            accuracyTitleLabel.setVisible(true);
+            accuracyTitleLabel.setManaged(true);
+        }
+        if (accuracyLabel != null) {
+            accuracyLabel.setVisible(true);
+            accuracyLabel.setManaged(true);
+        }
+    }
+
+    private void showCustomPrompt(String prompt) {
+        if (promptTitleLabel == null || promptDisplayLabel == null) return;
+        promptTitleLabel.setVisible(true);
+        promptTitleLabel.setManaged(true);
+        if (prompt == null || prompt.isBlank()) {
+            promptDisplayLabel.setText("--");
+        } else {
+            promptDisplayLabel.setText(prompt);
+        }
+        promptDisplayLabel.setVisible(true);
+        promptDisplayLabel.setManaged(true);
+    }
+
+    private void hidePrompt() {
+        if (promptTitleLabel != null) {
+            promptTitleLabel.setVisible(true);
+            promptTitleLabel.setManaged(true);
+        }
+        if (promptDisplayLabel != null) {
+            promptDisplayLabel.setVisible(true);
+            promptDisplayLabel.setManaged(true);
+            promptDisplayLabel.setText("--");
+        }
     }
 
     @FXML
@@ -155,7 +265,11 @@ public class LessonActivePageController {
         lessonTitleLabel.setText(p.title());
         lessonDurationLabel.setText(p.durationSeconds() + "s");
 
+        restoreStatsForStandardMode();
+        hidePrompt();
+
         metrics = new Metrics(p.durationSeconds());
+        metrics.setCharsPerWord(DEFAULT_CHARS_PER_WORD);
         metrics.bindTimerLabel(timerLabel);
         metrics.bindStats(wpmLabel, errorsLabel, accuracyLabel);
 
@@ -166,6 +280,7 @@ public class LessonActivePageController {
         keyboardHands.buildQwerty();
 
         showLoadingPlaceholder();
+        hidePrompt();
 
         currentUserId = Session.getCurrentUserId();
         SettingsRecord settings = settingsDAO.fetch(currentUserId);
@@ -201,6 +316,9 @@ public class LessonActivePageController {
         }
 
         if (latest == null) {
+            freeMode = false;
+            restoreStatsForStandardMode();
+            hidePrompt();
             buildInputSectionAndStart(p.text());
         }
         else {
@@ -209,6 +327,7 @@ public class LessonActivePageController {
             int durationSeconds = Math.max(10, latest.getDurationMinutes() * 60);
 
             metrics = new Metrics(durationSeconds);
+            metrics.setCharsPerWord(DEFAULT_CHARS_PER_WORD);
             metrics.bindTimerLabel(timerLabel);
             metrics.bindStats(wpmLabel, errorsLabel, accuracyLabel);
             progressFeature = new typingNinja.lesson.ProgressBar(timeProgress);
@@ -220,9 +339,17 @@ public class LessonActivePageController {
             boolean isFree = (lt != null && lt.toLowerCase().startsWith("free")); // matches your FreeTypeSelectController ("FreeWeakKeys", "FreeAnything")
 
             if (isFree) {
+                freeMode = true;
+                metrics.setCharsPerWord(FREE_MODE_CHARS_PER_WORD);
+                configureStatsForFreeMode();
+                lessonTitleLabel.setText("Free Typing");
                 buildInputSectionAndStart("");
             }
             else if (isCustom) {
+                freeMode = false;
+                metrics.setCharsPerWord(DEFAULT_CHARS_PER_WORD);
+                restoreStatsForStandardMode();
+                showCustomPrompt(latest.getPrompt());
                 typingNinja.ai.OllamaTextService ollama = new typingNinja.ai.OllamaTextService();
                 typingNinja.ai.LocalSimpleTextService local = new typingNinja.ai.LocalSimpleTextService();
                 int targetWords = Math.max(60, latest.getDurationMinutes() * 50); // ~50 wpm target
@@ -306,10 +433,14 @@ public class LessonActivePageController {
                                     ? new typingNinja.lesson.CustomPrompts().current().text()
                                     : text;
                             Platform.runLater(() -> buildInputSectionAndStart(finalPassage));
-                        });
+                });
 
             }
             else {
+                freeMode = false;
+                metrics.setCharsPerWord(DEFAULT_CHARS_PER_WORD);
+                restoreStatsForStandardMode();
+                hidePrompt();
                 // 1a…4f fixed placeholders for now
                 String fixed = typingNinja.lesson.FixedLessons.passageFor(lt);
                 buildInputSectionAndStart(fixed);
@@ -326,7 +457,11 @@ public class LessonActivePageController {
         readingStack.setPadding(new Insets(16));
 
         metrics.onLessonEnd(() -> {
-            inputSection.disable();
+            if (freeMode) {
+                hiddenInput.setDisable(true);
+            } else if (inputSection != null) {
+                inputSection.disable();
+            }
             keyboardHands.dim();
 
             double wpmVal;

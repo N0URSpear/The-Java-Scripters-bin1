@@ -23,15 +23,11 @@ public class TypingNinjaApp extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/example/addressbook/Ninja-view.fxml"));
         Parent root = fxmlLoader.load();
 
-        // Calculate window size
-        Rectangle2D screenBounds = Screen.getPrimary().getBounds();
-        double WIDTH = screenBounds.getWidth() * 0.75;
-        double HEIGHT = screenBounds.getHeight() * 0.75;
-
-        // Create and Display the scene
-        Scene scene = new Scene(root, WIDTH, HEIGHT);
+        Scene scene = new Scene(root);
         stage.setTitle(TITLE);
         stage.setScene(scene);
+        stage.setFullScreen(true);
+        stage.setFullScreenExitHint("");
         stage.show();
     }
 

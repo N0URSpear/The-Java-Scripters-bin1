@@ -1,6 +1,7 @@
 package typingNinja.controllers;
 
 import typingNinja.MainLessonDAO;
+import typingNinja.auth.Session;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -18,7 +19,7 @@ public class SubLessonSelectController {
     private final MainLessonDAO dao = new MainLessonDAO();
 
     private String codePrefix = "1"; // "1","2","3","4"
-    private int userId = 1;
+    private int userId = Session.getCurrentUserId();
 
     private String pendingTitle = null;
     private String[] pendingLeftTexts = null;
@@ -62,6 +63,7 @@ public class SubLessonSelectController {
     }
 
     private void pick(String letter) {
+        userId = Session.getCurrentUserId();
         String lessonType = codePrefix + letter;
         dao.insertSelection(userId, lessonType);
 

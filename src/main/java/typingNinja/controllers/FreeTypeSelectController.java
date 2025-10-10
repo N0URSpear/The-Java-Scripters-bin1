@@ -1,6 +1,7 @@
 package typingNinja.controllers;
 
 import typingNinja.MainLessonDAO;
+import typingNinja.auth.Session;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -15,7 +16,6 @@ public class FreeTypeSelectController {
     @FXML private ToggleButton dur1, dur3, dur5, dur10;
 
     private final MainLessonDAO dao = new MainLessonDAO();
-    private static final int USER_ID = 1; // for now
 
     @FXML
     private void initialize() {
@@ -35,7 +35,7 @@ public class FreeTypeSelectController {
     @FXML
     private void onGenerate() {
         int duration = getSelectedDuration();
-        dao.insertFreeType(USER_ID, duration);
+        dao.insertFreeType(Session.getCurrentUserId(), duration);
 
         try {
             Stage popup = (Stage) dur3.getScene().getWindow();

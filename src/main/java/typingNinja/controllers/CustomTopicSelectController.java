@@ -1,6 +1,7 @@
 package typingNinja.controllers;
 
 import typingNinja.MainLessonDAO;
+import typingNinja.auth.Session;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -21,7 +22,6 @@ public class CustomTopicSelectController {
     @FXML private CheckBox chkUpper, chkNums, chkPunct, chkSpecial;
 
     private final MainLessonDAO dao = new MainLessonDAO();
-    private static final int USER_ID = 1; // for now
 
     @FXML
     private void initialize() {
@@ -84,7 +84,7 @@ public class CustomTopicSelectController {
             }
         }
 
-        dao.insertCustomTopic(USER_ID, prompt, duration, upper, nums, punct, special);
+        dao.insertCustomTopic(Session.getCurrentUserId(), prompt, duration, upper, nums, punct, special);
 
         try {
             Stage popup = (Stage) promptField.getScene().getWindow();

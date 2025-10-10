@@ -17,6 +17,7 @@ public class Metrics {
     private final IntegerProperty errorRatePercent = new SimpleIntegerProperty(0);
     private Timeline timer;
     private boolean ended = false;
+    private double charsPerWord = 5.0;
     private Runnable onEnd = () -> {};
 
     public Metrics(int lessonSeconds) {
@@ -80,7 +81,8 @@ public class Metrics {
     private void recomputeDerived(int secondsElapsed) {
         double minutes = Math.max(1.0 / 60.0, secondsElapsed / 60.0);
         int correctChars = Math.max(0, charsTyped.get() - errors.get());
-        int computedWpm = (int) Math.round((correctChars / 5.0) / minutes);
+        double divisor = Math.max(1.0, charsPerWord);
+        int computedWpm = (int) Math.round((correctChars / divisor) / minutes);
         wpm.set(Math.max(0, computedWpm));
         int typed = Math.max(1, charsTyped.get());
         int err = Math.max(0, errors.get());
@@ -140,5 +142,13 @@ public class Metrics {
         if (typed <= 0) return 0.0;
         int correct = Math.max(typed - getErrors(), 0);
         return (correct * 100.0) / typed;
+    }
+
+    public void setCharsPerWord(double value) {
+        if (value > 0) {
+            this.charsPerWord = value;
+            int secondsElapsed = Math.max(1, lessonSeconds - timeRemaining.get());
+            recomputeDerived(secondsElapsed);
+        }
     }
 }
