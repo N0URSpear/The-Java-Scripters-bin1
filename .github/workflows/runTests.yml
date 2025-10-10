@@ -30,7 +30,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'corretto' 
-          java-version: '21.0.8'    
+          java-version: '21'    
 
       # builds and runs the tests with maven
       - name: Build and test
