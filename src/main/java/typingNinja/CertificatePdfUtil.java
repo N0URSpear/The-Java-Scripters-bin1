@@ -1,4 +1,4 @@
-package com.example.addressbook;
+package typingNinja;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;

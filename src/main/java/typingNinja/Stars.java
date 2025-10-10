@@ -1,4 +1,4 @@
-package com.example.addressbook;
+package typingNinja;
 
 import javafx.geometry.Pos;
 import javafx.scene.image.Image;

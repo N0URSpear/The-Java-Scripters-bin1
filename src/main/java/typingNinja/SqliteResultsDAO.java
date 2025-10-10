@@ -1,8 +1,8 @@
-package com.example.addressbook;
+package typingNinja;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import com.example.addressbook.auth.Session;
+import typingNinja.auth.Session;
 
 
 

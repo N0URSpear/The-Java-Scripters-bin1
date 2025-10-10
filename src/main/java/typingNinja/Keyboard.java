@@ -1,4 +1,4 @@
-package com.example.addressbook;
+package typingNinja;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;

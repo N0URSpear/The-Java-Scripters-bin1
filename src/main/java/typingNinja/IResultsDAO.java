@@ -1,4 +1,4 @@
-package com.example.addressbook;
+package typingNinja;
 
 import java.util.List;
 
