@@ -14,6 +14,11 @@ import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.time.LocalDate;
+
 
 import javafx.scene.Cursor;
 import javafx.scene.Node;
@@ -43,7 +48,7 @@ public class CertificatesScene {
     private static final double SCROLL_W = 1569, SCROLL_H = 724;
 
     // 内容占位，高于 ScrollPane 以产生滚动
-    private static final double CONTENT_W = 1569, CONTENT_H = 1000;
+    private static final double CONTENT_W = 1569, CONTENT_H = 10000;
 
     // 右上角返回按钮
     private static final double BACK_X = 1734, BACK_Y = 52;
@@ -223,11 +228,97 @@ public class CertificatesScene {
 
     // 从数据库加载，并渲染每条 result 一行 + 按钮
     private static final class Row {
-        final int index;
-        final int wpm;
-        final int acc; // 0..100
-        Row(int index, int wpm, int acc) { this.index = index; this.wpm = wpm; this.acc = acc; }
+        final int index;           // 列表里的序号（#001, #002...）
+        final int lessonId;        // LessonID（用于回查）
+        final int wpm;             // 速度（WPM）
+        final int acc;             // 准确率（0..100）
+        final LocalDate date;      // DateCompleted -> LocalDate
+        final String lessonType;   // LessonType
+        final String userName;     // Users.Username
+
+        Row(int index, int lessonId, int wpm, int acc,
+            LocalDate date, String lessonType, String userName) {
+            this.index = index;
+            this.lessonId = lessonId;
+            this.wpm = wpm;
+            this.acc = acc;
+            this.date = date;
+            this.lessonType = lessonType;
+            this.userName = userName;
+        }
     }
+
+    // 把 "YYYY-MM-DD HH:MM:SS" 解析成 LocalDate；解析失败则回退为今天
+    private static LocalDate toLocalDate(String dt) {
+        try {
+            // SQLite 默认 datetime('now') 形如 "2025-10-10 12:34:56"
+            return LocalDate.parse(dt.substring(0, 10));
+        } catch (Exception ignore) {
+            return LocalDate.now();
+        }
+    }
+
+    /**
+     * 读取最近 n 条（当前用户）的完整结果，包含：LessonID、WPM、Accuracy、DateCompleted、LessonType、Username。
+     * 数据顺序：旧 -> 新（和你现在列表显示保持一致）。
+     */
+    private static java.util.List<Row> loadRowsFromDb(int limit) {
+        java.util.List<Row> out = new java.util.ArrayList<>();
+
+        try {
+            Connection conn = SqliteConnection.getInstance();
+            // 用现有 DAO 获取“当前用户”的最近 n 条（它已处理当前用户的筛选与最新优先）
+            SqliteResultsDAO dao = new SqliteResultsDAO(conn);
+            java.util.List<Result> base = dao.getLastN(limit);   // 新 -> 旧
+            java.util.Collections.reverse(base);                 // 变为 旧 -> 新（和你原来的 UI 一致）
+
+            // 为了性能，只准备一次语句，在循环里反复设参执行
+            try (PreparedStatement psLesson = conn.prepareStatement(
+                    "SELECT LessonType, UserID FROM Lesson WHERE LessonID=?");
+                 PreparedStatement psUser = conn.prepareStatement(
+                         "SELECT Username FROM Users WHERE UserID=?")) {
+
+                int idx = 1;
+                for (Result r : base) {
+                    int lessonId = r.id();
+                    String lessonType = "Unknown";
+                    int userId = -1;
+
+                    // 查 LessonType / UserID
+                    psLesson.setInt(1, lessonId);
+                    try (ResultSet rs = psLesson.executeQuery()) {
+                        if (rs.next()) {
+                            lessonType = rs.getString(1);
+                            userId = rs.getInt(2);
+                        }
+                    }
+
+                    // 查 Username
+                    String userName = "Student Name";
+                    if (userId > 0) {
+                        psUser.setInt(1, userId);
+                        try (ResultSet rs2 = psUser.executeQuery()) {
+                            if (rs2.next()) userName = rs2.getString(1);
+                        }
+                    }
+
+                    out.add(new Row(
+                            idx++,                 // 列表序号
+                            lessonId,
+                            r.wpm(),               // ——保持你原来拿法
+                            r.acc(),               // ——保持你原来拿法
+                            toLocalDate(r.createdAt()),
+                            lessonType,
+                            userName
+                    ));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return out;
+    }
+
 
     /**
      * Populate the certificates list UI from the database.
@@ -237,15 +328,13 @@ public class CertificatesScene {
     private static void populateListFromDb(VBox listBox) {
         listBox.getChildren().clear();
 
-        // 1) 取数（用 ResultsBridge；没有 getAll 时取最近 1000 条，旧→新）
+        // 1) 取数：沿用 ResultsBridge.ensureTable（虽然它是 no-op，但不改你现有流程）
         ResultsBridge.ensureTable();
-        var m = ResultsBridge.loadLastN(1000);
-        List<Row> rows = new ArrayList<>();
-        for (int i = 0; i < m.wpm().size(); i++) {
-            rows.add(new Row(i + 1, m.wpm().get(i), m.acc().get(i)));
-        }
 
-        // 2) 没数据时给出提示
+        // 2) 读取完整字段（旧 -> 新）
+        java.util.List<Row> rows = loadRowsFromDb(1000);
+
+        // 3) 空数据提示
         if (rows.isEmpty()) {
             Label empty = new Label("No results yet.");
             empty.setTextFill(Color.BLACK);
@@ -254,7 +343,7 @@ public class CertificatesScene {
             return;
         }
 
-        // 3) 每条渲染为一行：左侧信息、右侧 Download 按钮
+        // 4) 渲染每一行
         for (Row r : rows) {
             HBox row = new HBox(12);
             row.setAlignment(Pos.CENTER_LEFT);
@@ -262,7 +351,10 @@ public class CertificatesScene {
             row.setStyle("-fx-background-color: rgba(0,0,0,0.04); -fx-background-radius: 10;");
             row.setPadding(new Insets(10, 12, 10, 12));
 
-            Label info = new Label(String.format("#%03d   WPM: %d   ACC: %d%%", r.index, r.wpm, r.acc));
+            Label info = new Label(String.format(
+                    "#%03d   WPM: %d   ACC: %d%%",
+                    r.index, r.wpm, r.acc
+            ));
             info.setTextFill(Color.BLACK);
             info.setStyle("-fx-font-size: 20;");
 
@@ -277,17 +369,20 @@ public class CertificatesScene {
                 try {
                     FileChooser chooser = new FileChooser();
                     chooser.setTitle("Save Certificate PDF");
-                    chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
-                    chooser.setInitialFileName(String.format("certificate_%03d_%dwpm_%d%%.pdf", r.index, r.wpm, r.acc));
+                    chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf")); // PDF (Portable Document Format)
+                    chooser.setInitialFileName(String.format(
+                            "certificate_%03d_%dwpm_%d%%.pdf",
+                            r.index, r.wpm, r.acc
+                    ));
                     File file = chooser.showSaveDialog(listBox.getScene().getWindow());
                     if (file == null) return;
 
-                    // 证书字段
-                    String name = "Student Name";
+                    // —— 关键：全部换成数据库真实值 ——
+                    String name = r.userName;
                     int typingSpeedWpm = r.wpm;
                     double accuracyPercent = r.acc;
-                    LocalDate dateCompleted = LocalDate.now();
-                    String lesson = "Lesson 7 - Punctuation";
+                    LocalDate dateCompleted = r.date;
+                    String lesson = r.lessonType;
 
                     CertificatePdfUtil.saveSimpleCertificate(
                             file.toPath(),
@@ -297,9 +392,6 @@ public class CertificatesScene {
                             dateCompleted,
                             lesson
                     );
-
-                    // 如需生成后自动打开系统 PDF 查看器：
-
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -309,13 +401,14 @@ public class CertificatesScene {
             listBox.getChildren().add(row);
         }
 
-        // 4) 根据行数把内容高度拉高，保证可滚动
+        // 5) 内容高度估算，保证可滚动（保留你的逻辑）
         double estimatedHeight = 40 + rows.size() * 64.0;
         Pane parent = (Pane) listBox.getParent();
         parent.setMinHeight(Math.max(CONTENT_H, estimatedHeight));
         parent.setPrefHeight(Math.max(CONTENT_H, estimatedHeight));
         parent.setMaxHeight(Math.max(CONTENT_H, estimatedHeight));
     }
+
 
     /**
      * Create a label with specified text, font, color, and position.
