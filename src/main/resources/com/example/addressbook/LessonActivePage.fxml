@@ -40,7 +40,7 @@
           </ScrollPane>
           <StackPane maxWidth="Infinity">
             <children>
-              <ProgressBar fx:id="timeProgress" maxWidth="Infinity" prefHeight="18"/>
+              <ProgressBar fx:id="timeProgress" maxWidth="Infinity" prefHeight="34"/>
               <Label fx:id="timerLabel" styleClass="timer-overlay"/>
             </children>
           </StackPane>
@@ -63,18 +63,18 @@
                   <ColumnConstraints halignment="LEFT" percentWidth="60"/>
                 </columnConstraints>
                 <children>
-                  <Label text="Lesson:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                  <Label fx:id="lessonTitleLabel" text="—" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
-                  <Label fx:id="promptTitleLabel" text="Prompt:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                  <Label fx:id="promptDisplayLabel" text="—" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
-                  <Label text="Duration:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                  <Label fx:id="lessonDurationLabel" text="—" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
-                  <Label text="WPM:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-                  <Label fx:id="wpmLabel" text="0" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
-                  <Label fx:id="errorsTitleLabel" text="Errors:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
-                  <Label fx:id="errorsLabel" text="0" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
-                  <Label fx:id="accuracyTitleLabel" text="Error rate:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
-                  <Label fx:id="accuracyLabel" text="100%" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+                  <Label text="Lesson:" GridPane.rowIndex="0" GridPane.columnIndex="0" styleClass="stat-label-title"/>
+                  <Label fx:id="lessonTitleLabel" text="—" GridPane.rowIndex="0" GridPane.columnIndex="1" styleClass="stat-label-value"/>
+                  <Label fx:id="promptTitleLabel" text="Prompt:" GridPane.rowIndex="1" GridPane.columnIndex="0" styleClass="stat-label-title"/>
+                  <Label fx:id="promptDisplayLabel" text="--" GridPane.rowIndex="1" GridPane.columnIndex="1" styleClass="stat-label-value"/>
+                  <Label text="Duration:" GridPane.rowIndex="2" GridPane.columnIndex="0" styleClass="stat-label-title"/>
+                  <Label fx:id="lessonDurationLabel" text="—" GridPane.rowIndex="2" GridPane.columnIndex="1" styleClass="stat-label-value"/>
+                  <Label text="WPM:" GridPane.rowIndex="3" GridPane.columnIndex="0" styleClass="stat-label-title"/>
+                  <Label fx:id="wpmLabel" text="0" GridPane.rowIndex="3" GridPane.columnIndex="1" styleClass="stat-label-value"/>
+                  <Label fx:id="errorsTitleLabel" text="Errors:" GridPane.rowIndex="4" GridPane.columnIndex="0" styleClass="stat-label-title"/>
+                  <Label fx:id="errorsLabel" text="0" GridPane.rowIndex="4" GridPane.columnIndex="1" styleClass="stat-label-value"/>
+                  <Label fx:id="accuracyTitleLabel" text="Error rate:" GridPane.rowIndex="5" GridPane.columnIndex="0" styleClass="stat-label-title"/>
+                  <Label fx:id="accuracyLabel" text="100%" GridPane.rowIndex="5" GridPane.columnIndex="1" styleClass="stat-label-value"/>
                 </children>
               </GridPane>
             </children>

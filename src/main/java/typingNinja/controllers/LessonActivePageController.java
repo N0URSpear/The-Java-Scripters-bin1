@@ -25,6 +25,12 @@ import typingNinja.lesson.*;
 import typingNinja.auth.Session;
 import typingNinja.SettingsDAO;
 import typingNinja.SettingsDAO.SettingsRecord;
+import typingNinja.MainMenu;
+
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
 public class LessonActivePageController {
     @FXML private HBox buttonBar;
@@ -72,6 +78,55 @@ public class LessonActivePageController {
     private EventHandler<KeyEvent> keyPressedHandler;
     private static final double DEFAULT_CHARS_PER_WORD = 5.0;
     private static final double FREE_MODE_CHARS_PER_WORD = 6.5;
+
+    private void rebuildPauseMenu() {
+        Platform.runLater(() ->
+                pauseMenu = new PauseMenu(pauseButton, metrics, hiddenInput,
+                        this::openSettingsView, this::returnToHome));
+    }
+
+    private void openSettingsView() {
+        Stage stage = pauseButton != null && pauseButton.getScene() != null
+                ? (Stage) pauseButton.getScene().getWindow() : null;
+        if (stage == null) return;
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/addressbook/Settings.fxml"));
+            Parent root = loader.load();
+            Scene scene = stage.getScene();
+            if (scene == null) {
+                scene = new Scene(root);
+                stage.setScene(scene);
+            }
+            else {
+                scene.setRoot(root);
+            }
+            stage.setTitle("Settings - Typing Ninja");
+            stage.centerOnScreen();
+            stage.setFullScreen(true);
+            stage.setFullScreenExitHint("");
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private void returnToHome() {
+        Stage stage = pauseButton != null && pauseButton.getScene() != null
+                ? (Stage) pauseButton.getScene().getWindow() : null;
+        if (stage == null) return;
+        try {
+            MainMenu mainMenu = new MainMenu();
+            Scene scene = mainMenu.buildScene(stage);
+            stage.setScene(scene);
+            stage.setTitle("Typing Ninja");
+            stage.centerOnScreen();
+            stage.setFullScreen(true);
+            stage.setFullScreenExitHint("");
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
 
     private void buildInputSectionAndStart(String passage) {
         if (keyTypedHandler != null) {
@@ -233,7 +288,7 @@ public class LessonActivePageController {
         if (prompt == null || prompt.isBlank()) {
             promptDisplayLabel.setText("--");
         } else {
-            promptDisplayLabel.setText(prompt);
+            promptDisplayLabel.setText(prompt.toUpperCase());
         }
         promptDisplayLabel.setVisible(true);
         promptDisplayLabel.setManaged(true);
@@ -272,6 +327,7 @@ public class LessonActivePageController {
         metrics.setCharsPerWord(DEFAULT_CHARS_PER_WORD);
         metrics.bindTimerLabel(timerLabel);
         metrics.bindStats(wpmLabel, errorsLabel, accuracyLabel);
+        rebuildPauseMenu();
 
         progressFeature = new ProgressBar(timeProgress);
         progressFeature.bindTo(metrics.timeRemainingProperty(), metrics.lessonSeconds());
@@ -333,6 +389,7 @@ public class LessonActivePageController {
             progressFeature = new typingNinja.lesson.ProgressBar(timeProgress);
             progressFeature.bindTo(metrics.timeRemainingProperty(), metrics.lessonSeconds());
             lessonDurationLabel.setText(durationSeconds + "s");
+            rebuildPauseMenu();
 
             String lt = latest.getLessonType();
             boolean isCustom = "CustomTopic".equalsIgnoreCase(lt);
@@ -349,6 +406,7 @@ public class LessonActivePageController {
                 freeMode = false;
                 metrics.setCharsPerWord(DEFAULT_CHARS_PER_WORD);
                 restoreStatsForStandardMode();
+                lessonTitleLabel.setText("Custom Topic");
                 showCustomPrompt(latest.getPrompt());
                 typingNinja.ai.OllamaTextService ollama = new typingNinja.ai.OllamaTextService();
                 typingNinja.ai.LocalSimpleTextService local = new typingNinja.ai.LocalSimpleTextService();
@@ -447,14 +505,17 @@ public class LessonActivePageController {
             }
         }
 
-        pauseMenu = new PauseMenu(pauseButton, metrics, hiddenInput);
+        rebuildPauseMenu();
+        if (pauseButton != null) {
+            pauseButton.getStyleClass().add("pause-button");
+        }
 
         StackPane.setAlignment(promptFlow, Pos.TOP_LEFT);
         StackPane.setAlignment(userFlow, Pos.TOP_LEFT);
         promptFlow.setLineSpacing(30);
         userFlow.setLineSpacing(30);
-        userFlow.setTranslateY(26);
-        readingStack.setPadding(new Insets(16));
+        userFlow.setTranslateY(18);
+        readingStack.setPadding(new Insets(16, 16, 8, 16));
 
         metrics.onLessonEnd(() -> {
             if (freeMode) {
