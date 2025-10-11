@@ -1,6 +1,6 @@
 package typingNinja;
 
-import com.example.addressbook.SqliteConnection;
+import typingNinja.SqliteConnection;
 
 import java.sql.Connection;
 import java.util.ArrayList;

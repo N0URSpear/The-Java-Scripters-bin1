@@ -141,7 +141,7 @@ public class SqliteResultsDAO implements IResultsDAO {
 // 需要：import com.example.addressbook.auth.Session;
     private Integer resolveCurrentUserId(Connection c) throws SQLException {
         // ① 优先使用登录会话里的用户ID
-        Integer sid = com.example.addressbook.auth.Session.getCurrentUserId(); // 若方法名不同，改成你的
+        Integer sid = typingNinja.auth.Session.getCurrentUserId(); // 若方法名不同，改成你的
         if (sid != null) return sid;
 
         // ② 无会话时回退到 Users 表里“最新”的用户（也可改成直接 return null 更严格）

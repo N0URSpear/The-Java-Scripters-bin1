@@ -1,4 +1,4 @@
-package com.example.addressbook.controllers;
+package typingNinja.controllers;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -13,10 +13,10 @@ import javafx.scene.input.*;
 import javafx.scene.text.*;
 import javafx.scene.layout.*;
 
-import com.example.addressbook.lesson.*;
-import com.example.addressbook.auth.Session;
-import com.example.addressbook.ai.AITextService;
-import com.example.addressbook.lesson.WeakKeyTracker;
+import typingNinja.lesson.*;
+import typingNinja.auth.Session;
+import typingNinja.ai.AITextService;
+import typingNinja.lesson.WeakKeyTracker;
 
 
 public class LessonActivePageController {
@@ -122,7 +122,7 @@ public class LessonActivePageController {
             metrics = new Metrics(durationSeconds);
             metrics.bindTimerLabel(timerLabel);
             metrics.bindStats(wpmLabel, errorsLabel, accuracyLabel);
-            progressFeature = new com.example.addressbook.lesson.ProgressBar(timeProgress);
+            progressFeature = new typingNinja.lesson.ProgressBar(timeProgress);
             progressFeature.bindTo(metrics.timeRemainingProperty(), metrics.lessonSeconds());
             lessonDurationLabel.setText(durationSeconds + "s");
 
@@ -134,8 +134,8 @@ public class LessonActivePageController {
                 buildInputSectionAndStart("");
             }
             else if (isCustom) {
-                com.example.addressbook.ai.OllamaTextService ollama = new com.example.addressbook.ai.OllamaTextService();
-                com.example.addressbook.ai.LocalSimpleTextService local = new com.example.addressbook.ai.LocalSimpleTextService();
+                typingNinja.ai.OllamaTextService ollama = new typingNinja.ai.OllamaTextService();
+                typingNinja.ai.LocalSimpleTextService local = new typingNinja.ai.LocalSimpleTextService();
                 int targetWords = Math.max(60, latest.getDurationMinutes() * 50); // ~50 wpm target
 
                 String promptToSend = latest.getPrompt();
@@ -209,12 +209,12 @@ public class LessonActivePageController {
                                 );
                             } catch (Exception e) {
                                 e.printStackTrace();
-                                return new com.example.addressbook.lesson.CustomPrompts().current().text();
+                                return new typingNinja.lesson.CustomPrompts().current().text();
                             }
                         })
                         .thenAccept(text -> {
                             String finalPassage = (text == null || text.isBlank())
-                                    ? new com.example.addressbook.lesson.CustomPrompts().current().text()
+                                    ? new typingNinja.lesson.CustomPrompts().current().text()
                                     : text;
                             Platform.runLater(() -> buildInputSectionAndStart(finalPassage));
                         });
@@ -222,7 +222,7 @@ public class LessonActivePageController {
             }
             else {
                 // 1a…4f fixed placeholders for now
-                String fixed = com.example.addressbook.lesson.FixedLessons.passageFor(lt);
+                String fixed = typingNinja.lesson.FixedLessons.passageFor(lt);
                 buildInputSectionAndStart(fixed);
             }
         }
