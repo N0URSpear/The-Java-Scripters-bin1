@@ -90,7 +90,7 @@ public class NinjaController {
      * @throws IOException if inputs or outputs are invalid
      */
     public void onloginClicked() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/example/addressbook/Login-view.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/typingNinja/Login-view.fxml"));
         Stage loginPopup = new Stage();
         Parent root = fxmlLoader.load();
         LoginController controller = fxmlLoader.getController();
@@ -110,7 +110,7 @@ public class NinjaController {
         }
 
         if (controller.isForgotPassword()) {
-            FXMLLoader fxmlLoader1 = new FXMLLoader(getClass().getResource("/com/example/addressbook/ForgorPassword-view.fxml"));
+            FXMLLoader fxmlLoader1 = new FXMLLoader(getClass().getResource("/typingNinja/ForgorPassword-view.fxml"));
             Stage forgotPasswordPopup = new Stage();
             Parent root1 = fxmlLoader1.load();
             forgotPasswordPopup.setTitle("Forgot Password");
@@ -128,7 +128,7 @@ public class NinjaController {
      * @throws IOException if inputs or outputs are invalid
      */
     public void onCreateAccountClicked() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/example/addressbook/AccountCreation-view.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/typingNinja/AccountCreation-view.fxml"));
         Stage AccountCreation = new Stage();
         Parent root = fxmlLoader.load();
         CreateAccountController controller = fxmlLoader.getController();
@@ -154,7 +154,7 @@ public class NinjaController {
      * @throws IOException if input or output is invalid
      */
     public void onHelpClicked() throws IOException{
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/example/addressbook/Help-view.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/typingNinja/Help-view.fxml"));
         Stage HelpPopup = new Stage();
         HelpPopup.setTitle("Help");
         HelpPopup.initModality(Modality.APPLICATION_MODAL);

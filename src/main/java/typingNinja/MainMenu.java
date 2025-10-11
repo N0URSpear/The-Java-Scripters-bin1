@@ -22,8 +22,8 @@ public class MainMenu {
     private static boolean FIRST_OPEN = true;
 
     public Scene buildScene(Stage stage) {
-        Font.loadFont(getClass().getResourceAsStream("/com/example/addressbook/fonts/Jaro-Regular.ttf"), 10);
-        Font.loadFont(getClass().getResourceAsStream("/com/example/addressbook/fonts/Inter-VariableFont.ttf"), 10);
+        Font.loadFont(getClass().getResourceAsStream("/com/example/typingNinja/fonts/Jaro-Regular.ttf"), 10);
+        Font.loadFont(getClass().getResourceAsStream("/com/example/typingNinja/fonts/Inter-VariableFont.ttf"), 10);
 
         // Top bar
         Label title = new Label("TYPING NINJA");
@@ -141,8 +141,8 @@ public class MainMenu {
         sep1.setFont(Font.font("Jaro", 40));
         sep2.setFont(Font.font("Jaro", 40));
 
-        asButton(profile, () -> switchTo(stage, "/com/example/addressbook/Profile.fxml", "Profile - Typing Ninja"));
-        asButton(settings, () -> switchTo(stage, "/com/example/addressbook/Settings.fxml", "Settings - Typing Ninja"));
+        asButton(profile, () -> switchTo(stage, "/typingNinja/Profile.fxml", "Profile - Typing Ninja"));
+        asButton(settings, () -> switchTo(stage, "/typingNinja/Settings.fxml", "Settings - Typing Ninja"));
 
         HBox bottomMenu = new HBox(40, mainMenu, sep1, profile, sep2, settings);
         bottomMenu.setAlignment(Pos.CENTER);
@@ -161,7 +161,7 @@ public class MainMenu {
 
         try {
             scene.getStylesheets().add(
-                    getClass().getResource("/com/example/addressbook/NinjaStyles.css").toExternalForm()
+                    getClass().getResource("/typingNinja/NinjaStyles.css").toExternalForm()
             );
         } catch (Exception ignored) {}
 
@@ -235,7 +235,7 @@ public class MainMenu {
     // ---------- Popups ----------
     private void openSubLesson(Stage owner, String title, String codePrefix, String[] leftTexts) {
         try {
-            FXMLLoader fxml = new FXMLLoader(getClass().getResource("/com/example/addressbook/SubLessonSelect.fxml"));
+            FXMLLoader fxml = new FXMLLoader(getClass().getResource("/typingNinja/SubLessonSelect.fxml"));
             Parent root = fxml.load();
             typingNinja.controllers.SubLessonSelectController c = fxml.getController();
             c.configure(title, codePrefix, leftTexts);
@@ -254,7 +254,7 @@ public class MainMenu {
 
     private void openCustomTopic(Stage owner) {
         try {
-            FXMLLoader fxml = new FXMLLoader(getClass().getResource("/com/example/addressbook/CustomTopicSelect.fxml"));
+            FXMLLoader fxml = new FXMLLoader(getClass().getResource("/typingNinja/CustomTopicSelect.fxml"));
             Parent root = fxml.load();
 
             Stage popup = new Stage();
@@ -271,7 +271,7 @@ public class MainMenu {
 
     private void openFreeType(Stage owner) {
         try {
-            FXMLLoader fxml = new FXMLLoader(getClass().getResource("/com/example/addressbook/FreeTypeSelect.fxml"));
+            FXMLLoader fxml = new FXMLLoader(getClass().getResource("/typingNinja/FreeTypeSelect.fxml"));
             Parent root = fxml.load();
 
             Stage popup = new Stage();

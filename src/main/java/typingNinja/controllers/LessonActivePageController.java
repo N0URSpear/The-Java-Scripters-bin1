@@ -90,7 +90,7 @@ public class LessonActivePageController {
                 ? (Stage) pauseButton.getScene().getWindow() : null;
         if (stage == null) return;
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/addressbook/Settings.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/typingNinja/Settings.fxml"));
             Parent root = loader.load();
             Scene scene = stage.getScene();
             if (scene == null) {

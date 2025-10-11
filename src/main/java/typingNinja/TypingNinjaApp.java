@@ -15,10 +15,10 @@ public class TypingNinjaApp extends Application {
     public void start(Stage stage) throws IOException {
 
         // Load Jaro font for stylesheets and FXML usage
-        Font.loadFont(getClass().getResourceAsStream("/com/example/addressbook/Fonts/Jaro-Regular-VariableFont_opsz.ttf"), 14);
+        Font.loadFont(getClass().getResourceAsStream("/typingNinja/Fonts/Jaro-Regular-VariableFont_opsz.ttf"), 14);
 
         // Load FXML
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/example/addressbook/Ninja-view.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/typingNinja/Ninja-view.fxml"));
         Parent root = fxmlLoader.load();
 
         Scene scene = new Scene(root);
