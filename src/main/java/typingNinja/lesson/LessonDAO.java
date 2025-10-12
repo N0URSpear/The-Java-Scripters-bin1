@@ -65,6 +65,19 @@ public class LessonDAO {
         }
     }
 
+    /**
+     * Deletes the lesson row if it has not been completed yet.
+     * Intended for cancelling an active lesson before completion.
+     */
+    public void deleteIfNotCompleted(int lessonId, int userId) throws SQLException {
+        String sql = "DELETE FROM Lesson WHERE LessonID = ? AND UserID = ? AND DateCompleted IS NULL";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, lessonId);
+            ps.setInt(2, userId);
+            ps.executeUpdate();
+        }
+    }
+
     public java.util.List<String> topWeakPairsForUserFromCompletedCustomLessons(int userId, int k) throws java.sql.SQLException {
         String sql = """
         SELECT WeakKeys

@@ -89,6 +89,8 @@ public class SettingsController {
         stage.setScene(scene);
         stage.setTitle("Typing Ninja");
         stage.centerOnScreen();
+        stage.setFullScreen(true);
+        stage.setFullScreenExitHint("");
     }
 
     private void switchTo(String fxmlPath, String title) {
@@ -104,6 +106,8 @@ public class SettingsController {
             }
             stage.setTitle(title);
             stage.centerOnScreen();
+            stage.setFullScreen(true);
+            stage.setFullScreenExitHint("");
         } catch (Exception ex) {
             ex.printStackTrace();
         }

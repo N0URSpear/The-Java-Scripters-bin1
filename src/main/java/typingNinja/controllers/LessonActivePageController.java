@@ -86,6 +86,8 @@ public class LessonActivePageController {
     }
 
     private void openSettingsView() {
+        // Cancel active lesson by removing its DB row if not completed
+        cancelActiveLesson();
         Stage stage = pauseButton != null && pauseButton.getScene() != null
                 ? (Stage) pauseButton.getScene().getWindow() : null;
         if (stage == null) return;
@@ -111,6 +113,8 @@ public class LessonActivePageController {
     }
 
     private void returnToHome() {
+        // Cancel active lesson by removing its DB row if not completed
+        cancelActiveLesson();
         Stage stage = pauseButton != null && pauseButton.getScene() != null
                 ? (Stage) pauseButton.getScene().getWindow() : null;
         if (stage == null) return;
@@ -125,6 +129,16 @@ public class LessonActivePageController {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+        }
+    }
+
+    private void cancelActiveLesson() {
+        if (currentLessonId != null) {
+            try {
+                lessonDAO.deleteIfNotCompleted(currentLessonId, currentUserId);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
 

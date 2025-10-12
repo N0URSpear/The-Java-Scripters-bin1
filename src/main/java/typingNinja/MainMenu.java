@@ -227,6 +227,8 @@ public class MainMenu {
             }
             if (title != null && !title.isEmpty()) stage.setTitle(title);
             stage.centerOnScreen();
+            stage.setFullScreen(true);
+            stage.setFullScreenExitHint("");
         } catch (Exception ex) {
             ex.printStackTrace();
         }

@@ -4,7 +4,7 @@
   -fx-text-fill: white;
 }
 .toolbar { -fx-background-color: #1b174b; }
-.pause-button { -fx-background-color: #2EFF04; -fx-text-fill: #0a1f05; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 8 22; -fx-border-color: rgba(0,0,0,0.2); -fx-border-radius: 20; -fx-border-width: 1; }
+.pause-button { -fx-background-color: #2EFF04; -fx-text-fill: #0a1f05; -fx-font-weight: bold; -fx-font-size: 28px; -fx-background-radius: 24; -fx-padding: 12 32; -fx-border-color: rgba(0,0,0,0.2); -fx-border-radius: 24; -fx-border-width: 1; }
 .pause-button:hover { -fx-background-color: #29d200; }
 .pause-button:pressed { -fx-background-color: #23b100; }
 .timer { -fx-text-fill: #a0ff88; -fx-font-weight: 800; -fx-font-size: 24px; }

@@ -212,6 +212,14 @@ public class ForgotPasswordController {
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
+        try {
+            if (getUsername != null && getUsername.getScene() != null) {
+                Stage owner = (Stage) getUsername.getScene().getWindow();
+                alert.initOwner(owner);
+                alert.initModality(javafx.stage.Modality.WINDOW_MODAL);
+                alert.initStyle(javafx.stage.StageStyle.UNDECORATED);
+            }
+        } catch (Exception ignored) {}
         alert.showAndWait();
     }
 

@@ -183,6 +183,14 @@ public class CreateAccountController {
         alert.setTitle("Invalid Input");
         alert.setHeaderText(null);
         alert.setContentText(message);
+        try {
+            if (usernameField != null && usernameField.getScene() != null) {
+                Stage owner = (Stage) usernameField.getScene().getWindow();
+                alert.initOwner(owner);
+                alert.initModality(javafx.stage.Modality.WINDOW_MODAL);
+                alert.initStyle(javafx.stage.StageStyle.UNDECORATED);
+            }
+        } catch (Exception ignored) {}
         alert.showAndWait();
     }
 
@@ -198,6 +206,14 @@ public class CreateAccountController {
         alert.setTitle("Success");
         alert.setHeaderText(null);
         alert.setContentText("Account created successfully!");
+        try {
+            if (usernameField != null && usernameField.getScene() != null) {
+                Stage owner = (Stage) usernameField.getScene().getWindow();
+                alert.initOwner(owner);
+                alert.initModality(javafx.stage.Modality.WINDOW_MODAL);
+                alert.initStyle(javafx.stage.StageStyle.UNDECORATED);
+            }
+        } catch (Exception ignored) {}
         alert.showAndWait();
     }
 

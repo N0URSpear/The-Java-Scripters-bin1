@@ -94,6 +94,8 @@ public class CustomTopicSelectController {
             owner.getScene().setRoot(root);
             owner.setTitle("Typing - Typing Ninja");
             owner.centerOnScreen();
+            owner.setFullScreen(true);
+            owner.setFullScreenExitHint("");
 
             popup.close();
         } catch (Exception ex) {

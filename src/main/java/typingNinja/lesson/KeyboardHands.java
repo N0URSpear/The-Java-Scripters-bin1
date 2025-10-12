@@ -2,6 +2,7 @@ package typingNinja.lesson;
 
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import java.net.URL;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
@@ -90,7 +91,7 @@ public class KeyboardHands {
         boolean needShift = requiresShift(ch);
 
         lightForChar(base);
-        if (handsLabel != null) handsLabel.setText(fingerTextFor(ch));
+        updateHandsVisual(fingerTextFor(ch));
 
         for (Button s : shiftKeys) s.getStyleClass().remove("keycap-lit");
         if (needShift) {
@@ -113,6 +114,13 @@ public class KeyboardHands {
         if (lit != null) lit.getStyleClass().remove("keycap-lit");
         lit = null;
         for (Button s : shiftKeys) s.getStyleClass().remove("keycap-lit");
+        if (handsRegion != null) {
+            handsRegion.setStyle("");
+        }
+        if (handsLabel != null) {
+            handsLabel.setVisible(false);
+            handsLabel.setText("");
+        }
     }
 
     private String mapCharToKey(char ch) {
@@ -174,5 +182,42 @@ public class KeyboardHands {
         if ("9ol.".contains(s)) return "right 4";
         if ("0p;/-=[]\\'".contains(s)) return "right 5";
         return "right 2";
+    }
+
+    /**
+     * Shows an image (if available) in the handsRegion for the given finger descriptor,
+     * e.g. "left 1" .. "left 5" and "right 1" .. "right 5". Falls back to text label if not found.
+     */
+    private void updateHandsVisual(String descriptor) {
+        if (handsRegion == null) return;
+        String base = "/typingNinja/Images/";
+        String[] exts = { ".png", ".jpg", ".jpeg", ".gif" };
+        URL found = null;
+        for (String ext : exts) {
+            String candidate = base + descriptor + ext; // descriptor contains space (e.g., "right 1")
+            URL u = getClass().getResource(candidate);
+            if (u != null) { found = u; break; }
+        }
+        if (found != null) {
+            String url = found.toExternalForm();
+            String style = "-fx-background-color: transparent;" +
+                    "-fx-background-image: url('" + url + "');" +
+                    "-fx-background-repeat: no-repeat;" +
+                    "-fx-background-position: center;" +
+                    "-fx-background-size: contain;";
+            handsRegion.setStyle(style);
+            if (handsLabel != null) {
+                handsLabel.setVisible(false);
+                handsLabel.setManaged(false);
+                handsLabel.setText("");
+            }
+        } else {
+            // Fallback: keep showing text if no image asset is present
+            if (handsLabel != null) {
+                handsLabel.setVisible(true);
+                handsLabel.setManaged(true);
+                handsLabel.setText(descriptor);
+            }
+        }
     }
 }

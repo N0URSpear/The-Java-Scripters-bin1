@@ -83,7 +83,7 @@
           <VBox spacing="8" alignment="CENTER" GridPane.columnIndex="2">
             <children>
               <Region fx:id="handsRegion" prefWidth="180" prefHeight="140" minHeight="0" styleClass="hands-placeholder"/>
-              <Label fx:id="handsLabel" text="Hands (stub)"/>
+              <Label fx:id="handsLabel" text="" visible="false" managed="false"/>
             </children>
           </VBox>
         </children>
