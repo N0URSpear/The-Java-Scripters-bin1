@@ -129,9 +129,9 @@
     <bottom>
         <HBox alignment="CENTER" spacing="40">
             <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
-            <Button text="MAIN MENU" styleClass="footer-button"/>
-            <Button text="PROFILE"   styleClass="footer-button-active"/>
-            <Button text="SETTINGS"  styleClass="footer-button"/>
+            <Button fx:id="mainMenuBtn" text="MAIN MENU" styleClass="footer-button"/>
+            <Button fx:id="profileBtn"  text="PROFILE"   styleClass="footer-button-active"/>
+            <Button fx:id="settingsBtn" text="SETTINGS"  styleClass="footer-button"/>
         </HBox>
     </bottom>
 </BorderPane>
