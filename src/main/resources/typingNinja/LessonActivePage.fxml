@@ -80,9 +80,9 @@
             </children>
           </VBox>
           <GridPane fx:id="keyboardGrid" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS" maxWidth="Infinity" maxHeight="Infinity" hgap="6" vgap="6"/>
-          <VBox spacing="8" alignment="CENTER" GridPane.columnIndex="2">
+          <VBox spacing="8" alignment="CENTER" GridPane.columnIndex="2" GridPane.vgrow="ALWAYS" GridPane.hgrow="ALWAYS" maxWidth="Infinity" maxHeight="Infinity" fillWidth="true">
             <children>
-              <Region fx:id="handsRegion" prefWidth="180" prefHeight="140" minHeight="0" styleClass="hands-placeholder"/>
+              <Region fx:id="handsRegion" prefWidth="180" prefHeight="140" minHeight="0" maxWidth="Infinity" maxHeight="Infinity" VBox.vgrow="ALWAYS" styleClass="hands-placeholder"/>
               <Label fx:id="handsLabel" text="" visible="false" managed="false"/>
             </children>
           </VBox>

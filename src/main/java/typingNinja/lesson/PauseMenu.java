@@ -18,6 +18,7 @@ import javafx.scene.control.ContentDisplay;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -64,7 +65,7 @@ public class PauseMenu {
             render();
         }
         else {
-            startResumeCountdown();
+            startResumeCountdownUpper();
         }
     }
 
@@ -78,6 +79,7 @@ public class PauseMenu {
         }
         if (statusLabel != null) statusLabel.setText("");
         enableButtons(true);
+        overlayStage.centerOnScreen();
         overlayStage.show();
         overlayStage.toFront();
     }
@@ -92,14 +94,11 @@ public class PauseMenu {
 
         stage.setResizable(false);
 
-        Rectangle2D bounds = Screen.getPrimary().getVisualBounds();
-        stage.setWidth(bounds.getWidth() * 0.7);
-        stage.setHeight(bounds.getHeight() * 0.5);
-        stage.centerOnScreen();
+        // size will be determined by content; we'll center after sizing
 
         BorderPane root = new BorderPane();
-        // Solid project purple (no transparency) + outer padding
-        root.setStyle("-fx-background-color: #140B38; -fx-background-radius: 24; -fx-padding: 40;");
+        // Solid project purple (no transparency) + tighter outer padding
+        root.setStyle("-fx-background-color: #140B38; -fx-background-radius: 24; -fx-padding: 24;");
 
         // Content row: image immediately next to buttons (no spacing)
         javafx.scene.layout.HBox row = new javafx.scene.layout.HBox(0);
@@ -118,32 +117,50 @@ public class PauseMenu {
         VBox leftBox = new VBox(10);
         leftBox.setAlignment(Pos.CENTER_LEFT);
         statusLabel = new Label();
-        statusLabel.setStyle("-fx-text-fill: #ffffff; -fx-font-size: 24px; -fx-font-weight: 700;");
+        statusLabel.setStyle("-fx-text-fill: #ffffff; -fx-font-size: 24px; -fx-font-weight: 900;");
+        statusLabel.setMaxWidth(Double.MAX_VALUE);
+        statusLabel.setWrapText(true);
+        statusLabel.setTextAlignment(TextAlignment.CENTER);
+        statusLabel.setAlignment(Pos.CENTER);
         leftBox.getChildren().addAll(logoView, statusLabel);
 
-        // Vertical buttons with no horizontal gap from logo
+        // Vertical buttons column with header
         VBox buttons = new VBox(18);
         buttons.setAlignment(Pos.CENTER_LEFT);
-        resumeButton = createOverlayButton("Resume", "resume.png");
-        resumeButton.setOnAction(e -> startResumeCountdown());
-        settingsButton = createOverlayButton("Settings", "settings.png");
+        Label pausedHeader = new Label("LESSON PAUSED");
+        pausedHeader.setStyle("-fx-text-fill: #ffffff; -fx-font-size: 28px; -fx-font-weight: 900;");
+        // Use the provided icon filenames from resources
+        resumeButton = createOverlayButton("Resume", "play_button.png");
+        resumeButton.setOnAction(e -> startResumeCountdownUpper());
+        settingsButton = createOverlayButton("Settings", "settings_button.png");
         settingsButton.setOnAction(e -> {
             resumeImmediately();
             if (settingsAction != null) settingsAction.run();
         });
-        homeButton = createOverlayButton("Home", "home.png");
+        homeButton = createOverlayButton("Home", "home_button.png");
         homeButton.setOnAction(e -> {
             resumeImmediately();
             if (homeAction != null) homeAction.run();
         });
-        buttons.getChildren().addAll(resumeButton, settingsButton, homeButton);
-
+        buttons.getChildren().addAll(pausedHeader, resumeButton, settingsButton, homeButton);
+        // Place logo immediately adjacent to buttons (no spacing) and set fixed size relative to screen
         row.getChildren().addAll(leftBox, buttons);
+        try {
+            Rectangle2D vb = Screen.getPrimary().getVisualBounds();
+            double targetH = vb.getHeight() * 0.40;
+            double targetW = vb.getWidth() * 0.35;
+            logoView.setPreserveRatio(true);
+            logoView.setFitHeight(targetH);
+            logoView.setFitWidth(targetW);
+            logoView.setSmooth(true);
+        } catch (Exception ignored) {}
         root.setCenter(row);
 
         Scene scene = new Scene(root);
         scene.setFill(Color.TRANSPARENT);
         stage.setScene(scene);
+        stage.sizeToScene();
+        stage.centerOnScreen();
         stage.setOnCloseRequest(e -> {
             e.consume();
             resumeImmediately();
@@ -151,8 +168,10 @@ public class PauseMenu {
         return stage;
     }
 
+    // removed height-binding helper to avoid layout oscillations
+
     private Button createOverlayButton(String text, String iconFileName) {
-        Button btn = new Button(text);
+        Button btn = new Button(text.toUpperCase());
         btn.setPrefWidth(260);
         btn.setStyle("-fx-background-color: #2EFF04; -fx-text-fill: #0a1f05; -fx-font-size: 18px; -fx-font-weight: 700; " +
                 "-fx-background-radius: 18; -fx-padding: 12 24; -fx-border-color: rgba(0,0,0,0.25); -fx-border-radius: 18; -fx-border-width: 1;");
@@ -209,6 +228,23 @@ public class PauseMenu {
         if (resumeButton != null) resumeButton.setDisable(!enabled);
         if (settingsButton != null) settingsButton.setDisable(!enabled);
         if (homeButton != null) homeButton.setDisable(!enabled);
+    }
+
+    // Uppercase, centered resume countdown text
+    private void startResumeCountdownUpper() {
+        if (resumeTimeline != null) resumeTimeline.stop();
+        enableButtons(false);
+        statusLabel.setText("RESUMING IN 3...");
+        resumeTimeline = new Timeline(
+                new KeyFrame(Duration.seconds(1), e -> statusLabel.setText("RESUMING IN 2...")),
+                new KeyFrame(Duration.seconds(2), e -> statusLabel.setText("RESUMING IN 1...")),
+                new KeyFrame(Duration.seconds(3), e -> {
+                    statusLabel.setText("");
+                    resumeFromOverlay();
+                })
+        );
+        resumeTimeline.setCycleCount(1);
+        resumeTimeline.playFromStart();
     }
 
     private void resumeImmediately() {

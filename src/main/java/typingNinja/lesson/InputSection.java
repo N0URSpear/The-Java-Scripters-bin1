@@ -21,13 +21,15 @@ public class InputSection {
     private final WeakKeyTracker weakKeys;
     private final boolean[] errorCounted;
     private final Consumer<Text> cursorListener;
+    private final Runnable onComplete;
     private final boolean[] typedCorrect;
 
     public char peekExpected() { return index < passage.length() ? passage.charAt(index) : '\0'; }
 
     public InputSection(TextFlow promptFlow, TextFlow userFlow, TextArea hiddenInput,
                         KeyboardHands keyboard, Metrics metrics, String passage,
-                        WeakKeyTracker weakKeys, Consumer<Text> cursorListener) {
+                        WeakKeyTracker weakKeys, Consumer<Text> cursorListener,
+                        Runnable onComplete) {
         this.promptFlow = promptFlow;
         this.userFlow = userFlow;
         this.hiddenInput = hiddenInput;
@@ -39,6 +41,7 @@ public class InputSection {
         this.cursor = new Text("_");
         this.cursor.getStyleClass().addAll("cursor", "mono");
         this.cursorListener = cursorListener;
+        this.onComplete = (onComplete != null) ? onComplete : () -> {};
         this.typedCorrect = new boolean[passage.length()];
         buildPrompt();
         userFlow.getChildren().clear();
@@ -123,7 +126,6 @@ public class InputSection {
                 keyboard.highlightExpected(peekExpected());
             }
             updateCursor();
-            keyboard.dim();
             e.consume();
         }
         else if (code == KeyCode.ENTER) {
@@ -241,8 +243,18 @@ public class InputSection {
 
     private void handleCompletionIfNeeded() {
         if (index >= passage.length()) {
-            hiddenInput.setDisable(true);
-            metrics.endLessonNow();
+            // Notify controller; controller decides whether to end or keep lesson active
+            try { onComplete.run(); } catch (Exception ignored) {}
         }
+    }
+
+    public boolean isComplete() { return index >= passage.length(); }
+
+    public int getPassageLength() { return passage.length(); }
+
+    public int getCorrectPositions() {
+        int c = 0;
+        for (int i = 0; i < typedCorrect.length; i++) if (typedCorrect[i]) c++;
+        return c;
     }
 }

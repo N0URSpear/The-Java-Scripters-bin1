@@ -204,7 +204,8 @@ public class KeyboardHands {
                     "-fx-background-image: url('" + url + "');" +
                     "-fx-background-repeat: no-repeat;" +
                     "-fx-background-position: center;" +
-                    "-fx-background-size: contain;";
+                    "-fx-background-size: 90% 90%;" +
+                    "-fx-background-radius: 16; -fx-border-radius: 16;";
             handsRegion.setStyle(style);
             if (handsLabel != null) {
                 handsLabel.setVisible(false);

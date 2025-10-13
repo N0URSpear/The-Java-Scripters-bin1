@@ -79,6 +79,54 @@ public class LessonActivePageController {
     private static final double DEFAULT_CHARS_PER_WORD = 5.0;
     private static final double FREE_MODE_CHARS_PER_WORD = 6.5;
 
+    private boolean finishedByTyping = false;
+    private boolean lessonCompleteSoundEnabled = false;
+
+    private void onReachedEndOfText() {
+        // User reached end of passage before timer ended
+        finishedByTyping = true;
+        if (inputSection == null) return;
+        int passageLen = inputSection.getPassageLength();
+        int correctPos = inputSection.getCorrectPositions();
+        double percentCorrectOfPassage = passageLen > 0 ? (correctPos * 100.0 / passageLen) : 0.0;
+        int err = metrics.getErrors();
+        boolean perfect = (err == 0 && correctPos == passageLen);
+        double accuracyVal = metrics.getAccuracyPercent();
+        boolean passWithErrors = (percentCorrectOfPassage > 40.0 && accuracyVal >= 40.0);
+
+        if (perfect || passWithErrors) {
+            // End timer and trigger onLessonEnd handler
+            Platform.runLater(metrics::endLessonNow);
+        } else {
+            // Too many errors; keep lesson running and show a fading prompt
+            Platform.runLater(() -> showFadingErrorBanner("TOO MANY ERRORS — CORRECT AND CONTINUE"));
+        }
+    }
+
+    private void showFadingErrorBanner(String message) {
+        Label banner = new Label(message);
+        banner.setStyle("-fx-background-color: rgba(205,25,25,0.95); -fx-text-fill: white; -fx-font-weight: 900; -fx-font-size: 20px; -fx-padding: 12 18; -fx-background-radius: 12; -fx-border-radius: 12;");
+        banner.setMouseTransparent(true);
+        StackPane.setAlignment(banner, Pos.TOP_CENTER);
+        readingStack.getChildren().add(banner);
+        javafx.animation.FadeTransition ft = new javafx.animation.FadeTransition(javafx.util.Duration.millis(2200), banner);
+        ft.setFromValue(1.0);
+        ft.setToValue(0.0);
+        ft.setOnFinished(e -> readingStack.getChildren().remove(banner));
+        ft.play();
+    }
+
+    private void playCompletionSoundIfEnabled() {
+        if (!lessonCompleteSoundEnabled) return;
+        try {
+            java.net.URL u = getClass().getResource("/typingNinja/Sounds/lesson_complete.mp3");
+            if (u != null) {
+                javafx.scene.media.AudioClip clip = new javafx.scene.media.AudioClip(u.toExternalForm());
+                clip.play();
+            }
+        } catch (Exception ignored) {}
+    }
+
     private void rebuildPauseMenu() {
         Platform.runLater(() ->
                 pauseMenu = new PauseMenu(pauseButton, metrics, hiddenInput,
@@ -155,6 +203,7 @@ public class LessonActivePageController {
         hiddenInput.clear();
         hiddenInput.setDisable(false);
 
+        finishedByTyping = false;
         if (freeMode) {
             Text message = new Text("Free typing mode — type anything you like.");
             message.getStyleClass().addAll("prompt-char", "mono");
@@ -167,7 +216,8 @@ public class LessonActivePageController {
         } else {
             inputSection = new InputSection(
                     promptFlow, userFlow, hiddenInput, keyboardHands, metrics, passage, weakKeyTracker,
-                    this::ensureCursorVisible
+                    this::ensureCursorVisible,
+                    this::onReachedEndOfText
             );
             inputSection.setStrictMode(strictModePreferred);
             keyboardHands.highlightExpected(inputSection.peekExpected());
@@ -194,7 +244,9 @@ public class LessonActivePageController {
             if (currentLessonId != null) {
                 try { lessonDAO.markStarted(currentLessonId, currentUserId); } catch (Exception ex) { ex.printStackTrace(); }
             }
-            if (!freeMode && inputSection != null) {
+            boolean timerExpired = metrics.timeRemainingProperty().get() <= 0;
+
+            if (!freeMode && inputSection != null && !timerExpired) {
                 keyboardHands.highlightExpected(inputSection.peekExpected());
             } else {
                 keyboardHands.dim();
@@ -355,6 +407,7 @@ public class LessonActivePageController {
         currentUserId = Session.getCurrentUserId();
         SettingsRecord settings = settingsDAO.fetch(currentUserId);
         strictModePreferred = settings.typingErrors;
+        lessonCompleteSoundEnabled = settings.lessonCompleteSound;
 
         readingScroll.setFitToWidth(true);
         readingScroll.setPannable(false);
@@ -528,7 +581,7 @@ public class LessonActivePageController {
         StackPane.setAlignment(userFlow, Pos.TOP_LEFT);
         promptFlow.setLineSpacing(30);
         userFlow.setLineSpacing(30);
-        userFlow.setTranslateY(18);
+        userFlow.setTranslateY(30);
         readingStack.setPadding(new Insets(16, 16, 8, 16));
 
         metrics.onLessonEnd(() -> {
@@ -555,25 +608,80 @@ public class LessonActivePageController {
             System.out.println("Top-5 pairs stored to DB: " + weakPairs);
             System.out.println("--------------------------------\n");
 
-            if (currentLessonId != null) {
-                try { lessonDAO.markCompleted(
-                        currentLessonId,
-                        currentUserId,
-                        star,
-                        wpmVal,
-                        accuracyVal,
-                        errorCount,
-                        weakPairs
-                );
+            boolean completed = false;
+            String popupTitle;
+            String popupMsg;
+            Alert.AlertType popupType;
+
+            boolean timerExpired = (!freeMode) && metrics.timeRemainingProperty().get() <= 0;
+
+            if (!freeMode && inputSection != null) {
+                int passageLen = inputSection.getPassageLength();
+                int correctPos = inputSection.getCorrectPositions();
+                double percentCorrectOfPassage = passageLen > 0 ? (correctPos * 100.0 / passageLen) : 0.0;
+
+                if (finishedByTyping) {
+                    boolean perfect = (errorCount == 0 && correctPos == passageLen);
+                    boolean passWithErrors = (percentCorrectOfPassage > 40.0 && accuracyVal >= 40.0);
+
+                    if (perfect) {
+                        completed = true;
+                        popupTitle = "Perfect!";
+                        popupMsg = "You completed the lesson with no errors and within time.";
+                        popupType = Alert.AlertType.INFORMATION;
+                    } else if (passWithErrors) {
+                        completed = true;
+                        popupTitle = "Done (With Errors)";
+                        popupMsg = String.format("Completed with %.0f%% accuracy. Keep practicing!", accuracyVal);
+                        popupType = Alert.AlertType.WARNING;
+                    } else {
+                        completed = false;
+                        popupTitle = "Not Enough Correct";
+                        popupMsg = "You must correctly type more than 40% of the prompt to complete.";
+                        popupType = Alert.AlertType.ERROR;
+                    }
+                } else {
+                    popupTitle = "";
+                    popupMsg = "";
+                    popupType = Alert.AlertType.INFORMATION;
                 }
-                catch (Exception ex) { ex.printStackTrace(); }
+            } else {
+                // Timer expired or free mode ended
+                completed = true;
+                popupTitle = timerExpired ? "Time's Up" : "Session Ended";
+                popupMsg = timerExpired ? "You ran out of time. Progress has been saved." : "Free typing session ended.";
+                popupType = timerExpired ? Alert.AlertType.ERROR : Alert.AlertType.INFORMATION;
             }
 
+            
+
+            if (completed && currentLessonId != null) {
+                try {
+                    lessonDAO.markCompleted(
+                            currentLessonId,
+                            currentUserId,
+                            star,
+                            wpmVal,
+                            accuracyVal,
+                            errorCount,
+                            weakPairs
+                    );
+                } catch (Exception ex) { ex.printStackTrace(); }
+            }
+
+            boolean finalCompleted = completed;
             Platform.runLater(() -> {
-                Alert a = new Alert(Alert.AlertType.INFORMATION, "You won! Lesson complete.");
+                if (finalCompleted) {
+                    // Play completion sound before showing the popup
+                    playCompletionSoundIfEnabled();
+                }
+                Alert a = new Alert(popupType, popupMsg);
                 a.setHeaderText(null);
-                a.setTitle("Lesson");
+                a.setTitle(popupTitle);
                 a.showAndWait();
+                if (finalCompleted) {
+                    returnToHome();
+                }
             });
         });
     }
