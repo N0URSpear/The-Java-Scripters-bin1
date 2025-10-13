@@ -27,6 +27,8 @@ public class CongratulationsScene {
 
     // 设计基准
     private static final double DESIGN_W = 1920, DESIGN_H = 1080;
+    //set the size in to a veriable
+
     // 颜色与字体
     private static final String BG = "#140B38", GREEN = "#2EFF04", JARO = "/fonts/Jaro-Regular.ttf";
 
@@ -82,17 +84,19 @@ public class CongratulationsScene {
         // 标题
         Font jaro180 = loadFont(JARO, TITLE_SIZE, Font.font("System", FontWeight.EXTRA_BOLD, TITLE_SIZE));
         Label title = label("CONGRATULATIONS", jaro180, Color.WHITE, TITLE_X, TITLE_Y);
+        title.setFont(Font.font("Jaro", 180));
+
 
         // 两行说明文字
-        Label redHint = label("Red indicates error frequency", Font.font("System", TEXT_SIZE), Color.WHITE, RED_HINT_X, RED_HINT_Y);
-        Label prev10  = label("Previous 10 results for this lesson", Font.font("System", TEXT_SIZE), Color.WHITE, PREV10_X,  PREV10_Y);
+        Label redHint = label("Red indicates error frequency", Font.font("Jaro", TEXT_SIZE), Color.WHITE, RED_HINT_X, RED_HINT_Y);
+        Label prev10  = label("Previous 10 results for this lesson", Font.font("Jaro", TEXT_SIZE), Color.WHITE, PREV10_X,  PREV10_Y);
 
         // 白框 + 文案
         Rectangle wpmBox = whiteBox(WPM_X, WPM_Y);
-        Label wpmLabel   = label("Words per minute", Font.font("System", 28), Color.BLACK, WPM_X + 19, WPM_Y + 10);
+        Label wpmLabel   = label("Words per minute", Font.font("Jaro", 28), Color.BLACK, WPM_X + 19, WPM_Y + 10);
 
         Rectangle accBox = whiteBox(ACC_X, ACC_Y);
-        Label accLabel   = label("Accuracy", Font.font("System", 28), Color.BLACK, ACC_X + 19, ACC_Y + 10);
+        Label accLabel   = label("Accuracy", Font.font("Jaro", 28), Color.BLACK, ACC_X + 19, ACC_Y + 10);
 
         // 读取数据库最新成绩，覆盖初始文案
         ResultsBridge.getLatest().ifPresent(latest -> {

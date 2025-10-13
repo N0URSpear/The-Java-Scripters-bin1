@@ -16,16 +16,16 @@ public final class Keyboard {
 
     private Keyboard() {}
 
-    // 简化的 QWERTY 布局（等宽键）
+
     private static final String[][] ROWS = new String[][]{
             {"0","1","2","3","4","5","6","7","8","9"} ,// 顶部数字行（按 0..9 顺序）
             {"Q","W","E","R","T","Y","U","I","O","P"},
             {"A","S","D","F","G","H","J","K","L", ";"},
             {"Z","X","C","V","B","N","M", ",", "."},
-            {" "} // Space // 空格（宽度与其他键相同；如需加宽可另说）
+            {" "}
     };
 
-    // 行的水平偏移（全 0 = 不错列，整齐对齐）
+
     private static final double[] ROW_OFFSET_IN_KEYW = new double[]{
             0.0, 0.0, 0.0, 0.0
     };
@@ -40,7 +40,6 @@ public final class Keyboard {
      */
 
     public static Node create(double width, double height, Map<String, Integer> counts) {
-        // 背板
         Rectangle bg = new Rectangle(width, height);
         bg.setArcWidth(32);
         bg.setArcHeight(32);
@@ -53,9 +52,9 @@ public final class Keyboard {
         keysLayer.setMaxSize(width, height);
 
         // 布局参数
-        double pad  = 14;  // 外边距
-        double gapX = 6;   // 列间距
-        double gapY = 8;   // 行间距
+        double pad  = 14;
+        double gapX = 6;
+        double gapY = 8;
         int rows = ROWS.length;
 
         // 统计总错误数（用于百分比）。对 null 做保护。

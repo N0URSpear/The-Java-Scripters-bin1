@@ -159,7 +159,7 @@ public class CertificatesScene {
         design.setMinSize(DESIGN_W, DESIGN_H);
         design.setMaxSize(DESIGN_W, DESIGN_H);
 
-        Font jaro180 = loadFont(JARO, TITLE_SIZE, Font.font("System", TITLE_SIZE));
+        Font jaro180 = loadFont(JARO, TITLE_SIZE, Font.font("Jaro", TITLE_SIZE));
         Label title  = label("CERTIFICATES", jaro180, Color.WHITE, TITLE_X, TITLE_Y);
 
         // ScrollPane + 内容
@@ -201,6 +201,7 @@ public class CertificatesScene {
         backBtn.setPrefWidth(140);
         backBtn.setPrefHeight(58);
         backBtn.setStyle("-fx-background-color: " + GREEN + "; -fx-background-radius: 10;");
+        backBtn.setFont(Font.font("Jaro", 40));
         backBtn.setOnAction(e -> stage.setScene(CongratulationsScene.createScene(stage)));
 
         // 底部 3 个文字按钮
