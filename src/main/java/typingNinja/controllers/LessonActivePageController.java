@@ -6,7 +6,6 @@ import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -25,6 +24,7 @@ import typingNinja.lesson.*;
 import typingNinja.auth.Session;
 import typingNinja.SettingsDAO;
 import typingNinja.SettingsDAO.SettingsRecord;
+import typingNinja.CongratulationsScene;
 import typingNinja.MainMenu;
 
 import javafx.fxml.FXMLLoader;
@@ -268,6 +268,26 @@ public class LessonActivePageController {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+        }
+    }
+
+    private void openResultsView() {
+        Stage stage = pauseButton != null && pauseButton.getScene() != null
+                ? (Stage) pauseButton.getScene().getWindow()
+                : (hiddenInput != null && hiddenInput.getScene() != null)
+                    ? (Stage) hiddenInput.getScene().getWindow()
+                    : null;
+        if (stage == null) return;
+        try {
+            Scene scene = CongratulationsScene.createScene(stage);
+            stage.setScene(scene);
+            stage.setTitle("Lesson Results - Typing Ninja");
+            stage.centerOnScreen();
+            stage.setFullScreen(true);
+            stage.setFullScreenExitHint("");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            returnToHome();
         }
     }
 
@@ -709,11 +729,7 @@ public class LessonActivePageController {
             System.out.println("--------------------------------\n");
 
             boolean completed = false;
-            boolean shouldReturnHome = false;
-            String popupTitle;
-            String popupMsg;
-            Alert.AlertType popupType;
-
+            boolean showResults = false;
             boolean timerExpired = (!freeMode) && metrics.timeRemainingProperty().get() <= 0;
 
             if (!freeMode && inputSection != null) {
@@ -723,41 +739,25 @@ public class LessonActivePageController {
 
                 if (timerExpired) {
                     completed = true;
-                    popupTitle = "Time's Up";
-                    popupMsg = "You ran out of time. Progress has been saved.";
-                    popupType = Alert.AlertType.ERROR;
-                    shouldReturnHome = true;
+                    showResults = true;
                 } else if (finishedByTyping) {
                     boolean perfect = (errorCount == 0 && correctPos == passageLen);
                     boolean passWithErrors = (percentCorrectOfPassage > 40.0 && accuracyVal >= 40.0);
 
                     if (perfect) {
                         completed = true;
-                        popupTitle = "Perfect!";
-                        popupMsg = "You completed the lesson with no errors and within time.";
-                        popupType = Alert.AlertType.INFORMATION;
+                        showResults = true;
                     } else if (passWithErrors) {
                         completed = true;
-                        popupTitle = "Done (With Errors)";
-                        popupMsg = String.format("Completed with %.0f%% accuracy. Keep practicing!", accuracyVal);
-                        popupType = Alert.AlertType.WARNING;
+                        showResults = true;
                     } else {
                         completed = false;
-                        popupTitle = "Not Enough Correct";
-                        popupMsg = "You must correctly type more than 40% of the prompt to complete.";
-                        popupType = Alert.AlertType.ERROR;
                     }
-                } else {
-                    popupTitle = "";
-                    popupMsg = "";
-                    popupType = Alert.AlertType.INFORMATION;
                 }
             } else {
                 // Timer expired or free mode ended
                 completed = true;
-                popupTitle = timerExpired ? "Time's Up" : "Session Ended";
-                popupMsg = timerExpired ? "You ran out of time. Progress has been saved." : "Free typing session ended.";
-                popupType = timerExpired ? Alert.AlertType.ERROR : Alert.AlertType.INFORMATION;
+                showResults = true;
             }
 
             
@@ -777,19 +777,15 @@ public class LessonActivePageController {
             }
 
             boolean finalCompleted = completed;
-            boolean finalShouldReturnHome = shouldReturnHome;
             boolean finalTimedOut = timerExpired;
+            boolean finalShowResults = showResults;
             Platform.runLater(() -> {
-                if (finalCompleted && !finalTimedOut) {
-                    // Play completion sound before showing the popup
-                    playCompletionSoundIfEnabled();
-                }
-                Alert a = new Alert(popupType, popupMsg);
-                a.setHeaderText(null);
-                a.setTitle(popupTitle);
-                a.showAndWait();
-                if (finalCompleted || finalShouldReturnHome) {
-                    returnToHome();
+                if (finalShowResults) {
+                    if (finalCompleted && !finalTimedOut) {
+                        // Play completion sound for successful lessons
+                        playCompletionSoundIfEnabled();
+                    }
+                    openResultsView();
                 }
             });
         });
