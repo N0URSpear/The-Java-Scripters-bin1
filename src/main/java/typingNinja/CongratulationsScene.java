@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import typingNinja.auth.Session;
+
 
 public class CongratulationsScene {
 
@@ -143,46 +145,25 @@ public class CongratulationsScene {
 
 // 键盘
         Map<String, Integer> heat = new HashMap<>();
-        heat.put("Q", 9);
-        heat.put("W", 0);
-        heat.put("E", 0);
-        heat.put("R", 6);
-        heat.put("T", 50);
-        heat.put("Y", 20);
-        heat.put("U", 0);
-        heat.put("I", 0);
-        heat.put("O", 0);
-        heat.put("P", 0);
-        heat.put("A", 0);
-        heat.put("S", 0);
-        heat.put("D", 0);
-        heat.put("F", 0);
-        heat.put("G", 0);
-        heat.put("H", 0);
-        heat.put("J", 0);
-        heat.put("K", 0);
-        heat.put("L", 0);
-        heat.put("Z", 0);
-        heat.put("X", 0);
-        heat.put("C", 0);
-        heat.put("V", 0);
-        heat.put("B", 0);
-        heat.put("N", 0);
-        heat.put("M", 0);
-        heat.put(" ", 0);
-        heat.put("1", 0);
-        heat.put("2", 0);
-        heat.put("3", 0);
-        heat.put("4", 0);
-        heat.put("5", 0);
-        heat.put("6", 0);
-        heat.put("7", 0);
-        heat.put("8", 0);
-        heat.put("9", 0);
-        heat.put("0", 0);
-        heat.put(";", 0);
-        heat.put(",", 0);
-        heat.put(".", 0);
+        for (String k : new String[]{
+                "Q","W","E","R","T","Y","U","I","O","P",
+                "A","S","D","F","G","H","J","K","L",
+                "Z","X","C","V","B","N","M",
+                " ","1","2","3","4","5","6","7","8","9","0",";",",","."
+        }) heat.put(k, 0);
+
+// 2) 用本次的全量逐键统计来上色（按最大值归一化到 0–100）
+        var totals = typingNinja.auth.Session.getLatestTotals();
+        if (totals != null && !totals.isEmpty()) {
+            int max = totals.values().stream().mapToInt(Integer::intValue).max().orElse(0);
+            for (var e : totals.entrySet()) {
+                String key = e.getKey().toUpperCase();
+                if (!heat.containsKey(key)) continue;          // 屏蔽键盘上没有的符号
+                int raw = e.getValue();
+                int scaled = (max > 0) ? (int) Math.round(100.0 * raw / max) : 0;
+                heat.put(key, Math.min(scaled, 100));
+            }
+        }
 
 
         Node keyboard = Keyboard.create(KEY_W, KEY_H, heat);

@@ -502,6 +502,15 @@ public class LessonActivePageController {
                 a.setTitle("Lesson");
                 a.showAndWait();
 
+                // 把全量逐键统计放进 Session（键名统一大写 String）
+                var totalsChar = weakKeyTracker.totalsAllKeys(); // Map<Character,Integer>
+                java.util.Map<String,Integer> totalsStr = new java.util.LinkedHashMap<>(totalsChar.size());
+                for (var e : totalsChar.entrySet()) {
+                    totalsStr.put(String.valueOf(Character.toUpperCase(e.getKey())), e.getValue());
+                }
+                typingNinja.auth.Session.setLatestTotals(totalsStr);
+
+
                 // 完成后统一跳转到 CongratulationsScene
                 Stage stage = (Stage) lessonTitleLabel.getScene().getWindow();  // lessonTitleLabel 是本控制器已有的 @FXML Label
                 stage.setScene(CongratulationsScene.createScene(stage));

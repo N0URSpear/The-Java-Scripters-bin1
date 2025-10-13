@@ -18,11 +18,11 @@ public class WeakKeyTracker {
     public static final List<Character> ALL_KEYS;
     static {
         List<Character> keys = new ArrayList<>();
-        // ASCII printable range 33..126 (space is 32 and is excluded)
-        for (char c = 33; c <= 126; c++) {
-            // trackable() already excludes whitespace/control; this keeps consistency
+        keys.add(' ');                     // 先放一个空格
+        for (char c = 33; c <= 126; c++) { // 然后再加 33..126 的可打印字符
             if (trackable(c)) keys.add(c);
         }
+
         ALL_KEYS = Collections.unmodifiableList(keys);
     }
 
@@ -39,7 +39,7 @@ public class WeakKeyTracker {
 
     public static boolean trackable(char c) {
         if (Character.isISOControl(c)) return false;
-        return !(c == ' ' || c == '\n' || c == '\r' || c == '\t');
+        return !(c == '\n' || c == '\r' || c == '\t');
     }
 
     private static String key(Character prev, char expected) {
