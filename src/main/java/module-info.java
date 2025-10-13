@@ -9,6 +9,7 @@ module typingNinja {
 
     requires com.google.gson;
     requires java.net.http;
+    requires org.apache.pdfbox;
 
     opens typingNinja to javafx.fxml;
     exports typingNinja;
