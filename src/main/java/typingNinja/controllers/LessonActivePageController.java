@@ -82,6 +82,21 @@ public class LessonActivePageController {
     private boolean finishedByTyping = false;
     private boolean lessonCompleteSoundEnabled = false;
 
+    // Sound toggles and clips (with throttling + pooling)
+    private boolean keyboardSoundsEnabled = false;
+    private boolean typingErrorSoundsEnabled = false;
+    private javafx.scene.media.AudioClip typingClip; // legacy single clip (fallback)
+    private javafx.scene.media.AudioClip errorClip;  // legacy single clip (fallback)
+    private javafx.scene.media.AudioClip[] typingPool;
+    private javafx.scene.media.AudioClip[] errorPool;
+    private int typingPoolIdx = 0, errorPoolIdx = 0;
+    private long lastTypingMs = 0, lastErrorMs = 0;
+    private static final long TYPING_GAP_MS = 25;  // ~40 clicks/sec max
+    private static final long ERROR_GAP_MS  = 200; // avoid buzzer spam
+    private int lastErrorCount = 0;
+
+    
+
     private void onReachedEndOfText() {
         // User reached end of passage before timer ended
         finishedByTyping = true;
@@ -126,6 +141,82 @@ public class LessonActivePageController {
             }
         } catch (Exception ignored) {}
     }
+
+    // --- Sound helpers ---
+    private void initSoundClips() {
+        try {
+            // Prefer WAV for lower latency; fallback to legacy MP3 if missing
+            java.net.URL typingUrl = getClass().getResource("/typingNinja/Sounds/keyboard_click.wav");
+            if (typingUrl == null) typingUrl = getClass().getResource("/typingNinja/Sounds/typing.mp3");
+            if (typingUrl != null) {
+                typingClip = new javafx.scene.media.AudioClip(typingUrl.toExternalForm());
+                // Build a small pool for polyphony
+                int n = 4;
+                typingPool = new javafx.scene.media.AudioClip[n];
+                for (int i = 0; i < n; i++) typingPool[i] = new javafx.scene.media.AudioClip(typingUrl.toExternalForm());
+            } else {
+                typingClip = null;
+                typingPool = null;
+            }
+        } catch (Exception ex) {
+            typingClip = null; typingPool = null;
+        }
+        try {
+            java.net.URL errorUrl = getClass().getResource("/typingNinja/Sounds/wrong_buzzer.mp3");
+            if (errorUrl != null) {
+                errorClip = new javafx.scene.media.AudioClip(errorUrl.toExternalForm());
+                int m = 2;
+                errorPool = new javafx.scene.media.AudioClip[m];
+                for (int i = 0; i < m; i++) errorPool[i] = new javafx.scene.media.AudioClip(errorUrl.toExternalForm());
+            } else {
+                errorClip = null;
+                errorPool = null;
+            }
+        } catch (Exception ex) {
+            errorClip = null; errorPool = null;
+        }
+    }
+
+    private void playTypingKeySound() {
+        if (!keyboardSoundsEnabled) return;
+        long now = System.currentTimeMillis();
+        if (now - lastTypingMs < TYPING_GAP_MS) return; // throttle
+        lastTypingMs = now;
+        if (typingPool != null && typingPool.length > 0) {
+            javafx.scene.media.AudioClip c = typingPool[typingPoolIdx];
+            typingPoolIdx = (typingPoolIdx + 1) % typingPool.length;
+            c.play();
+        } else if (typingClip != null) {
+            typingClip.play();
+        }
+    }
+
+    private void attachMetricsErrorSoundListener() {
+        if (metrics == null) return;
+        lastErrorCount = metrics.getErrors();
+        metrics.errorsProperty().addListener((o, oldVal, newVal) -> {
+            int oldCount = (oldVal != null) ? oldVal.intValue() : lastErrorCount;
+            int newCount = (newVal != null) ? newVal.intValue() : oldCount;
+            if (typingErrorSoundsEnabled && newCount > oldCount) {
+                playErrorBuzzer();
+            }
+            lastErrorCount = newCount;
+        });
+    }
+
+    private void playErrorBuzzer() {
+        long now = System.currentTimeMillis();
+        if (now - lastErrorMs < ERROR_GAP_MS) return; // throttle
+        lastErrorMs = now;
+        if (errorPool != null && errorPool.length > 0) {
+            javafx.scene.media.AudioClip c = errorPool[errorPoolIdx];
+            errorPoolIdx = (errorPoolIdx + 1) % errorPool.length;
+            c.play();
+        } else if (errorClip != null) {
+            errorClip.play();
+        }
+    }
+
 
     private void rebuildPauseMenu() {
         Platform.runLater(() ->
@@ -393,6 +484,7 @@ public class LessonActivePageController {
         metrics.setCharsPerWord(DEFAULT_CHARS_PER_WORD);
         metrics.bindTimerLabel(timerLabel);
         metrics.bindStats(wpmLabel, errorsLabel, accuracyLabel);
+        attachMetricsErrorSoundListener();
         rebuildPauseMenu();
 
         progressFeature = new ProgressBar(timeProgress);
@@ -408,6 +500,13 @@ public class LessonActivePageController {
         SettingsRecord settings = settingsDAO.fetch(currentUserId);
         strictModePreferred = settings.typingErrors;
         lessonCompleteSoundEnabled = settings.lessonCompleteSound;
+        keyboardSoundsEnabled = settings.keyboardSounds;
+        typingErrorSoundsEnabled = settings.typingErrorSounds;
+        initSoundClips();
+        if (hiddenInput != null) {
+            // Use KEY_TYPED so we only play on actual character input, not modifiers
+            hiddenInput.addEventFilter(KeyEvent.KEY_TYPED, e -> playTypingKeySound());
+        }
 
         readingScroll.setFitToWidth(true);
         readingScroll.setPannable(false);
@@ -453,6 +552,7 @@ public class LessonActivePageController {
             metrics.setCharsPerWord(DEFAULT_CHARS_PER_WORD);
             metrics.bindTimerLabel(timerLabel);
             metrics.bindStats(wpmLabel, errorsLabel, accuracyLabel);
+            attachMetricsErrorSoundListener();
             progressFeature = new typingNinja.lesson.ProgressBar(timeProgress);
             progressFeature.bindTo(metrics.timeRemainingProperty(), metrics.lessonSeconds());
             lessonDurationLabel.setText(durationSeconds + "s");
