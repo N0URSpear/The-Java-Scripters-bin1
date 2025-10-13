@@ -709,6 +709,7 @@ public class LessonActivePageController {
             System.out.println("--------------------------------\n");
 
             boolean completed = false;
+            boolean shouldReturnHome = false;
             String popupTitle;
             String popupMsg;
             Alert.AlertType popupType;
@@ -720,7 +721,13 @@ public class LessonActivePageController {
                 int correctPos = inputSection.getCorrectPositions();
                 double percentCorrectOfPassage = passageLen > 0 ? (correctPos * 100.0 / passageLen) : 0.0;
 
-                if (finishedByTyping) {
+                if (timerExpired) {
+                    completed = true;
+                    popupTitle = "Time's Up";
+                    popupMsg = "You ran out of time. Progress has been saved.";
+                    popupType = Alert.AlertType.ERROR;
+                    shouldReturnHome = true;
+                } else if (finishedByTyping) {
                     boolean perfect = (errorCount == 0 && correctPos == passageLen);
                     boolean passWithErrors = (percentCorrectOfPassage > 40.0 && accuracyVal >= 40.0);
 
@@ -770,8 +777,10 @@ public class LessonActivePageController {
             }
 
             boolean finalCompleted = completed;
+            boolean finalShouldReturnHome = shouldReturnHome;
+            boolean finalTimedOut = timerExpired;
             Platform.runLater(() -> {
-                if (finalCompleted) {
+                if (finalCompleted && !finalTimedOut) {
                     // Play completion sound before showing the popup
                     playCompletionSoundIfEnabled();
                 }
@@ -779,7 +788,7 @@ public class LessonActivePageController {
                 a.setHeaderText(null);
                 a.setTitle(popupTitle);
                 a.showAndWait();
-                if (finalCompleted) {
+                if (finalCompleted || finalShouldReturnHome) {
                     returnToHome();
                 }
             });
