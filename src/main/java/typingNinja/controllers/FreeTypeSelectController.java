@@ -41,10 +41,12 @@ public class FreeTypeSelectController {
             Stage popup = (Stage) dur3.getScene().getWindow();
             Stage owner = (Stage) popup.getOwner();
 
-            Parent root = FXMLLoader.load(getClass().getResource("/com/example/addressbook/LessonActivePage.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource("/typingNinja/LessonActivePage.fxml"));
             owner.getScene().setRoot(root);
             owner.setTitle("Typing - Typing Ninja");
             owner.centerOnScreen();
+            owner.setFullScreen(true);
+            owner.setFullScreenExitHint("");
 
             popup.close();
         } catch (Exception ex) {

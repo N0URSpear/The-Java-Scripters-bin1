@@ -5,6 +5,7 @@ module typingNinja {
     requires jbcrypt;
     requires java.sql;
     requires javafx.graphics;
+    requires javafx.media;
 
     requires com.google.gson;
     requires java.net.http;

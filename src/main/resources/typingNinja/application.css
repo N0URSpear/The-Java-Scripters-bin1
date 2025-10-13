@@ -1,0 +1,29 @@
+.root {
+  -fx-font-family: "Arial Rounded MT Bold", "Arial", sans-serif;
+  -fx-background: #0e0b2b;
+  -fx-text-fill: white;
+}
+.toolbar { -fx-background-color: #1b174b; }
+.pause-button { -fx-background-color: #2EFF04; -fx-text-fill: #0a1f05; -fx-font-weight: bold; -fx-font-size: 28px; -fx-background-radius: 24; -fx-padding: 12 32; -fx-border-color: rgba(0,0,0,0.2); -fx-border-radius: 24; -fx-border-width: 1; }
+.pause-button:hover { -fx-background-color: #29d200; }
+.pause-button:pressed { -fx-background-color: #23b100; }
+.timer { -fx-text-fill: #a0ff88; -fx-font-weight: 800; -fx-font-size: 24px; }
+.reading-pane { -fx-background-color: #D9D9D9; -fx-background-radius: 12; -fx-border-color: #3d3565; -fx-border-radius: 12; }
+.prompt-char { -fx-fill: #111; -fx-font-weight: 800; }
+.user-correct { -fx-fill: #58CD19; -fx-font-weight: 800; }
+.user-wrong { -fx-fill: #CD1919; -fx-font-weight: 800; }
+.cursor { -fx-fill: #3d3565; -fx-font-weight: 800; -fx-opacity: 0.85; }
+.timer-overlay { -fx-text-fill: #ffffff; -fx-font-weight: bold; }
+.progress-bar { -fx-pref-height: 34; }
+.progress-bar > .bar { -fx-background-insets: 0; -fx-background-radius: 18; -fx-background-color: linear-gradient(#2EFF04, #24C402); }
+.progress-bar > .track { -fx-background-color: #1a2b3f; -fx-background-radius: 18; }
+.stats-card { -fx-background-color: #D9D9D9; -fx-padding: 16; -fx-background-radius: 16; }
+.card-title { -fx-font-size: 24px; -fx-font-weight: 800; -fx-text-fill: #111; }
+.stat-label-title { -fx-font-size: 16px; -fx-font-weight: 700; -fx-text-fill: #222; }
+.stat-label-value { -fx-font-size: 16px; -fx-font-weight: 700; -fx-text-fill: #111; }
+.keycap { -fx-background-radius: 8; -fx-padding: 4 6; -fx-background-color: transparent; -fx-text-fill: #ffffff; -fx-border-color: rgba(255,255,255,0.25); -fx-border-radius: 8; -fx-font-size: 12px; }
+.keycap-lit { -fx-background-color: #6B46FF; }
+.hands-placeholder { -fx-background-color: #f0f0f0; -fx-background-radius: 12; -fx-border-color: #ccc; -fx-border-radius: 12; }
+.mono { -fx-font-family: "Menlo", "Consolas", "Monaco", monospace; -fx-font-size: 26px; -fx-line-spacing: 6px; }
+.loading-placeholder { -fx-fill: #555; -fx-font-weight: 800; -fx-font-size: 36px; }
+.free-typed { -fx-fill: #222; -fx-font-weight: 700; }

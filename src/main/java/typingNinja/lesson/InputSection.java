@@ -3,6 +3,7 @@ package typingNinja.lesson;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import java.util.function.Consumer;
@@ -20,12 +21,15 @@ public class InputSection {
     private final WeakKeyTracker weakKeys;
     private final boolean[] errorCounted;
     private final Consumer<Text> cursorListener;
+    private final Runnable onComplete;
+    private final boolean[] typedCorrect;
 
     public char peekExpected() { return index < passage.length() ? passage.charAt(index) : '\0'; }
 
     public InputSection(TextFlow promptFlow, TextFlow userFlow, TextArea hiddenInput,
                         KeyboardHands keyboard, Metrics metrics, String passage,
-                        WeakKeyTracker weakKeys, Consumer<Text> cursorListener) {
+                        WeakKeyTracker weakKeys, Consumer<Text> cursorListener,
+                        Runnable onComplete) {
         this.promptFlow = promptFlow;
         this.userFlow = userFlow;
         this.hiddenInput = hiddenInput;
@@ -37,6 +41,8 @@ public class InputSection {
         this.cursor = new Text("_");
         this.cursor.getStyleClass().addAll("cursor", "mono");
         this.cursorListener = cursorListener;
+        this.onComplete = (onComplete != null) ? onComplete : () -> {};
+        this.typedCorrect = new boolean[passage.length()];
         buildPrompt();
         userFlow.getChildren().clear();
         updateCursor();
@@ -107,6 +113,7 @@ public class InputSection {
             if (index > 0) {
                 removeCursor();
                 index--;
+                resetPromptCharColor(index);
                 if (userFlow.getChildren().size() > index) {
                     javafx.scene.Node removed = userFlow.getChildren().remove(index);
                     boolean wasError = removed.getStyleClass().contains("user-wrong");
@@ -119,7 +126,6 @@ public class InputSection {
                 keyboard.highlightExpected(peekExpected());
             }
             updateCursor();
-            keyboard.dim();
             e.consume();
         }
         else if (code == KeyCode.ENTER) {
@@ -159,6 +165,8 @@ public class InputSection {
         for (int i = 0; i < passage.length(); i++) {
             Text t = new Text(String.valueOf(passage.charAt(i)));
             t.getStyleClass().addAll("prompt-char", "mono");
+            typedCorrect[i] = false;
+            t.setFill(Color.web("#000000"));
             promptFlow.getChildren().add(t);
         }
     }
@@ -168,6 +176,24 @@ public class InputSection {
         t.getStyleClass().addAll(correct ? "user-correct" : "user-wrong", "mono");
         if (index <= userFlow.getChildren().size()) userFlow.getChildren().add(index, t);
         else userFlow.getChildren().add(t);
+        if (index < typedCorrect.length) {
+            typedCorrect[index] = correct;
+            applyPromptCharColor(index);
+        }
+    }
+
+    private void resetPromptCharColor(int idx) {
+        if (idx >= 0 && idx < typedCorrect.length) {
+            typedCorrect[idx] = false;
+            applyPromptCharColor(idx);
+        }
+    }
+
+    private void applyPromptCharColor(int idx) {
+        if (idx >= 0 && idx < promptFlow.getChildren().size()) {
+            Text promptChar = (Text) promptFlow.getChildren().get(idx);
+            promptChar.setFill(typedCorrect[idx] ? Color.web("#FFFFFF") : Color.web("#000000"));
+        }
     }
 
     private char applyShiftChar(char c) {
@@ -217,8 +243,18 @@ public class InputSection {
 
     private void handleCompletionIfNeeded() {
         if (index >= passage.length()) {
-            hiddenInput.setDisable(true);
-            metrics.endLessonNow();
+            // Notify controller; controller decides whether to end or keep lesson active
+            try { onComplete.run(); } catch (Exception ignored) {}
         }
+    }
+
+    public boolean isComplete() { return index >= passage.length(); }
+
+    public int getPassageLength() { return passage.length(); }
+
+    public int getCorrectPositions() {
+        int c = 0;
+        for (int i = 0; i < typedCorrect.length; i++) if (typedCorrect[i]) c++;
+        return c;
     }
 }

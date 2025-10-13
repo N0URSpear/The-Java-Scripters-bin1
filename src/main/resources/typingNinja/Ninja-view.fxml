@@ -13,7 +13,7 @@
 
     <!-- Background -->
     <ImageView fx:id="logoImage" preserveRatio="true" pickOnBounds="true">
-        <Image url="@Typing_Ninja_with_text.png"/>
+        <Image url="@Images/Typing_Ninja_with_text.png"/>
     </ImageView>
 
     <!-- Overlay -->

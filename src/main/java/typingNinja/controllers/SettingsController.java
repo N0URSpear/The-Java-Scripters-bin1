@@ -48,7 +48,7 @@ public class SettingsController {
         navSettings.setDisable(true);
 
         asButton(navMainMenu, this::goMainMenu);
-        asButton(navProfile, () -> switchTo("/com/example/addressbook/Profile.fxml", "Profile - Typing Ninja"));
+        asButton(navProfile, () -> switchTo("/typingNinja/Profile.fxml", "Profile - Typing Ninja"));
 
         var rec = dao.fetch(USER_ID);
         binding = true;
@@ -89,6 +89,8 @@ public class SettingsController {
         stage.setScene(scene);
         stage.setTitle("Typing Ninja");
         stage.centerOnScreen();
+        stage.setFullScreen(true);
+        stage.setFullScreenExitHint("");
     }
 
     private void switchTo(String fxmlPath, String title) {
@@ -104,6 +106,8 @@ public class SettingsController {
             }
             stage.setTitle(title);
             stage.centerOnScreen();
+            stage.setFullScreen(true);
+            stage.setFullScreenExitHint("");
         } catch (Exception ex) {
             ex.printStackTrace();
         }

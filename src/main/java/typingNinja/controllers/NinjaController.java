@@ -90,12 +90,15 @@ public class NinjaController {
      * @throws IOException if inputs or outputs are invalid
      */
     public void onloginClicked() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/example/addressbook/Login-view.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/typingNinja/Login-view.fxml"));
         Stage loginPopup = new Stage();
         Parent root = fxmlLoader.load();
         LoginController controller = fxmlLoader.getController();
         loginPopup.setTitle("Login");
-        loginPopup.initModality(Modality.APPLICATION_MODAL);
+        // Make this popup owned by the main stage so fullscreen is preserved
+        Stage owner = (Stage) backgroundPane.getScene().getWindow();
+        loginPopup.initOwner(owner);
+        loginPopup.initModality(Modality.WINDOW_MODAL);
         loginPopup.setScene(new Scene(root));
         loginPopup.setResizable(false);
         loginPopup.initStyle(StageStyle.UNDECORATED);
@@ -107,14 +110,17 @@ public class NinjaController {
             Scene mainMenuScene = menu.buildScene(stage);
             stage.setScene(mainMenuScene);
             stage.setTitle("Main Menu - Typing Ninja");
+            stage.setFullScreen(true);
+            stage.setFullScreenExitHint("");
         }
 
         if (controller.isForgotPassword()) {
-            FXMLLoader fxmlLoader1 = new FXMLLoader(getClass().getResource("/com/example/addressbook/ForgorPassword-view.fxml"));
+            FXMLLoader fxmlLoader1 = new FXMLLoader(getClass().getResource("/typingNinja/ForgorPassword-view.fxml"));
             Stage forgotPasswordPopup = new Stage();
             Parent root1 = fxmlLoader1.load();
             forgotPasswordPopup.setTitle("Forgot Password");
-            forgotPasswordPopup.initModality(Modality.APPLICATION_MODAL);
+            forgotPasswordPopup.initOwner((Stage) backgroundPane.getScene().getWindow());
+            forgotPasswordPopup.initModality(Modality.WINDOW_MODAL);
             forgotPasswordPopup.setScene(new Scene(root1));
             forgotPasswordPopup.setResizable(false);
             forgotPasswordPopup.initStyle(StageStyle.UNDECORATED);
@@ -128,12 +134,13 @@ public class NinjaController {
      * @throws IOException if inputs or outputs are invalid
      */
     public void onCreateAccountClicked() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/example/addressbook/AccountCreation-view.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/typingNinja/AccountCreation-view.fxml"));
         Stage AccountCreation = new Stage();
         Parent root = fxmlLoader.load();
         CreateAccountController controller = fxmlLoader.getController();
         AccountCreation.setTitle("Login");
-        AccountCreation.initModality(Modality.APPLICATION_MODAL);
+        AccountCreation.initOwner((Stage) backgroundPane.getScene().getWindow());
+        AccountCreation.initModality(Modality.WINDOW_MODAL);
         AccountCreation.setScene(new Scene(root));
         AccountCreation.setResizable(false);
         AccountCreation.initStyle(StageStyle.UNDECORATED);
@@ -145,6 +152,8 @@ public class NinjaController {
             Scene mainMenuScene = menu.buildScene(stage);
             stage.setScene(mainMenuScene);
             stage.setTitle("Main Menu - Typing Ninja");
+            stage.setFullScreen(true);
+            stage.setFullScreenExitHint("");
         }
     }
 
@@ -154,12 +163,14 @@ public class NinjaController {
      * @throws IOException if input or output is invalid
      */
     public void onHelpClicked() throws IOException{
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/example/addressbook/Help-view.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/typingNinja/Help-view.fxml"));
         Stage HelpPopup = new Stage();
         HelpPopup.setTitle("Help");
-        HelpPopup.initModality(Modality.APPLICATION_MODAL);
+        HelpPopup.initOwner((Stage) backgroundPane.getScene().getWindow());
+        HelpPopup.initModality(Modality.WINDOW_MODAL);
         HelpPopup.setScene(new Scene(fxmlLoader.load()));
         HelpPopup.setResizable(false);
+        HelpPopup.initStyle(StageStyle.UNDECORATED);
         HelpPopup.showAndWait();
     }
 }
