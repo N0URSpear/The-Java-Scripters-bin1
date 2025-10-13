@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox style="-fx-background-color: #D9D9D9; -fx-padding: 10 20 20 20;"
+      xmlns="http://javafx.com/javafx/17.0.12"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="typingNinja.controllers.LoginController"
+      stylesheets="@LoginStyles.css" >
+
+    <Label style="-fx-text-fill: black; -fx-font-size: 24; -fx-font-family: 'Jaro';" text="Login" prefWidth="340" alignment="CENTER">
+        <VBox.margin>
+            <Insets bottom="10"/>
+        </VBox.margin>
+    </Label>
+
+    <HBox prefWidth="340">
+        <Label text="Username:" style="-fx-text-fill: black; -fx-font-size: 20; -fx-font-family: 'Jaro';" prefWidth="100"/>
+        <TextField fx:id="usernameField" promptText="Username" prefWidth="240" />
+    </HBox>
+    <HBox>
+        <Label text="Password:" style="-fx-text-fill: black; -fx-font-size: 20; -fx-font-family: 'Jaro';" prefWidth="100"/>
+        <PasswordField fx:id="passwordField" promptText="Password" prefWidth="240" />
+    </HBox>
+
+
+    <Button fx:id="ForgotPasswordButton" text="Forgot Password?" onAction="#onForgotPasswordClicked"
+            style="-fx-background-color: transparent; -fx-border-color: transparent;-fx-text-fill: black;" textAlignment="RIGHT">
+        <VBox.margin>
+            <Insets left="230"/>
+        </VBox.margin>
+    </Button>
+    <HBox>
+        <Button onAction="#onLoginClicked" prefWidth="170" text="Login" style="-fx-text-fill: black; -fx-font-size: 24; -fx-font-family: 'Jaro';" />
+        <Button onAction="#onCancelClicked" prefWidth="170" text="Cancel" style="-fx-text-fill: black; -fx-font-size: 24; -fx-font-family: 'Jaro';" />
+    </HBox>
+
+</VBox>

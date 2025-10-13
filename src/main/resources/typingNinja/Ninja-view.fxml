@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+
+<StackPane fx:id="backgroundPane"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="typingNinja.controllers.NinjaController"
+           stylesheets="@NinjaStyles.css"
+           style="-fx-background-color: #140B38;">
+
+    <!-- Background -->
+    <ImageView fx:id="logoImage" preserveRatio="true" pickOnBounds="true">
+        <Image url="@Images/Typing_Ninja_with_text.png"/>
+    </ImageView>
+
+    <!-- Overlay -->
+    <Pane>
+
+        <Button text="LOG IN" fx:id="loginButton" onAction="#onloginClicked"/>
+        <Button text="CREATE ACCOUNT" fx:id="createAccountButton" onAction="#onCreateAccountClicked"/>
+        <Button text="HELP" fx:id="helpButton" onAction="#onHelpClicked"/>
+
+    </Pane>
+
+</StackPane>

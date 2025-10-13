@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.collections.FXCollections?>
+<?import java.lang.String?>
+<?import javafx.geometry.Insets?>
+<?import javafx.geometry.Pos?>
+<?import javafx.scene.Group?>                <!-- ✅ correct package -->
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane xmlns="http://javafx.com/javafx/21"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="typingNinja.controllers.SettingsController"
+           fx:id="outer"
+           style="-fx-background-color: #140B38;">
+
+    <Group>
+        <VBox fx:id="content" spacing="40" style="-fx-padding: 40;">
+            <Label text="SETTINGS"
+                   style="-fx-text-fill: white; -fx-font-family: 'Jaro'; -fx-font-size: 108;" />
+
+            <BorderPane>
+                <left><Region prefWidth="120"/></left>
+                <center>
+                    <GridPane hgap="30" vgap="24">
+                        <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="40"/>
+                            <ColumnConstraints percentWidth="60"/>
+                        </columnConstraints>
+
+                        <Label text="Display Language"
+                               GridPane.rowIndex="0" GridPane.columnIndex="0"
+                               style="-fx-text-fill: white; -fx-font-family: 'Jaro'; -fx-font-size: 40;" />
+                        <ComboBox fx:id="cmbLanguage"
+                                  GridPane.rowIndex="0" GridPane.columnIndex="1"
+                                  style="-fx-font-family: 'Inter'; -fx-font-size: 25;">
+                            <items>
+                                <FXCollections fx:factory="observableArrayList">
+                                    <String fx:value="English"/>
+                                </FXCollections>
+                            </items>
+                        </ComboBox>
+
+                        <Label text="Theme"
+                               GridPane.rowIndex="1" GridPane.columnIndex="0"
+                               style="-fx-text-fill: white; -fx-font-family: 'Jaro'; -fx-font-size: 40;" />
+                        <ComboBox fx:id="cmbTheme"
+                                  GridPane.rowIndex="1" GridPane.columnIndex="1"
+                                  style="-fx-font-family: 'Inter'; -fx-font-size: 25;">
+                            <items>
+                                <FXCollections fx:factory="observableArrayList">
+                                    <String fx:value="Dark Blue"/>
+                                    <String fx:value="Light"/>
+                                </FXCollections>
+                            </items>
+                        </ComboBox>
+
+                        <Label text="Font Size"
+                               GridPane.rowIndex="2" GridPane.columnIndex="0"
+                               style="-fx-text-fill: white; -fx-font-family: 'Jaro'; -fx-font-size: 40;" />
+                        <ComboBox fx:id="cmbFontSize"
+                                  GridPane.rowIndex="2" GridPane.columnIndex="1"
+                                  style="-fx-font-family: 'Inter'; -fx-font-size: 25;">
+                            <items>
+                                <FXCollections fx:factory="observableArrayList">
+                                    <String fx:value="Small"/>
+                                    <String fx:value="Medium"/>
+                                    <String fx:value="Large"/>
+                                </FXCollections>
+                            </items>
+                        </ComboBox>
+
+                        <Label text="Lesson Settings"
+                               GridPane.rowIndex="3" GridPane.columnIndex="0"
+                               style="-fx-text-fill: white; -fx-font-family: 'Jaro'; -fx-font-size: 40;" />
+
+                        <VBox spacing="16" GridPane.rowIndex="3" GridPane.columnIndex="1">
+                            <CheckBox fx:id="chkKeyboardSounds"
+                                      text="Keyboard sounds with key presses"
+                                      style="-fx-text-fill: white; -fx-font-family: 'Inter'; -fx-font-size: 25;" />
+                            <CheckBox fx:id="chkStopOnErrors"
+                                      text="Do not proceed past typing errors"
+                                      style="-fx-text-fill: white; -fx-font-family: 'Inter'; -fx-font-size: 25;" />
+                            <CheckBox fx:id="chkErrorBuzzer"
+                                      text="Buzzer sound with typing errors"
+                                      style="-fx-text-fill: white; -fx-font-family: 'Inter'; -fx-font-size: 25;" />
+                            <CheckBox fx:id="chkCelebration"
+                                      text="Celebratory sound on lesson completion"
+                                      style="-fx-text-fill: white; -fx-font-family: 'Inter'; -fx-font-size: 25;" />
+                        </VBox>
+                    </GridPane>
+                </center>
+            </BorderPane>
+
+            <Region VBox.vgrow="ALWAYS"/>
+
+            <HBox spacing="40" alignment="CENTER">
+                <padding><Insets top="0" right="0" bottom="20" left="0"/></padding>
+                <Label fx:id="navMainMenu" text="MAIN MENU"
+                       style="-fx-text-fill: white; -fx-font-family: 'Jaro'; -fx-font-size: 40;" />
+                <Label text="|" style="-fx-text-fill: white; -fx-font-family: 'Jaro'; -fx-font-size: 40;" />
+                <Label fx:id="navProfile" text="PROFILE"
+                       style="-fx-text-fill: white; -fx-font-family: 'Jaro'; -fx-font-size: 40;" />
+                <Label text="|" style="-fx-text-fill: white; -fx-font-family: 'Jaro'; -fx-font-size: 40;" />
+                <Label fx:id="navSettings" text="SETTINGS"
+                       style="-fx-text-fill: white; -fx-font-family: 'Jaro'; -fx-font-size: 40;" />
+            </HBox>
+        </VBox>
+    </Group>
+</StackPane>
