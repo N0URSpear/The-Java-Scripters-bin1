@@ -1,7 +1,7 @@
-package com.example.addressbook.controllers;
+package typingNinja.controllers;
 
-import com.example.addressbook.INinjaContactDAO;
-import com.example.addressbook.MockNinjaDAO;
+import typingNinja.INinjaContactDAO;
+import typingNinja.MockNinjaDAO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
