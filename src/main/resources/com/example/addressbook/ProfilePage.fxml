@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.example.addressbook.controllers.ProfilePageController"
+            stylesheets="@ProfileStyles.css"
+            style="-fx-background-color: #0A002C;">
+
+    <!-- 顶部 Header -->
+    <top>
+        <HBox spacing="20" alignment="CENTER" BorderPane.alignment="CENTER">
+            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+
+            <Label text="PROFILE" styleClass="title-label"/>
+            <Pane HBox.hgrow="ALWAYS"/>
+            <HBox spacing="10" alignment="CENTER_RIGHT">
+                <ImageView fx:id="avatarImage" fitWidth="50" fitHeight="50"/>
+                <Label fx:id="usernameLabel" styleClass="username-label"/>
+                <Button fx:id="editUserBtn" styleClass="icon-button">
+                    <graphic>
+                        <ImageView fitWidth="20" fitHeight="20" preserveRatio="true">
+                            <image><Image url="@pencil-write-tool-icon.png"/></image>
+                        </ImageView>
+                    </graphic>
+                </Button>
+            </HBox>
+        </HBox>
+    </top>
+
+    <!-- 中间主要内容：左右顶端对齐 -->
+    <center>
+        <HBox alignment="TOP_CENTER" spacing="60">
+            <padding><Insets top="30" right="30" bottom="30" left="30"/></padding>
+
+            <!-- 左半区：描述 | GOALS | Actual -->
+            <VBox spacing="20" alignment="TOP_LEFT">
+                <GridPane hgap="40" vgap="18">
+                    <columnConstraints>
+                        <!-- 左：指标描述 -->
+                        <ColumnConstraints halignment="LEFT" minWidth="280"/>
+                        <!-- 中：Goals -->
+                        <ColumnConstraints halignment="LEFT" minWidth="160"/>
+                        <!-- 右：Actual -->
+                        <ColumnConstraints halignment="LEFT" minWidth="160"/>
+                    </columnConstraints>
+
+                    <!-- 表头（⚠️ 已去掉左侧空 label） -->
+                    <Label text="GOALS"  styleClass="section-title"
+                           GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                    <Label text="Actual" styleClass="section-title"
+                           GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+
+                    <!-- Row 1 -->
+                    <Label text="Practice hours per week" styleClass="metric-label"
+                           GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                    <HBox spacing="10" GridPane.rowIndex="1" GridPane.columnIndex="1">
+                        <Button fx:id="editHoursBtn" styleClass="icon-button">
+                            <graphic>
+                                <ImageView fitWidth="18" fitHeight="18" preserveRatio="true">
+                                    <image><Image url="@pencil-write-tool-icon.png"/></image>
+                                </ImageView>
+                            </graphic>
+                        </Button>
+                        <Label fx:id="hoursGoalLabel" styleClass="goal-value"/>
+                    </HBox>
+                    <Label fx:id="hoursActualLabel" styleClass="actual-value"
+                           GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+
+                    <!-- Row 2 -->
+                    <Label text="Target speed" styleClass="metric-label"
+                           GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                    <HBox spacing="10" GridPane.rowIndex="2" GridPane.columnIndex="1">
+                        <Button fx:id="editWpmBtn" styleClass="icon-button">
+                            <graphic>
+                                <ImageView fitWidth="18" fitHeight="18" preserveRatio="true">
+                                    <image><Image url="@pencil-write-tool-icon.png"/></image>
+                                </ImageView>
+                            </graphic>
+                        </Button>
+                        <Label fx:id="wpmGoalLabel" styleClass="goal-value"/>
+                    </HBox>
+                    <Label fx:id="wpmActualLabel" styleClass="actual-value"
+                           GridPane.rowIndex="2" GridPane.columnIndex="2"/>
+
+                    <!-- Row 3 -->
+                    <Label text="Target accuracy" styleClass="metric-label"
+                           GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                    <HBox spacing="10" GridPane.rowIndex="3" GridPane.columnIndex="1">
+                        <Button fx:id="editAccBtn" styleClass="icon-button">
+                            <graphic>
+                                <ImageView fitWidth="18" fitHeight="18" preserveRatio="true">
+                                    <image><Image url="@pencil-write-tool-icon.png"/></image>
+                                </ImageView>
+                            </graphic>
+                        </Button>
+                        <Label fx:id="accGoalLabel" styleClass="goal-value"/>
+                    </HBox>
+                    <Label fx:id="accActualLabel" styleClass="actual-value"
+                           GridPane.rowIndex="3" GridPane.columnIndex="2"/>
+                </GridPane>
+
+                <!-- 功能按钮 -->
+                <Button fx:id="lessonHistoryBtn" text="LESSON HISTORY" styleClass="action-button"/>
+                <Button fx:id="certBtn"        text="VIEW CERTIFICATES" styleClass="action-button"/>
+                <Label text="Total Ninja Stars Earned:" styleClass="caption"/>
+                <Label fx:id="starsValueLabel" styleClass="stars-label"/>
+            </VBox>
+
+            <!-- 右半区 -->
+            <VBox spacing="40" alignment="TOP_LEFT">
+                <ImageView fx:id="beltImage" fitWidth="120" fitHeight="120"/>
+                <Label fx:id="beltLabel"    styleClass="belt-label"/>
+                <Label fx:id="lessonsLabel" styleClass="info-label"/>
+                <Label fx:id="avgWpmLabel"  styleClass="info-label"/>
+                <Label text="Highest Rating:" styleClass="caption"/>
+                <HBox fx:id="highestRatingBox" spacing="8"/>
+                <Label text="Average Rating:" styleClass="caption"/>
+                <HBox fx:id="avgRatingBox" spacing="8"/>
+            </VBox>
+        </HBox>
+    </center>
+
+    <!-- 底部导航 -->
+    <bottom>
+        <HBox alignment="CENTER" spacing="40">
+            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+            <Button fx:id="mainMenuBtn" text="MAIN MENU" styleClass="footer-button"/>
+            <Button fx:id="profileBtn"  text="PROFILE"   styleClass="footer-button-active"/>
+            <Button fx:id="settingsBtn" text="SETTINGS"  styleClass="footer-button"/>
+        </HBox>
+    </bottom>
+</BorderPane>
