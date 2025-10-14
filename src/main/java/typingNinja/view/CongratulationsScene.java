@@ -164,7 +164,7 @@ public class CongratulationsScene {
             for (String[] row : rows) for (String k : row) heat.put(k, 0);
 
             // 2) 用本次逐键错误计数覆盖（来自 Session，控制器在跳转前已 setLatestTotals）
-            java.util.Map<String,Integer> totals = typingNinja.auth.Session.getLatestTotals();
+            java.util.Map<String,Integer> totals = typingNinja.model.auth.Session.getLatestTotals();
             if (totals != null) {
                 for (java.util.Map.Entry<String,Integer> e : totals.entrySet()) {
                     String k = e.getKey();                 // 如 "A","1"

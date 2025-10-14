@@ -786,7 +786,7 @@ public class LessonActivePageController {
                 totalsStr.put(String.valueOf(Character.toUpperCase(e.getKey())), e.getValue());
             }
 // 存入 Session
-            typingNinja.auth.Session.setLatestTotals(totalsStr);
+            typingNinja.model.auth.Session.setLatestTotals(totalsStr);
 
             boolean finalCompleted = completed;
             boolean finalTimedOut = timerExpired;
