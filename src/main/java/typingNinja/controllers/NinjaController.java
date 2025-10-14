@@ -170,7 +170,6 @@ public class NinjaController {
         HelpPopup.initModality(Modality.WINDOW_MODAL);
         HelpPopup.setScene(new Scene(fxmlLoader.load()));
         HelpPopup.setResizable(false);
-        HelpPopup.initStyle(StageStyle.UNDECORATED);
         HelpPopup.showAndWait();
     }
 }
