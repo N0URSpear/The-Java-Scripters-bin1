@@ -600,7 +600,15 @@ public class LessonActivePageController {
                 showCustomPrompt(latest.getPrompt());
                 typingNinja.model.ai.OllamaTextService ollama = new typingNinja.model.ai.OllamaTextService();
                 typingNinja.model.ai.LocalSimpleTextService local = new typingNinja.model.ai.LocalSimpleTextService();
-                int targetWords = Math.max(60, latest.getDurationMinutes() * 50); // ~50 wpm target
+                int wpmTarget = 50;
+                try {
+                    String envWpm = System.getenv("AI_TARGET_WPM");
+                    if (envWpm != null && !envWpm.isBlank()) {
+                        int v = Integer.parseInt(envWpm.trim());
+                        if (v >= 20 && v <= 150) wpmTarget = v; // clamp sane range
+                    }
+                } catch (Exception ignored) {}
+                int targetWords = Math.max(60, latest.getDurationMinutes() * wpmTarget); // configurable WPM target
 
                 String promptToSend = latest.getPrompt();
                 if ("PracticeWeakKeyCombos".equalsIgnoreCase(promptToSend)) {

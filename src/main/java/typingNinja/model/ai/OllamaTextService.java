@@ -19,6 +19,18 @@ public class OllamaTextService implements AITextService {
     private static final String AUTH_HEADER =
             System.getenv("OLLAMA_AUTH_HEADER") != null ? System.getenv("OLLAMA_AUTH_HEADER") : "Authorization";
 
+    private static String clean(String s) {
+        if (s == null) return null;
+        String t = s.trim();
+        if (t.length() >= 2) {
+            char a = t.charAt(0), b = t.charAt(t.length() - 1);
+            if ((a == '"' && b == '"') || (a == '\'' && b == '\'')) {
+                t = t.substring(1, t.length() - 1).trim();
+            }
+        }
+        return t;
+    }
+
     private final HttpClient http = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(10))
             .build();
@@ -37,20 +49,46 @@ public class OllamaTextService implements AITextService {
         // optional generation options
         JsonObject options = new JsonObject();
         options.addProperty("temperature", 0.7);
-        options.addProperty("num_predict", Math.max(120, targetWords * 2)); // rough budget
+        int numPredict = Math.max(120, targetWords * 2);
+        try {
+            String np = clean(System.getenv("OLLAMA_NUM_PREDICT"));
+            if (np != null && !np.isBlank()) {
+                int v = Integer.parseInt(np);
+                if (v >= 64 && v <= 4096) numPredict = v;
+            }
+        } catch (Exception ignored) {}
+        numPredict = Math.min(numPredict, 1200);
+        options.addProperty("num_predict", numPredict);
         body.add("options", options);
 
         String url = BASE + "/api/generate";
         System.out.println("[AI] Ollama request → " + url + " model=" + MODEL);
 
+        int timeoutSec = 40;
+        try {
+            String t = clean(System.getenv("OLLAMA_HTTP_TIMEOUT_SECONDS"));
+            if (t != null && !t.isBlank()) {
+                int v = Integer.parseInt(t);
+                if (v >= 10 && v <= 3600) timeoutSec = v;
+            }
+        } catch (Exception ignored) {}
+
         HttpRequest.Builder b = HttpRequest.newBuilder()
                 .uri(URI.create(url))
-                .timeout(Duration.ofSeconds(40))
+                .timeout(Duration.ofSeconds(timeoutSec))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(body)));
-        if (API_KEY != null && !API_KEY.isBlank()) {
-            // If you front Ollama with a proxy, set OLLAMA_AUTH_HEADER to what your proxy expects (e.g., "X-API-Key")
-            b.header(AUTH_HEADER, AUTH_HEADER.equalsIgnoreCase("authorization") ? ("Bearer " + API_KEY) : API_KEY);
+        String headerName = clean(AUTH_HEADER);
+        String apiKey = clean(API_KEY);
+        if (apiKey != null && !apiKey.isBlank() && headerName != null && !headerName.isBlank()) {
+            // If you front Ollama with a proxy, set OLLAMA_AUTH_HEADER to what your proxy expects (e.g., "X-API-Key").
+            String value;
+            if (headerName.equalsIgnoreCase("authorization")) {
+                value = apiKey.regionMatches(true, 0, "Bearer ", 0, 7) ? apiKey : ("Bearer " + apiKey);
+            } else {
+                value = apiKey;
+            }
+            b.header(headerName, value);
         }
         HttpRequest req = b.build();
 
