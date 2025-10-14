@@ -18,11 +18,13 @@ public final class Keyboard {
 
 
     private static final String[][] ROWS = new String[][]{
-            {"0","1","2","3","4","5","6","7","8","9"} ,// 顶部数字行（按 0..9 顺序）
-            {"Q","W","E","R","T","Y","U","I","O","P"},
-            {"A","S","D","F","G","H","J","K","L", ";"},
-            {"Z","X","C","V","B","N","M", ",", "."},
-            {" "}
+            {"`","1","2","3","4","5","6","7","8","9","0","-","+","="} ,
+            {"Tab","Q","W","E","R","T","Y","U","I","O","P","[","]"},
+            {"Cap","A","S","D","F","G","H","J","K","L", ";","'","Enter"},
+            {"Shift","Z","X","C","V","B","N","M", ",", ".","/","Shift"},
+            //if there is an error with capital letter for example "A",
+            //then it count as an error on both "a" and "Shift"
+            {"ctrl","fn","alt","Space","ctrl","alt"}
     };
 
 
@@ -92,7 +94,6 @@ public final class Keyboard {
                     Integer v = counts.get(k);
                     if (v == null) v = counts.get(k.toLowerCase());
                     if (v == null) v = counts.get(k.toUpperCase());
-                    // 也兼容 "SPACE" 作为空格键名
                     if (v == null && " ".equals(k)) v = counts.get("SPACE");
                     count = (v == null) ? 0 : Math.max(0, v);
                 }

@@ -19,7 +19,7 @@ public class WeakKeyTracker {
     static {
         List<Character> keys = new ArrayList<>();
         keys.add(' ');                     // 先放一个空格
-        for (char c = 33; c <= 126; c++) { // 然后再加 33..126 的可打印字符
+        for (char c = 33; c <= 126; c++) {
             if (trackable(c)) keys.add(c);
         }
 
