@@ -7,6 +7,9 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import typingNinja.model.INinjaContactDAO;
+import typingNinja.model.MockNinjaDAO;
+import typingNinja.model.NinjaUser;
 
 /**
  * 接口契约单元测试：使用 MockNinjaDAO，避免真实 DB。

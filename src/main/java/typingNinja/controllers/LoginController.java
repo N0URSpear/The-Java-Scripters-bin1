@@ -1,9 +1,9 @@
 package typingNinja.controllers;
 
-import typingNinja.INinjaContactDAO;
-import typingNinja.SqliteContactDAO;
-import typingNinja.NinjaUser;
-import typingNinja.auth.Session;
+import typingNinja.model.INinjaContactDAO;
+import typingNinja.model.SqliteContactDAO;
+import typingNinja.model.NinjaUser;
+import typingNinja.model.auth.Session;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.PasswordField;

@@ -35,7 +35,7 @@ class StarsTest {
         double starHeight = 24.0;
         double gap = 6.0;
 
-        HBox box = Stars.create(50.0, starHeight, gap);
+        HBox box = typingNinja.view.widgets.Stars.create(50.0, starHeight, gap);
         assertNotNull(box, "Root container should not be null");
         assertEquals(HBox.class, box.getClass(), "Root should be an HBox");
         assertEquals(Pos.CENTER, box.getAlignment(), "Alignment should be CENTER");
@@ -56,7 +56,7 @@ class StarsTest {
     @DisplayName("create(0%): all stars are the same image (all OFF)")
     void zero_percent_all_off() {
         // 0% 应全部相同（全暗）
-        HBox box = Stars.create(0.0, 20.0, 4.0);
+        HBox box = typingNinja.view.widgets.Stars.create(0.0, 20.0, 4.0);
         assertAllSameImage(box);
     }
 
@@ -64,7 +64,7 @@ class StarsTest {
     @DisplayName("create(100%): all stars are the same image (all ON)")
     void hundred_percent_all_on() {
         // 100% 应全部相同（全亮）
-        HBox box = Stars.create(100.0, 20.0, 4.0);
+        HBox box = typingNinja.view.widgets.Stars.create(100.0, 20.0, 4.0);
         assertAllSameImage(box);
     }
 
@@ -72,7 +72,7 @@ class StarsTest {
     @DisplayName("create(60%): contains a single switch from ON to OFF (prefix ON, suffix OFF)")
     void middle_percent_has_single_switch() {
         // 中间比例应呈现前缀亮、后缀暗的“单次切换”，不应多次交替
-        HBox box = Stars.create(60.0, 20.0, 4.0);
+        HBox box = typingNinja.view.widgets.Stars.create(60.0, 20.0, 4.0);
         List<Node> children = box.getChildren();
 
         int distinct = countDistinctImages(children);
@@ -85,8 +85,8 @@ class StarsTest {
     @DisplayName("create(<0% and >100%): should clamp to valid output without exceptions")
     void out_of_range_inputs_are_clamped() {
         // 越界输入不应抛异常，仍应生成 5 颗星，且两端极值保持统一的图像（全暗或全亮）
-        HBox below = Stars.create(-10.0, 18.0, 4.0);
-        HBox above = Stars.create(200.0, 18.0, 4.0);
+        HBox below = typingNinja.view.widgets.Stars.create(-10.0, 18.0, 4.0);
+        HBox above = typingNinja.view.widgets.Stars.create(200.0, 18.0, 4.0);
 
         assertEquals(5, below.getChildren().size(), "Below 0% should still produce 5 stars");
         assertEquals(5, above.getChildren().size(), "Above 100% should still produce 5 stars");

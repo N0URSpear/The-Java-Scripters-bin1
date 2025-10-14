@@ -12,7 +12,7 @@ import javafx.scene.text.Text;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import typingNinja.Keyboard;   // <-- 引用生产代码（已导出）
+import typingNinja.view.widgets.Keyboard;   // <-- 引用生产代码（已导出）
 
 import java.util.*;
 

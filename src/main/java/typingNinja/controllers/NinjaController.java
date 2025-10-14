@@ -1,6 +1,6 @@
 package typingNinja.controllers;
 
-import typingNinja.MainMenu;
+import typingNinja.view.MainMenu;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.fxml.FXML;

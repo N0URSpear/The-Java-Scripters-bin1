@@ -3,6 +3,7 @@ package typingNinja;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
+import typingNinja.model.NinjaUser;
 
 class NinjaUserTest {
 

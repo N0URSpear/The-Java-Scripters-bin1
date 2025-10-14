@@ -1,7 +1,7 @@
 package typingNinja.controllers;
 
-import typingNinja.SettingsDAO;
-import typingNinja.MainMenu;
+import typingNinja.model.SettingsDAO;
+import typingNinja.view.MainMenu;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;

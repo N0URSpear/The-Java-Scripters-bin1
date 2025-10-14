@@ -1,8 +1,8 @@
 package typingNinja.controllers;
 
-import typingNinja.INinjaContactDAO;
-import typingNinja.SqliteContactDAO;
-import typingNinja.NinjaUser;
+import typingNinja.model.INinjaContactDAO;
+import typingNinja.model.SqliteContactDAO;
+import typingNinja.model.NinjaUser;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -12,7 +12,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.mindrot.jbcrypt.BCrypt;
-import typingNinja.auth.Session;
+import typingNinja.model.auth.Session;
 
 public class CreateAccountController {
     @FXML private TextField usernameField;

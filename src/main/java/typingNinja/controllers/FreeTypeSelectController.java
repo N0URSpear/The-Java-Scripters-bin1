@@ -1,7 +1,7 @@
 package typingNinja.controllers;
 
-import typingNinja.MainLessonDAO;
-import typingNinja.auth.Session;
+import typingNinja.model.MainLessonDAO;
+import typingNinja.model.auth.Session;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;

@@ -1,8 +1,8 @@
 package typingNinja.controllers;
 
-import typingNinja.INinjaContactDAO;
-import typingNinja.MockNinjaDAO;
-import typingNinja.NinjaUser;
+import typingNinja.model.INinjaContactDAO;
+import typingNinja.model.MockNinjaDAO;
+import typingNinja.model.NinjaUser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

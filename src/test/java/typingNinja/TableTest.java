@@ -33,7 +33,7 @@ class TableTest {
         List<Integer> wpm = List.of(60, 70, 80);
         List<Integer> acc = List.of(95, 96, 97);
 
-        Node root = Table.create(w, h, wpm, acc);
+        Node root = typingNinja.view.widgets.Table.create(w, h, wpm, acc);
         assertNotNull(root);
         assertTrue(root instanceof StackPane, "root 应为 StackPane");
 
@@ -54,7 +54,7 @@ class TableTest {
         List<Integer> acc = List.of(90, 91, 92, 93, 94);
         int n = wpm.size();
 
-        Node root = Table.create(w, h, wpm, acc);
+        Node root = typingNinja.view.widgets.Table.create(w, h, wpm, acc);
         LineChart<Number, Number> chart = find(root, LineChart.class);
         assertNotNull(chart, "应找到 LineChart");
 
@@ -70,7 +70,7 @@ class TableTest {
     @Test
     @DisplayName("create(): wrapper StackPane 具备 10px 内边距")
     void create_wrapperHasPadding10() {
-        Node root = Table.create(400, 200,
+        Node root = typingNinja.view.widgets.Table.create(400, 200,
                 List.of(1, 2, 3), List.of(90, 91, 92));
 
         // wrapper = 包着 LineChart 的那个 StackPane
@@ -86,7 +86,7 @@ class TableTest {
     @DisplayName("create(): 背景矩形尺寸等于传入宽高")
     void create_backgroundRectangleFills() {
         double w = 300, h = 150;
-        Node root = Table.create(w, h,
+        Node root = typingNinja.view.widgets.Table.create(w, h,
                 List.of(10, 20), List.of(95, 96));
 
         Rectangle bg = find(root, Rectangle.class);
