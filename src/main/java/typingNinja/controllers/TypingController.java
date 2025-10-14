@@ -4,7 +4,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import typingNinja.MainMenu;
+import typingNinja.view.MainMenu;
 
 public class TypingController {
 

@@ -20,12 +20,21 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.scene.text.TextAlignment;
 
-import typingNinja.lesson.*;
-import typingNinja.auth.Session;
-import typingNinja.SettingsDAO;
-import typingNinja.SettingsDAO.SettingsRecord;
-import typingNinja.CongratulationsScene;
-import typingNinja.MainMenu;
+import typingNinja.controllers.lesson.KeyboardHands;
+import typingNinja.controllers.lesson.InputSection;
+import typingNinja.controllers.lesson.FreeTypingInput;
+import typingNinja.controllers.lesson.ProgressBar;
+import typingNinja.controllers.lesson.PauseMenu;
+import typingNinja.model.lesson.Lesson;
+import typingNinja.model.lesson.CustomPrompts;
+import typingNinja.model.lesson.LessonDAO;
+import typingNinja.model.lesson.WeakKeyTracker;
+import typingNinja.model.lesson.StarRating;
+import typingNinja.model.auth.Session;
+import typingNinja.model.SettingsDAO;
+import typingNinja.model.SettingsDAO.SettingsRecord;
+import typingNinja.view.CongratulationsScene;
+import typingNinja.view.MainMenu;
 
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -60,7 +69,7 @@ public class LessonActivePageController {
     @FXML private Label promptTitleLabel;
     @FXML private Label promptDisplayLabel;
 
-    private Metrics metrics;
+    private typingNinja.model.lesson.Metrics metrics;
     private CustomPrompts prompts;
     private ProgressBar progressFeature;
     private PauseMenu pauseMenu;
@@ -133,13 +142,7 @@ public class LessonActivePageController {
 
     private void playCompletionSoundIfEnabled() {
         if (!lessonCompleteSoundEnabled) return;
-        try {
-            java.net.URL u = getClass().getResource("/typingNinja/Sounds/lesson_complete.mp3");
-            if (u != null) {
-                javafx.scene.media.AudioClip clip = new javafx.scene.media.AudioClip(u.toExternalForm());
-                clip.play();
-            }
-        } catch (Exception ignored) {}
+        try { typingNinja.util.SoundManager.playLessonComplete(); } catch (Exception ignored) {}
     }
 
     // --- Sound helpers ---
@@ -500,7 +503,7 @@ public class LessonActivePageController {
         restoreStatsForStandardMode();
         hidePrompt();
 
-        metrics = new Metrics(p.durationSeconds());
+        metrics = new typingNinja.model.lesson.Metrics(p.durationSeconds());
         metrics.setCharsPerWord(DEFAULT_CHARS_PER_WORD);
         metrics.bindTimerLabel(timerLabel);
         metrics.bindStats(wpmLabel, errorsLabel, accuracyLabel);
@@ -568,12 +571,12 @@ public class LessonActivePageController {
             lessonTitleLabel.setText(latest.getLessonType());
             int durationSeconds = Math.max(10, latest.getDurationMinutes() * 60);
 
-            metrics = new Metrics(durationSeconds);
+            metrics = new typingNinja.model.lesson.Metrics(durationSeconds);
             metrics.setCharsPerWord(DEFAULT_CHARS_PER_WORD);
             metrics.bindTimerLabel(timerLabel);
             metrics.bindStats(wpmLabel, errorsLabel, accuracyLabel);
             attachMetricsErrorSoundListener();
-            progressFeature = new typingNinja.lesson.ProgressBar(timeProgress);
+            progressFeature = new typingNinja.controllers.lesson.ProgressBar(timeProgress);
             progressFeature.bindTo(metrics.timeRemainingProperty(), metrics.lessonSeconds());
             lessonDurationLabel.setText(durationSeconds + "s");
             rebuildPauseMenu();
@@ -595,8 +598,8 @@ public class LessonActivePageController {
                 restoreStatsForStandardMode();
                 lessonTitleLabel.setText("Custom Topic");
                 showCustomPrompt(latest.getPrompt());
-                typingNinja.ai.OllamaTextService ollama = new typingNinja.ai.OllamaTextService();
-                typingNinja.ai.LocalSimpleTextService local = new typingNinja.ai.LocalSimpleTextService();
+                typingNinja.model.ai.OllamaTextService ollama = new typingNinja.model.ai.OllamaTextService();
+                typingNinja.model.ai.LocalSimpleTextService local = new typingNinja.model.ai.LocalSimpleTextService();
                 int targetWords = Math.max(60, latest.getDurationMinutes() * 50); // ~50 wpm target
 
                 String promptToSend = latest.getPrompt();
@@ -670,12 +673,12 @@ public class LessonActivePageController {
                                 );
                             } catch (Exception e) {
                                 e.printStackTrace();
-                                return new typingNinja.lesson.CustomPrompts().current().text();
+                                return new typingNinja.model.lesson.CustomPrompts().current().text();
                             }
                         })
                         .thenAccept(text -> {
                             String finalPassage = (text == null || text.isBlank())
-                                    ? new typingNinja.lesson.CustomPrompts().current().text()
+                                    ? new typingNinja.model.lesson.CustomPrompts().current().text()
                                     : text;
                             Platform.runLater(() -> buildInputSectionAndStart(finalPassage));
                 });
@@ -687,7 +690,7 @@ public class LessonActivePageController {
                 restoreStatsForStandardMode();
                 hidePrompt();
                 // 1a…4f fixed placeholders for now
-                String fixed = typingNinja.lesson.FixedLessons.passageFor(lt);
+                String fixed = typingNinja.model.lesson.FixedLessons.passageFor(lt);
                 buildInputSectionAndStart(fixed);
             }
         }
@@ -790,10 +793,9 @@ public class LessonActivePageController {
             boolean finalShowResults = showResults;
             Platform.runLater(() -> {
                 if (finalShowResults) {
-                    if (finalCompleted && !finalTimedOut) {
-                        // Play completion sound for successful lessons
-                        playCompletionSoundIfEnabled();
-                    }
+                    // Play the congratulations sound for all lesson completions
+                    // (timer expiry, perfect, pass-with-errors, and free-mode end)
+                    playCompletionSoundIfEnabled();
                     openResultsView();
                 }
             });

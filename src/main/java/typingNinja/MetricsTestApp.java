@@ -42,11 +42,11 @@ public class MetricsTestApp extends Application {
                 int wpm = parseNonNegativeInt(wpmField.getText().trim(), "WPM");
                 int acc = parseBoundedInt(accField.getText().trim(), "Accuracy", 0, 100);
 
-                ResultsBridge.ensureTable();
-                ResultsBridge.saveResult(wpm, acc);
+                typingNinja.model.ResultsBridge.ensureTable();
+                typingNinja.model.ResultsBridge.saveResult(wpm, acc);
 
                 // 传入当前 stage，匹配 createScene(Stage) 的签名
-                Scene congrats = CongratulationsScene.createScene(stage);
+                Scene congrats = typingNinja.view.CongratulationsScene.createScene(stage);
                 stage.setScene(congrats);
                 stage.centerOnScreen();
 

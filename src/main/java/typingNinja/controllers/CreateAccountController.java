@@ -1,8 +1,8 @@
 package typingNinja.controllers;
 
-import typingNinja.INinjaContactDAO;
-import typingNinja.SqliteContactDAO;
-import typingNinja.NinjaUser;
+import typingNinja.model.INinjaContactDAO;
+import typingNinja.model.SqliteContactDAO;
+import typingNinja.model.NinjaUser;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -12,6 +12,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.mindrot.jbcrypt.BCrypt;
+import typingNinja.model.auth.Session;
 
 public class CreateAccountController {
     @FXML private TextField usernameField;
@@ -148,7 +149,7 @@ public class CreateAccountController {
         String answer1Hash = BCrypt.hashpw(answer1, BCrypt.gensalt());
         String answer2Hash = BCrypt.hashpw(answer2, BCrypt.gensalt());
 
-        NinjaUser newUser = new NinjaUser(
+        NinjaUser ninja = new NinjaUser(
                 username,
                 passwordHash,
                 secretQ1,
@@ -157,7 +158,8 @@ public class CreateAccountController {
                 answer2Hash
         );
 
-        NinjaDAO.addNinjaUser(newUser);
+        NinjaDAO.addNinjaUser(ninja);
+        Session.setCurrentUserId(ninja.getId());
 
         showSuccess();
 

@@ -1,6 +1,6 @@
 package typingNinja.controllers;
 
-import typingNinja.MainMenu;
+import typingNinja.view.MainMenu;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.fxml.FXML;
@@ -170,7 +170,6 @@ public class NinjaController {
         HelpPopup.initModality(Modality.WINDOW_MODAL);
         HelpPopup.setScene(new Scene(fxmlLoader.load()));
         HelpPopup.setResizable(false);
-        HelpPopup.initStyle(StageStyle.UNDECORATED);
         HelpPopup.showAndWait();
     }
 }

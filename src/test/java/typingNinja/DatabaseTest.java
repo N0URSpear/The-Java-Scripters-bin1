@@ -6,6 +6,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import static org.junit.jupiter.api.Assertions.*;
+import typingNinja.model.NinjaUser;
+import typingNinja.model.SqliteConnection;
+import typingNinja.model.SqliteContactDAO;
 
 /**
  * Integration tests for SqliteContactDAO against the connected SQLite database.
