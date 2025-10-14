@@ -15,6 +15,9 @@ public class OllamaTextService implements AITextService {
             System.getenv("OLLAMA_BASE_URL") != null ? System.getenv("OLLAMA_BASE_URL") : "http://localhost:11434";
     private static final String MODEL =
             System.getenv("OLLAMA_MODEL") != null ? System.getenv("OLLAMA_MODEL") : "gemma3:1b"; // small, fast
+    private static final String API_KEY = System.getenv("OLLAMA_API_KEY");
+    private static final String AUTH_HEADER =
+            System.getenv("OLLAMA_AUTH_HEADER") != null ? System.getenv("OLLAMA_AUTH_HEADER") : "Authorization";
 
     private final HttpClient http = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(10))
@@ -40,12 +43,16 @@ public class OllamaTextService implements AITextService {
         String url = BASE + "/api/generate";
         System.out.println("[AI] Ollama request → " + url + " model=" + MODEL);
 
-        HttpRequest req = HttpRequest.newBuilder()
+        HttpRequest.Builder b = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .timeout(Duration.ofSeconds(40))
                 .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(body)))
-                .build();
+                .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(body)));
+        if (API_KEY != null && !API_KEY.isBlank()) {
+            // If you front Ollama with a proxy, set OLLAMA_AUTH_HEADER to what your proxy expects (e.g., "X-API-Key")
+            b.header(AUTH_HEADER, AUTH_HEADER.equalsIgnoreCase("authorization") ? ("Bearer " + API_KEY) : API_KEY);
+        }
+        HttpRequest req = b.build();
 
         HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
         System.out.println("[AI] Ollama response status = " + resp.statusCode());
