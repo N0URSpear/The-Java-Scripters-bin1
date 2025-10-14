@@ -151,14 +151,35 @@ public class CongratulationsScene {
 
 
 // 键盘
-        Map<String, Integer> heat = new HashMap<>();
-        for (String k : new String[]{
-                "Q","W","E","R","T","Y","U","I","O","P",
-                "A","S","D","F","G","H","J","K","L",
-                "Z","X","C","V","B","N","M",
-                " ","1","2","3","4","5","6","7","8","9","0",";",",","."
-        }) heat.put(k, 0);
+        {
+            // 1) 先按 Keyboard 布局把所有键置零，避免缺键
+            String[][] rows = new String[][]{
+                    {"`","1","2","3","4","5","6","7","8","9","0","-","+","="},
+                    {"Tab","Q","W","E","R","T","Y","U","I","O","P","[","]"},
+                    {"Cap","A","S","D","F","G","H","J","K","L",";","'","Enter"},
+                    {"Shift","Z","X","C","V","B","N","M",",",".","/","Shift"},
+                    {"ctrl","fn","alt","Space","ctrl","alt"}
+            };
+            java.util.Map<String,Integer> heat = new java.util.LinkedHashMap<>();
+            for (String[] row : rows) for (String k : row) heat.put(k, 0);
 
+            // 2) 用本次逐键错误计数覆盖（来自 Session，控制器在跳转前已 setLatestTotals）
+            java.util.Map<String,Integer> totals = typingNinja.auth.Session.getLatestTotals();
+            if (totals != null) {
+                for (java.util.Map.Entry<String,Integer> e : totals.entrySet()) {
+                    String k = e.getKey();                 // 如 "A","1"
+                    if (" ".equals(k)) k = "Space";        // 若以后统计空格，这里映射到“Space”
+                    String Ku = k.toUpperCase();
+
+                    if      (heat.containsKey(k))  heat.put(k,  e.getValue());
+                    else if (heat.containsKey(Ku)) heat.put(Ku, e.getValue());
+                    else {
+                        String Kl = k.toLowerCase();
+                        if (heat.containsKey(Kl)) heat.put(Kl, e.getValue());
+                    }
+                }
+            }
+            /* BACKUP
 // 2) 用本次的全量逐键统计来上色（按最大值归一化到 0–100）
         var totals = typingNinja.model.auth.Session.getLatestTotals();
         if (totals != null && !totals.isEmpty()) {
@@ -172,13 +193,22 @@ public class CongratulationsScene {
             }
         }
 
+             */
 
+            // 3) 渲染键盘（Keyboard.create 内部会按百分比着色）
+            javafx.scene.Node keyboard = Keyboard.create(KEY_W, KEY_H, heat);
+            keyboard.setLayoutX(KEY_X);
+            keyboard.setLayoutY(KEY_Y);
+            design.getChildren().add(keyboard);
+        }
+
+/* BACKUP
         Node keyboard = typingNinja.view.widgets.Keyboard.create(KEY_W, KEY_H, heat);
         keyboard.setLayoutX(KEY_X);
         keyboard.setLayoutY(KEY_Y);
         design.getChildren().add(keyboard);
 
-
+*/
 
         design.getChildren().addAll(
                 title, redHint, prev10,

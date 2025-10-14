@@ -779,6 +779,15 @@ public class LessonActivePageController {
                 } catch (Exception ex) { ex.printStackTrace(); }
             }
 
+            var totalsChar = weakKeyTracker.totalsAllKeys(); // Map<Character,Integer>
+// 转成键名为大写 String，便于与 UI 键帽匹配
+            java.util.Map<String,Integer> totalsStr = new java.util.LinkedHashMap<>(totalsChar.size());
+            for (var e : totalsChar.entrySet()) {
+                totalsStr.put(String.valueOf(Character.toUpperCase(e.getKey())), e.getValue());
+            }
+// 存入 Session
+            typingNinja.auth.Session.setLatestTotals(totalsStr);
+
             boolean finalCompleted = completed;
             boolean finalTimedOut = timerExpired;
             boolean finalShowResults = showResults;
