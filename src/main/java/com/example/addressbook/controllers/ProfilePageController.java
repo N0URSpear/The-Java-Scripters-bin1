@@ -7,6 +7,10 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
 import java.util.Optional;
 
@@ -41,13 +45,11 @@ public class ProfilePageController {
     @FXML private Label avgWpmLabel;
     @FXML private HBox highestRatingBox;
     @FXML private HBox avgRatingBox;
+    @FXML private Label mainMenuLabel;
 
     private final SqliteContactDAO dao = new SqliteContactDAO();
     private int userId = -1;
     private boolean initialized = false;
-
-    private static final String GOLD_SHURIKEN = "/com/example/addressbook/gold_shuriken.png";
-    private static final String GRAY_SHURIKEN = "/com/example/addressbook/gray_shuriken.png";
 
     public ProfilePageController() {}
 
@@ -70,6 +72,9 @@ public class ProfilePageController {
         certBtn.getStyleClass().add("action-button");
 
         ensureDataAndRefresh();
+
+        lessonHistoryBtn.setOnAction(e -> openLessonHistory());
+        mainMenuLabel.setOnMouseClicked(e -> openMainMenu());
     }
 
     private void ensureDataAndRefresh() {
@@ -141,31 +146,41 @@ public class ProfilePageController {
 
     private void fillRatingWithShuriken(HBox box, double rating) {
         box.getChildren().clear();
-        int full = (int) Math.round(Math.max(0, Math.min(5, rating)));
-        Image gold = safeImage(GOLD_SHURIKEN);
-        Image gray = safeImage(GRAY_SHURIKEN);
+
+        // ✅ 使用 Math.floor 而不是 Math.round，4.5 → 4
+        int full = (int) Math.floor(Math.max(0, Math.min(5, rating)));
+
+        Image gold = new Image(getClass().getResource("/com/example/addressbook/gold_shuriken.png").toExternalForm());
+        Image gray = new Image(getClass().getResource("/com/example/addressbook/gray_shuriken.png").toExternalForm());
 
         for (int i = 0; i < 5; i++) {
             Image img = (i < full ? gold : gray);
-            if (img != null && !img.isError()) {
-                ImageView iv = new ImageView(img);
-                iv.setPreserveRatio(true);
-                iv.setFitWidth(22);
-                iv.setFitHeight(22);
-                box.getChildren().add(iv);
-            } else {
-                Label star = new Label(i < full ? "★" : "☆");
-                star.setStyle("-fx-text-fill: gold; -fx-font-size: 18;");
-                box.getChildren().add(star);
-            }
+            ImageView iv = new ImageView(img);
+            iv.setPreserveRatio(true);
+            iv.setFitWidth(24);
+            iv.setFitHeight(24);
+            box.getChildren().add(iv);
         }
     }
 
-    private Image safeImage(String path) {
-        try { Image img = new Image(path, true); return img.isError() ? null : img; }
-        catch (Exception e) { return null; }
-    }
 
+
+
+    private Image safeImage(String path) {
+        try {
+            Image img = new Image(path, true);
+            if (img.isError()) {
+                System.out.println("⚠️ Failed to load image: " + path);
+            } else {
+                System.out.println("✅ Loaded image: " + path);
+            }
+            return img.isError() ? null : img;
+        } catch (Exception e) {
+            System.out.println("❌ Exception loading: " + path);
+            e.printStackTrace();
+            return null;
+        }
+    }
     private void openEditUserDialog() {
         try {
             javafx.fxml.FXMLLoader loader =
@@ -184,6 +199,53 @@ public class ProfilePageController {
             loadStats();
         } catch (Exception ex) {
             ex.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void openLessonHistory() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/com/example/addressbook/LessonHistoryPage.fxml"));
+            Parent root = loader.load();
+
+            // 获取当前窗口
+            Stage stage = (Stage) lessonHistoryBtn.getScene().getWindow();
+
+            // 🔹 自动计算 75% 的屏幕尺寸
+            javafx.geometry.Rectangle2D screenBounds = javafx.stage.Screen.getPrimary().getVisualBounds();
+            double WIDTH = screenBounds.getWidth() * 0.75;
+            double HEIGHT = screenBounds.getHeight() * 0.75;
+
+            Scene scene = new Scene(root, WIDTH, HEIGHT);
+            stage.setScene(scene);
+
+            // 居中显示
+            stage.setX((screenBounds.getWidth() - WIDTH) / 2);
+            stage.setY((screenBounds.getHeight() - HEIGHT) / 2);
+
+            stage.show();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private void openMainMenu() {
+        try {
+            // 获取当前 Stage
+            Stage stage = (Stage) mainMenuLabel.getScene().getWindow();
+
+            // 创建 MainMenu 实例
+            com.example.addressbook.MainMenu mainMenu = new com.example.addressbook.MainMenu();
+
+            // 构建 MainMenu 场景
+            Scene mainScene = mainMenu.buildScene(stage);
+
+            // 切换场景
+            stage.setScene(mainScene);
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

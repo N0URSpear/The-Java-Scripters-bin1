@@ -4,6 +4,8 @@ module com.example.addressbook {
     requires java.desktop;
     requires jbcrypt;
     requires java.sql;
+    requires itextpdf;
+    requires javafx.swing;
 
 
     opens com.example.addressbook to javafx.fxml;
