@@ -4,7 +4,6 @@ import javafx.beans.binding.Bindings;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
@@ -24,6 +23,8 @@ import typingNinja.model.auth.Session;
 import typingNinja.view.widgets.Keyboard;
 import typingNinja.view.widgets.Table;
 import typingNinja.view.widgets.Stars;
+import javafx.scene.Parent;
+import typingNinja.util.SceneNavigator;
 
 
 public class CongratulationsScene {
@@ -73,12 +74,21 @@ public class CongratulationsScene {
     private static final double KEY_H = 223;
 
     /**
-     * Build and return the "Congratulations" scene.
+     * Display the congratulations view on the supplied stage while keeping the existing scene.
      *
-     * @param stage the JavaFX Stage used to size the UI and navigate between scenes
-     * @return the Scene for the Congratulations screen
+     * @param stage active application stage
      */
-    public static Scene createScene(Stage stage) {
+    public static void show(Stage stage) {
+        SceneNavigator.show(stage, createView(stage), "Lesson Results - Typing Ninja");
+    }
+
+    /**
+     * Build the congratulations view content ready to be swapped into the primary scene.
+     *
+     * @param stage active application stage
+     * @return root node for the congratulations screen
+     */
+    public static Parent createView(Stage stage) {
         Pane design = new Pane();
         design.setPrefSize(DESIGN_W, DESIGN_H);
         design.setMinSize(DESIGN_W, DESIGN_H);
@@ -111,8 +121,8 @@ public class CongratulationsScene {
         // 绿色按钮（示例：都跳到 Certificates）
         Button printBtn = greenButton("Print Certificate", PRINT_X, PRINT_Y);
         Button backBtn  = greenButton("Return to Main Menu", BACK_X, BACK_Y);
-        printBtn.setOnAction(e -> stage.setScene(CertificatesScene.createScene(stage)));
-        backBtn.setOnAction(e -> stage.setScene(new typingNinja.view.MainMenu().buildScene(stage)));
+        printBtn.setOnAction(e -> CertificatesScene.show(stage));
+        backBtn.setOnAction(e -> new typingNinja.view.MainMenu().show(stage));
 
 
 // 数据10次
@@ -193,16 +203,22 @@ public class CongratulationsScene {
         viewport.setAlignment(Pos.CENTER);
         viewport.setStyle("-fx-background-color: " + BG + ";");
 
-        Scene scene = new Scene(viewport, 1280, 720, Color.web(BG));
-
         // 等比缩放绑定
         scalable.scaleXProperty().bind(Bindings.createDoubleBinding(
-                () -> Math.min(scene.getWidth() / DESIGN_W, scene.getHeight() / DESIGN_H),
-                scene.widthProperty(), scene.heightProperty()
+                () -> {
+                    double w = viewport.getWidth();
+                    double h = viewport.getHeight();
+                    if (w <= 0 || h <= 0) {
+                        return 1.0;
+                    }
+                    return Math.min(w / DESIGN_W, h / DESIGN_H);
+                },
+                viewport.widthProperty(),
+                viewport.heightProperty()
         ));
         scalable.scaleYProperty().bind(scalable.scaleXProperty());
 
-        return scene;
+        return viewport;
     }
 
     /**

@@ -1,11 +1,9 @@
 package typingNinja.controllers;
 
+import javafx.scene.Scene;
 import typingNinja.model.SettingsDAO;
 import typingNinja.view.MainMenu;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
@@ -16,6 +14,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import typingNinja.util.SceneNavigator;
 
 public class SettingsController {
 
@@ -85,29 +84,13 @@ public class SettingsController {
     private void goMainMenu() {
         Stage stage = (Stage) navMainMenu.getScene().getWindow();
         MainMenu mm = new MainMenu();
-        Scene scene = mm.buildScene(stage);
-        stage.setScene(scene);
-        stage.setTitle("Typing Ninja");
-        stage.centerOnScreen();
-        stage.setFullScreen(true);
-        stage.setFullScreenExitHint("");
+        mm.show(stage);
     }
 
     private void switchTo(String fxmlPath, String title) {
         try {
             Stage stage = (Stage) navProfile.getScene().getWindow();
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Parent root = loader.load();
-            Scene current = stage.getScene();
-            if (current == null) {
-                stage.setScene(new Scene(root));
-            } else {
-                current.setRoot(root);
-            }
-            stage.setTitle(title);
-            stage.centerOnScreen();
-            stage.setFullScreen(true);
-            stage.setFullScreenExitHint("");
+            SceneNavigator.load(stage, fxmlPath, title);
         } catch (Exception ex) {
             ex.printStackTrace();
         }

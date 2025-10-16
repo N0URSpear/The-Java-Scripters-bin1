@@ -36,10 +36,8 @@ import typingNinja.model.SettingsDAO.SettingsRecord;
 import typingNinja.view.CongratulationsScene;
 import typingNinja.view.MainMenu;
 
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
+import typingNinja.util.SceneNavigator;
 
 public class LessonActivePageController {
     @FXML private HBox buttonBar;
@@ -234,20 +232,7 @@ public class LessonActivePageController {
                 ? (Stage) pauseButton.getScene().getWindow() : null;
         if (stage == null) return;
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/typingNinja/Settings.fxml"));
-            Parent root = loader.load();
-            Scene scene = stage.getScene();
-            if (scene == null) {
-                scene = new Scene(root);
-                stage.setScene(scene);
-            }
-            else {
-                scene.setRoot(root);
-            }
-            stage.setTitle("Settings - Typing Ninja");
-            stage.centerOnScreen();
-            stage.setFullScreen(true);
-            stage.setFullScreenExitHint("");
+            SceneNavigator.load(stage, "/typingNinja/Settings.fxml", "Settings - Typing Ninja");
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -262,12 +247,7 @@ public class LessonActivePageController {
         if (stage == null) return;
         try {
             MainMenu mainMenu = new MainMenu();
-            Scene scene = mainMenu.buildScene(stage);
-            stage.setScene(scene);
-            stage.setTitle("Typing Ninja");
-            stage.centerOnScreen();
-            stage.setFullScreen(true);
-            stage.setFullScreenExitHint("");
+            mainMenu.show(stage);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -282,12 +262,7 @@ public class LessonActivePageController {
                     : null;
         if (stage == null) return;
         try {
-            Scene scene = CongratulationsScene.createScene(stage);
-            stage.setScene(scene);
-            stage.setTitle("Lesson Results - Typing Ninja");
-            stage.centerOnScreen();
-            stage.setFullScreen(true);
-            stage.setFullScreenExitHint("");
+            CongratulationsScene.show(stage);
         } catch (Exception ex) {
             ex.printStackTrace();
             returnToHome();

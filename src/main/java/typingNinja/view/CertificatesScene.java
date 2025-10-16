@@ -4,7 +4,6 @@ import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -18,20 +17,20 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.time.LocalDate;
+import java.io.IOException;
 
 
 import javafx.scene.Cursor;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import javafx.fxml.FXMLLoader;
-import java.io.IOException;
-
 import java.io.File;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+
+import typingNinja.util.SceneNavigator;
+import typingNinja.view.MainMenu;
+import javafx.scene.Parent;
 
 public class CertificatesScene {
 
@@ -91,13 +90,13 @@ public class CertificatesScene {
         Label settings = navLabel("SETTINGS",  false);
 
         // 点击行为（复制 MainMenu 的跳转方式）
-        asButton(mainMenu, () -> stage.setScene(new typingNinja.view.MainMenu().buildScene(stage)));
+        asButton(mainMenu, () -> new MainMenu().show(stage));
 
-        asButton(profile, () -> switchTo(stage,
-                "/com/example/addressbook/Profile.fxml",
+        asButton(profile, () -> navigate(stage,
+                "/typingNinja/Profile.fxml",
                 "Profile - Typing Ninja"));
-        asButton(settings, () -> switchTo(stage,
-                "/com/example/addressbook/Settings.fxml",
+        asButton(settings, () -> navigate(stage,
+                "/typingNinja/Settings.fxml",
                 "Settings - Typing Ninja"));
 
         // 水平排布 + 居中 + 贴底
@@ -131,15 +130,9 @@ public class CertificatesScene {
      * @param fxml  the classpath path of the FXML resource
      * @param title the window title for the new scene
      */
-    // 若项目里暂无 switchTo，这里给一个本地最小实现（已有就删掉这段）
-    private static void switchTo(Stage stage, String fxml, String title) {
+    private static void navigate(Stage stage, String fxml, String title) {
         try {
-            Parent root = FXMLLoader.load(CertificatesScene.class.getResource(fxml));
-
-            Scene sc = new Scene(root, stage.getScene() != null ? stage.getScene().getWidth() : 1280,
-                    stage.getScene() != null ? stage.getScene().getHeight() : 720);
-            stage.setTitle(title);
-            stage.setScene(sc);
+            SceneNavigator.load(stage, fxml, title);
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -147,12 +140,15 @@ public class CertificatesScene {
 
 
     /**
-     * Build and return the main Certificates scene.
+     * Display the certificates screen on the primary stage while preserving the existing scene instance.
      *
-     * @param stage the Stage used to size and host the scene
-     * @return the Scene for the Certificates screen
+     * @param stage the Stage used to size and host the view
      */
-    public static Scene createScene(Stage stage) {
+    public static void show(Stage stage) {
+        SceneNavigator.show(stage, createView(stage), "Certificates - Typing Ninja");
+    }
+
+    public static Parent createView(Stage stage) {
         // 设计层
         Pane design = new Pane();
         design.setPrefSize(DESIGN_W, DESIGN_H);
@@ -202,7 +198,7 @@ public class CertificatesScene {
         backBtn.setPrefHeight(58);
         backBtn.setStyle("-fx-background-color: " + GREEN + "; -fx-background-radius: 10;");
         backBtn.setFont(Font.font("Jaro", 40));
-        backBtn.setOnAction(e -> stage.setScene(typingNinja.view.CongratulationsScene.createScene(stage)));
+        backBtn.setOnAction(e -> CongratulationsScene.show(stage));
 
         // 底部 3 个文字按钮
         design.getChildren().add(buildBottomNav(stage, design));
@@ -216,15 +212,21 @@ public class CertificatesScene {
         viewport.setAlignment(Pos.CENTER);
         viewport.setStyle("-fx-background-color: " + BG + ";");
 
-        Scene scene = new Scene(viewport, 1280, 720, Color.web(BG));
-
         scalable.scaleXProperty().bind(Bindings.createDoubleBinding(
-                () -> Math.min(scene.getWidth() / DESIGN_W, scene.getHeight() / DESIGN_H),
-                scene.widthProperty(), scene.heightProperty()
+                () -> {
+                    double w = viewport.getWidth();
+                    double h = viewport.getHeight();
+                    if (w <= 0 || h <= 0) {
+                        return 1.0;
+                    }
+                    return Math.min(w / DESIGN_W, h / DESIGN_H);
+                },
+                viewport.widthProperty(),
+                viewport.heightProperty()
         ));
         scalable.scaleYProperty().bind(scalable.scaleXProperty());
 
-        return scene;
+        return viewport;
     }
 
     // 从数据库加载，并渲染每条 typingNinja.model.Result 一行 + 按钮

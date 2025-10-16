@@ -12,6 +12,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.*;
 import javafx.fxml.FXMLLoader;
+import typingNinja.util.SceneNavigator;
+
+import java.util.Objects;
 
 public class MainMenu {
 
@@ -21,7 +24,31 @@ public class MainMenu {
     // Maximize only the first time we open Main Menu in this run
     private static boolean FIRST_OPEN = true;
 
-    public Scene buildScene(Stage stage) {
+    public void show(Stage stage) {
+        Parent root = buildView(stage);
+        SceneNavigator.show(stage, root, "Main Menu - Typing Ninja");
+
+        // Apply stylesheet once the scene exists
+        var scene = stage.getScene();
+        String css = null;
+        try {
+            css = Objects.requireNonNull(getClass().getResource("/typingNinja/NinjaStyles.css")).toExternalForm();
+        } catch (Exception ignored) {}
+        if (scene != null && css != null && !scene.getStylesheets().contains(css)) {
+            scene.getStylesheets().add(css);
+        }
+
+        // Maximise on first open to eliminate window resizing flashes
+        if (FIRST_OPEN) {
+            FIRST_OPEN = false;
+            javafx.application.Platform.runLater(() -> {
+                stage.setMaximized(true);
+                SceneNavigator.ensureFullscreen(stage);
+            });
+        }
+    }
+
+    public Parent buildView(Stage stage) {
         Font.loadFont(getClass().getResourceAsStream("/com/example/typingNinja/fonts/Jaro-Regular.ttf"), 10);
         Font.loadFont(getClass().getResourceAsStream("/com/example/typingNinja/fonts/Inter-VariableFont.ttf"), 10);
 
@@ -157,30 +184,10 @@ public class MainMenu {
         outer.setBackground(new Background(new BackgroundFill(Color.web("#140B38"),
                 CornerRadii.EMPTY, Insets.EMPTY)));
 
-        Scene scene = new Scene(outer, BASE_WIDTH, BASE_HEIGHT);
-
-        try {
-            scene.getStylesheets().add(
-                    getClass().getResource("/typingNinja/NinjaStyles.css").toExternalForm()
-            );
-        } catch (Exception ignored) {}
-
         // Bind scaling (scene-based) and listen to stage too
         bindDpiNeutralScale(outer, content, stage);
 
-        // Maximize on first open
-        if (FIRST_OPEN) {
-            FIRST_OPEN = false;
-            javafx.application.Platform.runLater(() -> {
-                if (!stage.isShowing()) {
-                    javafx.application.Platform.runLater(() -> stage.setMaximized(true));
-                } else {
-                    stage.setMaximized(true);
-                }
-            });
-        }
-
-        return scene;
+        return outer;
     }
 
     private VBox createLessonBox(String headingText, String descriptionText) {
@@ -217,18 +224,7 @@ public class MainMenu {
 
     private void switchTo(Stage stage, String fxmlPath, String title) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Parent root = loader.load();
-            Scene current = stage.getScene();
-            if (current == null) {
-                stage.setScene(new Scene(root));
-            } else {
-                current.setRoot(root);
-            }
-            if (title != null && !title.isEmpty()) stage.setTitle(title);
-            stage.centerOnScreen();
-            stage.setFullScreen(true);
-            stage.setFullScreenExitHint("");
+            SceneNavigator.load(stage, fxmlPath, title);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
