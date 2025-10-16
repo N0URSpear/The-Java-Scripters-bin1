@@ -24,4 +24,18 @@ public class SqliteConnection {
         }
         return instance;
     }
+
+    /**
+     * Test-only hook that lets unit tests isolate themselves by closing and nulling the singleton.
+     * Production code should never call this.
+     */
+    public static void resetForTests() {
+        if (instance != null) {
+            try {
+                instance.close();
+            } catch (SQLException ignored) {
+            }
+            instance = null;
+        }
+    }
 }

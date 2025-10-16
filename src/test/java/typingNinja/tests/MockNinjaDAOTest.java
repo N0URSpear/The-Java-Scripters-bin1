@@ -1,14 +1,14 @@
-package typingNinja;
+package typingNinja.tests;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import typingNinja.model.MockNinjaDAO;
+import typingNinja.model.NinjaUser;
 
 import java.lang.reflect.Method;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import typingNinja.model.MockNinjaDAO;
-import typingNinja.model.NinjaUser;
 
 class MockNinjaDAOTest {
 
@@ -24,13 +24,12 @@ class MockNinjaDAOTest {
 
     @BeforeEach
     void setUp() {
-        // 如果 MockNinjaDAO 提供了静态 clearAll()，优先清空全局状态
         try {
             Method m = MockNinjaDAO.class.getDeclaredMethod("clearAll");
             m.setAccessible(true);
             m.invoke(null);
         } catch (Exception ignored) {
-            // 没有也没关系；下面还会用“唯一用户名”避免冲突
+            // If the helper doesn't exist we rely on unique usernames.
         }
         dao = new MockNinjaDAO();
     }
@@ -46,7 +45,6 @@ class MockNinjaDAOTest {
         dao.addNinjaUser(u1);
         dao.addNinjaUser(u2);
 
-        // ✅ 不再假定从 0 开始；只要求自增且连续
         assertTrue(u2.getId() == u1.getId() + 1, "id should be incremental");
 
         NinjaUser got = dao.getNinjaUser(a);
@@ -61,7 +59,6 @@ class MockNinjaDAOTest {
         NinjaUser u = make(a, "oldHash");
         dao.addNinjaUser(u);
 
-        // 修改“同一个实例”并更新
         u.setPasswordHash("newHash");
         dao.updateNinjaUser(u);
 
@@ -77,19 +74,15 @@ class MockNinjaDAOTest {
         String b = unique("bob");
 
         NinjaUser alice = make(a, "h1");
-        NinjaUser bob   = make(b, "h2");
+        NinjaUser bob = make(b, "h2");
 
         dao.addNinjaUser(alice);
         dao.addNinjaUser(bob);
 
-        // ✅ 用“当初 add 的同一个实例”删除，避免因防御性拷贝删不掉
         dao.deleteNinjaUser(alice);
 
         assertNull(dao.getNinjaUser(a), "Alice should be removed");
         assertNotNull(dao.getNinjaUser(b), "Bob should still exist");
-
-        // （可选）如果 Mock 维护列表大小正确，可启用：
-        // assertEquals(1, dao.getAllNinjas().size());
     }
 
     @Test
@@ -97,7 +90,7 @@ class MockNinjaDAOTest {
         dao.addNinjaUser(make(unique("alice"), "h1"));
         List<NinjaUser> list = dao.getAllNinjas();
         int size = list.size();
-        list.clear();                 // 修改外部列表不应影响内部存储
+        list.clear();
         assertEquals(size, dao.getAllNinjas().size());
     }
 

@@ -1,11 +1,12 @@
-package typingNinja.controllers;
+package typingNinja.tests.controllers;
 
-import typingNinja.model.INinjaContactDAO;
-import typingNinja.model.MockNinjaDAO;
-import typingNinja.model.NinjaUser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mindrot.jbcrypt.BCrypt;
+import typingNinja.controllers.LoginController;
+import typingNinja.model.INinjaContactDAO;
+import typingNinja.model.MockNinjaDAO;
+import typingNinja.model.NinjaUser;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -17,8 +18,6 @@ public class LoginControllerTest {
 
     @BeforeEach
     void setUp() {
-
-        // reset the in-memory DAO between tests
         MockNinjaDAO.clearAll();
         mockDao = new MockNinjaDAO();
         controller = new LoginController(mockDao);
@@ -27,13 +26,13 @@ public class LoginControllerTest {
 
     @Test
     void loginFailsWhenUserNotFound() {
-        controller.doLogin("notaUser","Password");
+        controller.doLogin("notaUser", "Password");
         assertFalse(controller.isLoginSuccessful());
     }
 
     @Test
     void loginFailsWithWrongPassword() {
-        NinjaUser user = new NinjaUser("testUser", BCrypt.hashpw("correctPass", BCrypt.gensalt()),"Q1","Q2","Q1","Q2");
+        NinjaUser user = new NinjaUser("testUser", BCrypt.hashpw("correctPass", BCrypt.gensalt()), "Q1", "Q2", "Q1", "Q2");
         mockDao.addNinjaUser(user);
 
         controller.doLogin("testUser", "wrongPass");
@@ -43,7 +42,7 @@ public class LoginControllerTest {
 
     @Test
     void loginSucceedsWithCorrectPassword() {
-        NinjaUser user = new NinjaUser("testUser", BCrypt.hashpw("correctPass", BCrypt.gensalt()),"Q1","Q2","Q1","Q2");
+        NinjaUser user = new NinjaUser("testUser", BCrypt.hashpw("correctPass", BCrypt.gensalt()), "Q1", "Q2", "Q1", "Q2");
         mockDao.addNinjaUser(user);
 
         controller.doLogin("testUser", "correctPass");

@@ -1,13 +1,13 @@
-package typingNinja.controllers;
+package typingNinja.tests.controllers;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mindrot.jbcrypt.BCrypt;
+import typingNinja.controllers.ForgotPasswordController;
+import typingNinja.controllers.ForgotPasswordController.ForgotPasswordResult;
 import typingNinja.model.INinjaContactDAO;
 import typingNinja.model.MockNinjaDAO;
 import typingNinja.model.NinjaUser;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import typingNinja.controllers.ForgotPasswordController.ForgotPasswordResult;
-import org.mindrot.jbcrypt.BCrypt;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -18,8 +18,6 @@ public class ForgotPasswordControllerTest {
 
     @BeforeEach
     void setUp() {
-
-        // reset the in-memory DAO between tests
         MockNinjaDAO.clearAll();
         mockDao = new MockNinjaDAO();
         controller = new ForgotPasswordController(mockDao);
@@ -28,7 +26,6 @@ public class ForgotPasswordControllerTest {
         controller.setTestMode(true);
     }
 
-    // Stage 1
     @Test
     void testStage1_emptyUsername() {
         assertEquals(ForgotPasswordResult.EMPTY_USERNAME, controller.validateStage1(""));
@@ -44,10 +41,9 @@ public class ForgotPasswordControllerTest {
         assertEquals(ForgotPasswordResult.SUCCESS, controller.validateStage1("testUser"));
     }
 
-    // Stage 2
     @Test
     void stage2_blankAnswers() {
-        controller.validateStage1("testUser"); // load ninja
+        controller.validateStage1("testUser");
         assertEquals(ForgotPasswordResult.EMPTY_SECRET_ANSWERS,
                 controller.validateStage2("", ""));
     }
@@ -66,7 +62,6 @@ public class ForgotPasswordControllerTest {
                 controller.validateStage2("testQ1Answer", "testQ2Answer"));
     }
 
-    // Stage 3
     @Test
     void stage3_emptyPassword() {
         controller.validateStage1("testUser");
@@ -95,11 +90,8 @@ public class ForgotPasswordControllerTest {
 
         assertEquals(ForgotPasswordResult.SUCCESS, result);
 
-        // fetch updated user from DAO
         NinjaUser updated = mockDao.getNinjaUser("testUser");
         assertNotNull(updated);
         assertNotEquals("testPassword", updated.getPasswordHash());
     }
-
-
 }

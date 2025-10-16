@@ -1,4 +1,4 @@
-package typingNinja;
+package typingNinja.tests;
 
 import javafx.application.Platform;
 import javafx.scene.Node;
@@ -10,6 +10,7 @@ import javafx.scene.shape.Rectangle;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import typingNinja.view.widgets.Table;
 
 import java.util.List;
 
@@ -19,23 +20,22 @@ class TableTest {
 
     @BeforeAll
     static void initJavaFx() {
-
         try {
-            Platform.startup(() -> { /* no-op */ });
+            Platform.startup(() -> {});
         } catch (IllegalStateException ignore) {
         }
     }
 
     @Test
-    @DisplayName("create(): 返回根节点且尺寸与入参一致")
+    @DisplayName("create(): returns root node with requested sizing")
     void create_returnsRootWithSizing() {
         double w = 485, h = 266;
         List<Integer> wpm = List.of(60, 70, 80);
         List<Integer> acc = List.of(95, 96, 97);
 
-        Node root = typingNinja.view.widgets.Table.create(w, h, wpm, acc);
+        Node root = Table.create(w, h, wpm, acc);
         assertNotNull(root);
-        assertTrue(root instanceof StackPane, "root 应为 StackPane");
+        assertTrue(root instanceof StackPane, "Root should be a StackPane");
 
         StackPane sp = (StackPane) root;
         assertEquals(w, sp.getPrefWidth(), 0.0001);
@@ -47,35 +47,32 @@ class TableTest {
     }
 
     @Test
-    @DisplayName("create(): 含一张 LineChart，且 series 数量为 2、每个长度等于输入长度")
+    @DisplayName("create(): contains a LineChart with two series matching input lengths")
     void create_containsLineChartWithTwoSeriesMatchingLengths() {
         double w = 521, h = 223;
         List<Integer> wpm = List.of(50, 55, 58, 60, 62);
         List<Integer> acc = List.of(90, 91, 92, 93, 94);
         int n = wpm.size();
 
-        Node root = typingNinja.view.widgets.Table.create(w, h, wpm, acc);
+        Node root = Table.create(w, h, wpm, acc);
         LineChart<Number, Number> chart = find(root, LineChart.class);
-        assertNotNull(chart, "应找到 LineChart");
+        assertNotNull(chart, "LineChart should be present");
 
         List<XYChart.Series<Number, Number>> data = chart.getData();
-        assertEquals(2, data.size(), "应有两条系列（WPM 与 Accuracy）");
-
-        // 两条系列都应与输入等长（不假设系列顺序/命名）
+        assertEquals(2, data.size(), "Expect two series (WPM and Accuracy)");
         for (XYChart.Series<Number, Number> s : data) {
-            assertEquals(n, s.getData().size(), "series 长度应等于输入长度");
+            assertEquals(n, s.getData().size(), "Each series should match input length");
         }
     }
 
     @Test
-    @DisplayName("create(): wrapper StackPane 具备 10px 内边距")
+    @DisplayName("create(): wrapper StackPane has 10px padding")
     void create_wrapperHasPadding10() {
-        Node root = typingNinja.view.widgets.Table.create(400, 200,
+        Node root = Table.create(400, 200,
                 List.of(1, 2, 3), List.of(90, 91, 92));
 
-        // wrapper = 包着 LineChart 的那个 StackPane
         StackPane wrapper = findStackPaneWithChild(root, LineChart.class);
-        assertNotNull(wrapper, "应找到包含 LineChart 的 wrapper StackPane");
+        assertNotNull(wrapper, "Wrapper around the chart should exist");
         assertEquals(10.0, wrapper.getPadding().getTop(), 0.0001);
         assertEquals(10.0, wrapper.getPadding().getRight(), 0.0001);
         assertEquals(10.0, wrapper.getPadding().getBottom(), 0.0001);
@@ -83,20 +80,17 @@ class TableTest {
     }
 
     @Test
-    @DisplayName("create(): 背景矩形尺寸等于传入宽高")
+    @DisplayName("create(): background rectangle matches requested size")
     void create_backgroundRectangleFills() {
         double w = 300, h = 150;
-        Node root = typingNinja.view.widgets.Table.create(w, h,
+        Node root = Table.create(w, h,
                 List.of(10, 20), List.of(95, 96));
 
         Rectangle bg = find(root, Rectangle.class);
-        assertNotNull(bg, "应找到背景 Rectangle");
-        // 代码中直接 new Rectangle(width, height)，因此可直接比对 width/height
+        assertNotNull(bg, "Background rectangle should exist");
         assertEquals(w, bg.getWidth(), 0.0001);
         assertEquals(h, bg.getHeight(), 0.0001);
     }
-
-    // --------- 小工具：在节点树中查找某类型节点 ----------
 
     private static <T extends Node> T find(Node root, Class<T> type) {
         if (type.isInstance(root)) return type.cast(root);

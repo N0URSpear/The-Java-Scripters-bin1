@@ -106,7 +106,7 @@ public class CreateAccountController {
      * @param answer1 the provided answer to the first question
      * @param answer2 the provided answer to the second question
      */
-    void doCreateAccount(String username, String password, String repeatPassword, String secretQ1, String secretQ2, String answer1, String answer2) {
+    public void doCreateAccount(String username, String password, String repeatPassword, String secretQ1, String secretQ2, String answer1, String answer2) {
         isCreateAccountSuccessful = false;
         if (username == null || username.isEmpty()) {
             showError("Username cannot be empty.");

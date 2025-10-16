@@ -1,12 +1,12 @@
-package typingNinja;
+package typingNinja.tests;
 
 import org.junit.jupiter.api.Test;
+import typingNinja.model.SqliteConnection;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
 import static org.junit.jupiter.api.Assertions.*;
-import typingNinja.model.SqliteConnection;
 
 class SqliteConnectionTest {
 
@@ -21,13 +21,6 @@ class SqliteConnectionTest {
     void getInstance_calledTwice_shouldReturnSameConnectionIfSingleton() throws SQLException {
         Connection c1 = SqliteConnection.getInstance();
         Connection c2 = SqliteConnection.getInstance();
-
-        // 若你的实现是“单例连接”，保留这一句：
         assertSame(c1, c2, "Expecting the same Connection instance (singleton)");
-
-        // 若你的实现每次新建连接，把上一句换成：
-        // assertNotSame(c1, c2);
-        // 并可增加一致性检查（同一 DB）：
-        // assertEquals(c1.getMetaData().getURL(), c2.getMetaData().getURL());
     }
 }
