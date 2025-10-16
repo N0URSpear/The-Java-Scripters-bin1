@@ -45,10 +45,7 @@ public class MetricsTestApp extends Application {
                 typingNinja.model.ResultsBridge.ensureTable();
                 typingNinja.model.ResultsBridge.saveResult(wpm, acc);
 
-                // 传入当前 stage，匹配 createScene(Stage) 的签名
-                Scene congrats = typingNinja.view.CongratulationsScene.createScene(stage);
-                stage.setScene(congrats);
-                stage.centerOnScreen();
+                typingNinja.view.CongratulationsScene.show(stage);
 
             } catch (Exception ex) {
                 new Alert(Alert.AlertType.ERROR, "输入或保存失败：\n" + ex.getMessage()).showAndWait();
