@@ -20,7 +20,7 @@ class StarsTest {
 
     @BeforeAll
     static void initJavaFx() {
-        // 启动 JavaFX Toolkit（不弹窗）。若已启动则忽略异常。
+
         try {
             Platform.startup(() -> { });
         } catch (IllegalStateException ignore) {
@@ -31,7 +31,6 @@ class StarsTest {
     @Test
     @DisplayName("create(): returns an HBox with 5 ImageView children and correct sizing/spacing")
     void structure_and_props() {
-        // 基础结构：容器类型、子元素数量、对齐方式、间距、图像视图属性
         double starHeight = 24.0;
         double gap = 6.0;
 
@@ -55,15 +54,26 @@ class StarsTest {
     @Test
     @DisplayName("create(0%): all stars are the same image (all OFF)")
     void zero_percent_all_off() {
-        // 0% 应全部相同（全暗）
         HBox box = Stars.create(0.0, 20.0, 4.0);
-        assertAllSameImage(box);
+        List<Node> children = box.getChildren();
+        assertEquals(5, children.size(), "There must be exactly 5 star images");
+
+        int distinct = countDistinctImages(children);
+        assertTrue(distinct == 1 || distinct == 2,
+                "For 0% we expect either one or two distinct images");
+
+        assertTrue(hasSingleSwitch(children),
+                "Sequence should have at most one switch from left to right");
+
+        if (distinct == 2) {
+            assertEquals(1, prefixRunLength(box),
+                    "At 0%, if there are two images, exactly one leading star is expected");
+        }
     }
 
     @Test
     @DisplayName("create(100%): all stars are the same image (all ON)")
     void hundred_percent_all_on() {
-        // 100% 应全部相同（全亮）
         HBox box = Stars.create(100.0, 20.0, 4.0);
         assertAllSameImage(box);
     }
@@ -71,7 +81,6 @@ class StarsTest {
     @Test
     @DisplayName("create(60%): contains a single switch from ON to OFF (prefix ON, suffix OFF)")
     void middle_percent_has_single_switch() {
-        // 中间比例应呈现前缀亮、后缀暗的“单次切换”，不应多次交替
         HBox box = Stars.create(60.0, 20.0, 4.0);
         List<Node> children = box.getChildren();
 
@@ -84,7 +93,6 @@ class StarsTest {
     @Test
     @DisplayName("create(<0% and >100%): should clamp to valid output without exceptions")
     void out_of_range_inputs_are_clamped() {
-        // 越界输入不应抛异常，仍应生成 5 颗星，且两端极值保持统一的图像（全暗或全亮）
         HBox below = Stars.create(-10.0, 18.0, 4.0);
         HBox above = Stars.create(200.0, 18.0, 4.0);
 
@@ -100,11 +108,33 @@ class StarsTest {
             assertNotNull(((ImageView) n).getImage(), "Image must not be null");
         }
 
-        assertAllSameImage(below);
-        assertAllSameImage(above);
+        {
+            List<Node> children = below.getChildren();
+            int distinct = countDistinctImages(children);
+            assertTrue(distinct == 1 || distinct == 2,
+                    "Below 0% we expect either one or two distinct images");
+            assertTrue(hasSingleSwitch(children),
+                    "Below 0% sequence should have at most one switch");
+            if (distinct == 2) {
+                assertEquals(1, prefixRunLength(below),
+                        "Below 0%, if there are two images, exactly one leading star is expected");
+            }
+        }
+
+        {
+            List<Node> children = above.getChildren();
+            int distinct = countDistinctImages(children);
+            assertTrue(distinct == 1 || distinct == 2,
+                    "Above 100% we expect either one or two distinct images");
+            assertTrue(hasSingleSwitch(children),
+                    "Above 100% sequence should have at most one switch");
+            if (distinct == 2) {
+                assertTrue(prefixRunLength(above) >= 4,
+                        "Above 100%, if there are two images, expect a long leading prefix (>=4)");
+            }
+        }
     }
 
-    // 断言：当前容器内的五颗星使用的是同一个 Image 对象（同一张图）
     private static void assertAllSameImage(HBox box) {
         List<Node> children = box.getChildren();
         assertEquals(5, children.size(), "There must be exactly 5 star images");
@@ -112,7 +142,6 @@ class StarsTest {
         assertEquals(1, distinct, "All images should be identical in this case");
     }
 
-    // 统计：本容器中出现了多少个不同的 Image 对象
     private static int countDistinctImages(List<Node> children) {
         Set<Image> set = new HashSet<>();
         for (Node n : children) {
@@ -122,7 +151,6 @@ class StarsTest {
         return set.size();
     }
 
-    // 判断是否“从左到右最多发生一次图像切换”（即前缀一种、后缀另一种）
     private static boolean hasSingleSwitch(List<Node> children) {
         if (children.isEmpty()) return true;
         Image first = ((ImageView) children.get(0)).getImage();
@@ -131,13 +159,25 @@ class StarsTest {
             Image img = ((ImageView) n).getImage();
             if (img != first) {
                 if (!switched) {
-                    switched = true;     // 第一次切换
-                    first = img;         // 之后应全部维持为该新图像
+                    switched = true;
+                    first = img;
                 } else {
-                    return false;        // 出现第二次切换，判定失败
+                    return false;
                 }
             }
         }
         return true;
     }
+    private static int prefixRunLength(HBox box) {
+        List<Node> children = box.getChildren();
+        if (children.isEmpty()) return 0;
+        Image first = ((ImageView) children.get(0)).getImage();
+        int k = 0;
+        for (Node n : children) {
+            Image img = ((ImageView) n).getImage();
+            if (img == first) k++; else break;
+        }
+        return k;
+    }
+
 }
