@@ -23,11 +23,9 @@ class CertificatesSceneTest {
 
     @BeforeAll
     static void initJavaFx() {
-        // 启动 JavaFX Toolkit（不弹窗）。若已启动则忽略异常。
         try {
             Platform.startup(() -> { /* no-op */ });
         } catch (IllegalStateException ignore) {
-            // 已经启动
         }
     }
 
@@ -42,7 +40,7 @@ class CertificatesSceneTest {
             assertEquals(720, scene.getHeight(), 1e-6, "Scene height should be 720");
             assertNotNull(scene.getRoot(), "Scene root should not be null");
 
-            // 标题应包含 “CERTIFICATES”（忽略大小写）
+
             List<String> texts = collectAllText(scene.getRoot());
             boolean hasTitle = texts.stream().anyMatch(s -> s.equals("certificates"));
             assertTrue(hasTitle, "Scene should show a 'CERTIFICATES' title");
@@ -84,7 +82,7 @@ class CertificatesSceneTest {
             Scene scene = CertificatesScene.createScene(new Stage());
             List<Button> buttons = findAll(scene.getRoot(), Button.class);
 
-            // 列表可能为空：如果找不到下载按钮，不视为失败；若找到了，则必须可点击。
+
             List<Button> downloads = new ArrayList<>();
             for (Button b : buttons) {
                 if (b.getText() != null && b.getText().toLowerCase(Locale.ROOT).contains("download")
@@ -98,9 +96,6 @@ class CertificatesSceneTest {
         });
     }
 
-    // ----------------- 辅助方法（中文注释） -----------------
-
-    // 在 FX 线程中执行 runnable；若抛异常则在测试线程中重新抛出
     private static void runOnFxThread(Runnable r) {
         RuntimeException[] ex = new RuntimeException[1];
         Error[] err = new Error[1];
@@ -128,7 +123,6 @@ class CertificatesSceneTest {
         if (err[0] != null) throw err[0];
     }
 
-    // 广度优先收集某类型节点
     private static <T extends Node> List<T> findAll(Node root, Class<T> type) {
         List<T> out = new ArrayList<>();
         if (root == null) return out;
@@ -142,7 +136,6 @@ class CertificatesSceneTest {
         return out;
     }
 
-    // 收集所有 Label/Text 的文本并统一为小写，便于匹配
     private static List<String> collectAllText(Node root) {
         List<String> texts = new ArrayList<>();
         for (Label l : findAll(root, Label.class)) {
@@ -158,7 +151,6 @@ class CertificatesSceneTest {
         return texts;
     }
 
-    // 字符串等值（忽略大小写与首尾空格）
     private static boolean textEquals(String a, String b) {
         if (a == null || b == null) return false;
         return a.trim().equalsIgnoreCase(b.trim());
