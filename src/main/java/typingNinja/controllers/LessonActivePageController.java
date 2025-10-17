@@ -39,6 +39,9 @@ import typingNinja.view.MainMenu;
 import javafx.stage.Stage;
 import typingNinja.util.SceneNavigator;
 
+/**
+ * Main controller that orchestrates the active typing lesson experience.
+ */
 public class LessonActivePageController {
     @FXML private HBox buttonBar;
     @FXML private Button pauseButton;
@@ -471,6 +474,9 @@ public class LessonActivePageController {
     }
 
     @FXML
+    /**
+     * JavaFX lifecycle entry point that wires up bindings and loads the relevant lesson.
+     */
     private void initialize() {
         // Bootstraps UI bindings, pulls the latest lesson selection, and launches the timer.
         promptFlow.setMinWidth(0);

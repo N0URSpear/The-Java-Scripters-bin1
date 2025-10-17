@@ -9,6 +9,9 @@ import typingNinja.model.lesson.Metrics;
 
 import java.util.function.Consumer;
 
+/**
+ * Manages the lightweight input experience used by free typing lessons.
+ */
 public class FreeTypingInput {
     private final TextFlow userFlow;
     private final TextArea hiddenInput;
@@ -18,6 +21,15 @@ public class FreeTypingInput {
     private final Consumer<Text> cursorListener;
     private int index = 0;
 
+    /**
+     * Builds a new free typing handler around the shared UI nodes.
+     *
+     * @param userFlow visual container that mirrors the user's input
+     * @param hiddenInput backing text area that actually receives key events
+     * @param keyboard keyboard overlay used for highlighting
+     * @param metrics metrics recorder shared with the controller
+     * @param cursorListener callback invoked whenever the caret shifts
+     */
     public FreeTypingInput(TextFlow userFlow,
                            TextArea hiddenInput,
                            KeyboardHands keyboard,
@@ -35,6 +47,11 @@ public class FreeTypingInput {
         updateCursor();
     }
 
+    /**
+     * Responds to printable characters and commits them to the free typing flow.
+     *
+     * @param e key-typed event straight from the hidden text area
+     */
     public void onKeyTyped(KeyEvent e) {
         // Let every printable character update the display immediately so free typing feels live.
         String s = e.getCharacter();
@@ -52,6 +69,11 @@ public class FreeTypingInput {
         e.consume();
     }
 
+    /**
+     * Handles backspace so the user can correct mistakes.
+     *
+     * @param e physical key press event
+     */
     public void onKeyPressed(KeyEvent e) {
         // Backspace is the only control key we care about in this lightweight mode.
         if (e.getCode() == KeyCode.BACK_SPACE) {

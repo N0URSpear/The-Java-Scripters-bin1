@@ -2,6 +2,9 @@ package typingNinja.model.lesson;
 
 import java.util.*;
 
+/**
+ * Captures per-key and contextual mistake statistics during structured lessons.
+ */
 public class WeakKeyTracker {
     private final Map<Character, Integer> totals = new HashMap<>();
     private final Map<Character, Map<Character, Integer>> misinputs = new HashMap<>();
@@ -18,6 +21,13 @@ public class WeakKeyTracker {
         ALL_KEYS = Collections.unmodifiableList(keys);
     }
 
+    /**
+     * Records a mistake for the expected character under the supplied context.
+     *
+     * @param prevExpected character that preceded the mistake (nullable)
+     * @param expected character that should have been typed
+     * @param actual character that was actually typed
+     */
     public void record(Character prevExpected, char expected, char actual) {
         // Count this mistake by key, by misinput, and by the two-character context.
         if (!trackable(expected) || !trackable(actual)) return;
@@ -29,6 +39,9 @@ public class WeakKeyTracker {
                 .merge(actual, 1, Integer::sum);
     }
 
+    /**
+     * Indicates whether the tracker cares about the supplied character.
+     */
     public static boolean trackable(char c) {
         // Ignore control characters so we stay focused on printable keys.
         if (Character.isISOControl(c)) return false;
@@ -40,6 +53,12 @@ public class WeakKeyTracker {
         return (prev == null ? "\u0000" : String.valueOf(prev)) + "|" + expected;
     }
 
+    /**
+     * Builds the list of most troublesome expected/misinput pairs.
+     *
+     * @param k maximum number of pairs to include
+     * @return space-separated pairs, padded with {@code "--"}
+     */
     public String topPairsString(int k) {
         // Produce the most troublesome expected/misinput pairs for quick summaries.
         List<String> pairs = new ArrayList<>(k);
@@ -60,6 +79,12 @@ public class WeakKeyTracker {
         return String.join(" ", pairs);
     }
 
+    /**
+     * Builds the list of most troublesome previous/expected combinations.
+     *
+     * @param k maximum number of combinations to include
+     * @return space-separated pairs, padded with {@code "--"}
+     */
     public String topPrevExpectedPairsString(int k) {
         // Focus on two-character contexts so we can craft smarter free-typing prompts.
         java.util.List<String> out = new java.util.ArrayList<>(k);
@@ -137,10 +162,13 @@ public class WeakKeyTracker {
         }
         return best;
     }
-    // Expose totals for diagnostics without letting callers mutate them.
+    /** @return immutable view of total mistakes per expected key */
     public Map<Character, Integer> totals() { return Collections.unmodifiableMap(totals); }
-    // Same idea for misinput breakdowns.
+    /** @return immutable view of misinput breakdowns per expected key */
     public Map<Character, Map<Character, Integer>> misinputs() { return Collections.unmodifiableMap(misinputs); }
+    /**
+     * @return formatted diagnostic string containing totals, misinputs, and context data
+     */
     public String debugDump() {
         // Handy textual report for console debugging and unit tests.
         StringBuilder sb = new StringBuilder();
@@ -199,6 +227,9 @@ public class WeakKeyTracker {
         return sb.toString();
     }
 
+    /**
+     * Returns an ordered map containing every trackable key with a count.
+     */
     public java.util.Map<Character, Integer> totalsAllKeys() {
         // Return a stable map covering every key so UI rendering is easy.
         java.util.LinkedHashMap<Character, Integer> out = new java.util.LinkedHashMap<>(ALL_KEYS.size());

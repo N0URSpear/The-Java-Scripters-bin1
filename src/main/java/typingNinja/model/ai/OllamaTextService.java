@@ -9,6 +9,9 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 
+/**
+ * Talks to a local Ollama server to generate higher quality passages when available.
+ */
 public class OllamaTextService implements AITextService {
     private static final String BASE =
             System.getenv("OLLAMA_BASE_URL") != null ? System.getenv("OLLAMA_BASE_URL") : "http://localhost:11434";

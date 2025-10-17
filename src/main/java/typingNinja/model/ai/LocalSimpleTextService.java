@@ -2,6 +2,9 @@ package typingNinja.model.ai;
 
 import java.util.*;
 
+/**
+ * Generates deterministic pseudo-random passages without hitting an external AI.
+ */
 public class LocalSimpleTextService implements AITextService {
 
     @Override

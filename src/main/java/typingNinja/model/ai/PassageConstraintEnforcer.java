@@ -3,6 +3,9 @@ package typingNinja.model.ai;
 import java.util.Locale;
 import java.util.Set;
 
+/**
+ * Normalises AI output so it strictly respects the user's character toggles.
+ */
 final class PassageConstraintEnforcer {
     private static final Set<Character> PUNCTUATION = Set.of(
             '.', ',', ';', ':', '!', '?', '\'', '"', '-'
@@ -15,6 +18,17 @@ final class PassageConstraintEnforcer {
 
     private PassageConstraintEnforcer() { }
 
+    /**
+     * Cleans up a passage, removing forbidden character categories and inserting
+     * at least one of each enabled category.
+     *
+     * @param text raw passage returned from an AI provider
+     * @param includeUpper whether uppercase should appear
+     * @param includeNumbers whether digits should appear
+     * @param includePunct whether punctuation should appear
+     * @param includeSpecial whether special symbols should appear
+     * @return sanitised passage string
+     */
     static String enforce(String text,
                           boolean includeUpper,
                           boolean includeNumbers,

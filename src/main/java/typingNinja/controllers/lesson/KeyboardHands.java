@@ -14,6 +14,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Renders a virtual keyboard and hand hints to coach finger positioning.
+ */
 public class KeyboardHands {
     private final GridPane grid;
     private final Region handsRegion;
@@ -22,6 +25,11 @@ public class KeyboardHands {
     private final List<Button> shiftKeys = new ArrayList<>();
     private Button lit;
 
+    /**
+     * @param grid grid pane that hosts the visual keyboard
+     * @param handsRegion region that displays hand hint imagery
+     * @param handsLabel fallback label for textual finger guidance
+     */
     public KeyboardHands(GridPane grid, Region handsRegion, Label handsLabel) {
         // Cache references so we can rebuild or highlight keys without recreating controls.
         this.grid = grid;
@@ -29,6 +37,9 @@ public class KeyboardHands {
         this.handsLabel = handsLabel;
     }
 
+    /**
+     * Lays out a proportional QWERTY keyboard inside the supplied grid.
+     */
     public void buildQwerty() {
         // Lay out a proportional keyboard so highlighting works regardless of window size.
         grid.setMinSize(0, 0);
@@ -88,6 +99,11 @@ public class KeyboardHands {
         }
     }
 
+    /**
+     * Highlights the expected key and corresponding shift modifiers.
+     *
+     * @param ch character the student should press next
+     */
     public void highlightExpected(char ch) {
         // Figure out which finger should move next and light both the key and the supporting shift.
         char base = baseChar(ch);
@@ -104,6 +120,11 @@ public class KeyboardHands {
         }
     }
 
+    /**
+     * Illuminates the keycap associated with the supplied character.
+     *
+     * @param ch character to highlight
+     */
     public void lightForChar(char ch) {
         // Keep only one key lit so the visual cue is unambiguous.
         String key = mapCharToKey(ch).toLowerCase();
@@ -114,6 +135,9 @@ public class KeyboardHands {
         if (!lit.getStyleClass().contains("keycap-lit")) lit.getStyleClass().add("keycap-lit");
     }
 
+    /**
+     * Clears all key and hand highlights.
+     */
     public void dim() {
         // Clear all highlights when the lesson pauses or completes.
         if (lit != null) lit.getStyleClass().remove("keycap-lit");

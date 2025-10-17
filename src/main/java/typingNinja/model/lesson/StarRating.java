@@ -1,8 +1,19 @@
 package typingNinja.model.lesson;
 
+/**
+ * Utility for condensing performance metrics into a star rating.
+ */
 public final class StarRating {
     private StarRating() {}
 
+    /**
+     * Combines speed, accuracy, and error counts into a five-star rating.
+     *
+     * @param wpm words per minute scored
+     * @param accuracyPercent accuracy percentage
+     * @param errors total errors recorded
+     * @return clamped star rating rounded to two decimals
+     */
     public static double compute(double wpm, double accuracyPercent, int errors) {
         // Blend speed and accuracy, then shave a bit off if the student racked up mistakes.
         double accScore = clamp01(accuracyPercent / 100.0);

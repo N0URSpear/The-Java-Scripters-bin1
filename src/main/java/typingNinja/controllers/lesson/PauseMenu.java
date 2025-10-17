@@ -25,6 +25,9 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 
+/**
+ * Presents the full-screen pause experience and handles resume or navigation actions.
+ */
 public class PauseMenu {
     private final Button pauseBtn;
     private final typingNinja.model.lesson.Metrics metrics;
@@ -42,6 +45,15 @@ public class PauseMenu {
     private Node blurredNode;
     private Effect previousEffect;
 
+    /**
+     * Wires the pause overlay into the host controller.
+     *
+     * @param pauseBtn button that triggers the pause window
+     * @param metrics shared metrics instance to pause/resume
+     * @param input hidden text area that captures typing input
+     * @param settingsAction callback invoked when the user opens settings
+     * @param homeAction callback invoked when the user returns home
+     */
     public PauseMenu(Button pauseBtn, typingNinja.model.lesson.Metrics metrics, TextArea input,
                      Runnable settingsAction, Runnable homeAction) {
         // Hook the pause button so we can freeze the timer and raise the overlay on demand.

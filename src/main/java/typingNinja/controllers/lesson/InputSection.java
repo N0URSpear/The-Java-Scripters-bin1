@@ -11,6 +11,9 @@ import typingNinja.model.lesson.WeakKeyTracker;
 import typingNinja.model.lesson.Metrics;
 import typingNinja.controllers.lesson.KeyboardHands;
 
+/**
+ * Drives the structured typing workflow against a fixed lesson passage.
+ */
 public class InputSection {
     private final TextFlow promptFlow;
     private final TextFlow userFlow;
@@ -28,8 +31,26 @@ public class InputSection {
     private final boolean[] typedCorrect;
 
     // Expose the next expected character so keyboard hints can stay lockstep with the prompt.
+    /**
+     * Exposes the next expected character so external UI can highlight it.
+     *
+     * @return the next expected character or {@code '\0'} if the passage is complete
+     */
     public char peekExpected() { return index < passage.length() ? passage.charAt(index) : '\0'; }
 
+    /**
+     * Builds a new typed-lesson section, wiring prompt display and input tracking together.
+     *
+     * @param promptFlow flow containing the reference passage
+     * @param userFlow flow reflecting the user's key strokes
+     * @param hiddenInput backing text area that receives focus
+     * @param keyboard keyboard visualiser used for hints
+     * @param metrics metrics aggregator shared by the controller
+     * @param passage literal passage the student should type
+     * @param weakKeys tracker capturing recurrent mistakes
+     * @param cursorListener callback invoked when the caret moves
+     * @param onComplete hook executed when the passage is finished
+     */
     public InputSection(TextFlow promptFlow, TextFlow userFlow, TextArea hiddenInput,
                         KeyboardHands keyboard, Metrics metrics, String passage,
                         WeakKeyTracker weakKeys, Consumer<Text> cursorListener,
@@ -53,16 +74,29 @@ public class InputSection {
         updateCursor();
     }
 
+    /**
+     * Enables or disables strict mode where incorrect characters block forward progress.
+     *
+     * @param strict {@code true} for strict mode, {@code false} for relaxed mode
+     */
     public void setStrictMode(boolean strict) {
         // Toggle whether mismatched characters block progress or get logged as soft errors.
         this.strictMode = strict;
     }
 
+    /**
+     * Stops accepting input once the controller retires this section.
+     */
     public void disable() {
         // Lock the hidden text area once a lesson winds down.
         hiddenInput.setDisable(true);
     }
 
+    /**
+     * Handles printable key events and updates the prompt/user flows accordingly.
+     *
+     * @param e key-typed event
+     */
     public void onKeyTyped(KeyEvent e) {
         // Handle printable characters here because KeyTyped gives us already-localised chars.
         String s = e.getCharacter();
@@ -113,6 +147,11 @@ public class InputSection {
         e.consume();
     }
 
+    /**
+     * Handles backspace and enter key presses.
+     *
+     * @param e key-pressed event
+     */
     public void onKeyPressed(KeyEvent e) {
         // Non-printables like backspace and enter live here so we can tweak prompt state manually.
         KeyCode code = e.getCode();
@@ -263,12 +302,21 @@ public class InputSection {
         }
     }
 
-    // Keep a cheap completion check around for polling contexts.
+    /**
+     * Indicates whether the user has finished the passage.
+     *
+     * @return {@code true} when the passage has been fully traversed
+     */
     public boolean isComplete() { return index >= passage.length(); }
 
-    // Consumers occasionally need the static length for accuracy calculations.
+    /**
+     * @return the total passage length tracked by this section
+     */
     public int getPassageLength() { return passage.length(); }
 
+    /**
+     * @return count of passage positions typed correctly so far
+     */
     public int getCorrectPositions() {
         // Collapse the correctness array down into a simple count for post-lesson stats.
         int c = 0;

@@ -1,5 +1,8 @@
 package typingNinja.model.lesson;
 
+/**
+ * Immutable representation of a lesson selection persisted in the database.
+ */
 public class Lesson {
     private final int lessonId;
     private final int userId;
@@ -11,6 +14,9 @@ public class Lesson {
     private final boolean punctuation;
     private final boolean specialChars;
 
+    /**
+     * Constructs a new lesson DTO.
+     */
     public Lesson(int lessonId, int userId, String lessonType, String prompt,
                   int durationMinutes, boolean upperCase, boolean numbers,
                   boolean punctuation, boolean specialChars) {
@@ -26,22 +32,22 @@ public class Lesson {
         this.specialChars = specialChars;
     }
 
-    // Database row identifier.
+    /** @return database row identifier */
     public int getLessonId() { return lessonId; }
-    // Owning user for this lesson selection.
+    /** @return owning user for this lesson selection */
     public int getUserId() { return userId; }
-    // Shorthand used to look up prompts or configure the controller.
+    /** @return shorthand lesson type string */
     public String getLessonType() { return lessonType; }
-    // Optional prompt provided for custom/AI lessons.
+    /** @return optional prompt text for custom lessons */
     public String getPrompt() { return prompt; }
-    // Duration in minutes as originally requested.
+    /** @return requested duration in minutes */
     public int getDurationMinutes() { return durationMinutes; }
-    // Flags for uppercase inclusion.
+    /** @return whether uppercase characters were requested */
     public boolean isUpperCase() { return upperCase; }
-    // Flags for digit inclusion.
+    /** @return whether digits were requested */
     public boolean isNumbers() { return numbers; }
-    // Flags for punctuation inclusion.
+    /** @return whether punctuation was requested */
     public boolean isPunctuation() { return punctuation; }
-    // Flags for special character inclusion.
+    /** @return whether special characters were requested */
     public boolean isSpecialChars() { return specialChars; }
 }

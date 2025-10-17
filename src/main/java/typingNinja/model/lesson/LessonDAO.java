@@ -3,9 +3,19 @@ package typingNinja.model.lesson;
 import typingNinja.model.SqliteConnection;
 import java.sql.*;
 
+/**
+ * Data access object for core lesson records.
+ */
 public class LessonDAO {
     private final Connection conn = SqliteConnection.getInstance();
 
+    /**
+     * Returns the most recent lesson row for the supplied user id.
+     *
+     * @param userId user whose latest lesson we want
+     * @return most recent lesson or {@code null} if none recorded
+     * @throws SQLException when the query fails
+     */
     public Lesson fetchLatestForUser(int userId) throws SQLException {
         // Grab the most recent lesson selection so controllers know what to launch next.
         String sql = """
@@ -35,6 +45,13 @@ public class LessonDAO {
         }
     }
 
+    /**
+     * Timestamps a lesson row when the user begins typing.
+     *
+     * @param lessonId lesson to update
+     * @param userId owner of the lesson
+     * @throws SQLException when the update fails
+     */
     public void markStarted(int lessonId, int userId) throws SQLException {
         // Stamp the start time once the student actually begins typing.
         String sql = "UPDATE Lesson SET DateStarted = datetime('now','localtime') WHERE LessonID = ? AND UserID = ?";
@@ -45,6 +62,18 @@ public class LessonDAO {
         }
     }
 
+    /**
+     * Persists the completion metrics for a lesson that has finished.
+     *
+     * @param lessonId lesson to update
+     * @param userId owner of the lesson
+     * @param starRating final star rating
+     * @param wpm final words per minute
+     * @param accuracy accuracy percentage
+     * @param errors total errors recorded
+     * @param weakKeys weak key string to store alongside the row
+     * @throws SQLException when the update fails
+     */
     public void markCompleted(int lessonId, int userId,
                               double starRating, double wpm, double accuracy, int errors,
                               String weakKeys) throws SQLException {
@@ -67,6 +96,13 @@ public class LessonDAO {
         }
     }
 
+    /**
+     * Deletes any pending lesson row if it has not yet been completed.
+     *
+     * @param lessonId lesson to remove
+     * @param userId owner of the lesson
+     * @throws SQLException when the delete fails
+     */
     public void deleteIfNotCompleted(int lessonId, int userId) throws SQLException {
         // Cleanup helper for when a lesson is cancelled before it finishes.
         String sql = "DELETE FROM Lesson WHERE LessonID = ? AND UserID = ? AND DateCompleted IS NULL";
@@ -77,6 +113,14 @@ public class LessonDAO {
         }
     }
 
+    /**
+     * Aggregates the most common weak key bigrams across completed custom lessons.
+     *
+     * @param userId user whose history should be analysed
+     * @param k maximum number of bigrams to return
+     * @return ordered list of bigram strings with highest frequency first
+     * @throws SQLException when the query fails
+     */
     public java.util.List<String> topWeakPairsForUserFromCompletedCustomLessons(int userId, int k) throws java.sql.SQLException {
         // Aggregate bigram mistakes from finished custom lessons to feed the AI prompts.
         String sql = """

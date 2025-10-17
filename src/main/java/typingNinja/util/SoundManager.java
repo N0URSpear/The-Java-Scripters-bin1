@@ -2,6 +2,9 @@ package typingNinja.util;
 
 import javafx.scene.media.AudioClip;
 
+/**
+ * Central sound manager that keeps audio clips warm across scene changes.
+ */
 public final class SoundManager {
     private static AudioClip lessonCompleteClip;
 
@@ -17,6 +20,9 @@ public final class SoundManager {
 
     private SoundManager() {}
 
+    /**
+     * Plays the lesson complete audio cue if the clip loaded successfully.
+     */
     public static void playLessonComplete() {
         // Fire-and-forget helper used when a lesson wraps up.
         if (lessonCompleteClip != null) {
