@@ -48,7 +48,7 @@ public class LoginController {
      * @param username provided username
      * @param password provided password
      */
-    void doLogin(String username, String password) {
+    public void doLogin(String username, String password) {
 
         //check credentials
         NinjaUser ninja = NinjaDAO.getNinjaUser(username);
@@ -122,7 +122,7 @@ public class LoginController {
     /**
      * Functionality when the forgot password button is clicked.
      */
-    void ForgotPassword() {
+    public void ForgotPassword() {
         forgotPassword = true;
         if (usernameField != null && usernameField.getScene() != null) {
             Stage stage = (Stage) usernameField.getScene().getWindow();

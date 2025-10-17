@@ -1,9 +1,10 @@
-package typingNinja.controllers;
+package typingNinja.tests.controllers;
 
-import typingNinja.model.INinjaContactDAO;
-import typingNinja.model.MockNinjaDAO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import typingNinja.controllers.CreateAccountController;
+import typingNinja.model.INinjaContactDAO;
+import typingNinja.model.MockNinjaDAO;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -14,8 +15,6 @@ public class CreateAccountControllerTest {
 
     @BeforeEach
     void setUp() {
-
-        // reset the in-memory DAO between tests
         MockNinjaDAO.clearAll();
         mockDao = new MockNinjaDAO();
         controller = new CreateAccountController(mockDao);
@@ -59,14 +58,12 @@ public class CreateAccountControllerTest {
 
     @Test
     void duplicateUsernameFails() {
-        // Add first user
         controller.doCreateAccount("user", "pass", "pass", "Q1", "Q2", "a1", "a2");
         assertTrue(controller.isCreateAccountSuccessful());
         assertEquals(1, mockDao.getAllNinjas().size());
 
-        // Try to add second user with same username
         controller.doCreateAccount("user", "pass2", "pass2", "Q1", "Q2", "a1", "a2");
-        assertFalse(controller.isCreateAccountSuccessful()); // stays false after second attempt
+        assertFalse(controller.isCreateAccountSuccessful());
         assertEquals(1, mockDao.getAllNinjas().size());
     }
 

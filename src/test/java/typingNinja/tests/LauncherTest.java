@@ -1,6 +1,7 @@
-package typingNinja;
+package typingNinja.tests;
 
 import org.junit.jupiter.api.Test;
+import typingNinja.Launcher;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -16,10 +17,4 @@ class LauncherTest {
         assertTrue(Modifier.isStatic(m.getModifiers()), "main must be static");
         assertEquals(void.class, m.getReturnType(), "main must return void");
     }
-
-    // 如需真正调用（会启动 UI），请在手测/集成阶段做，单元测试保持快速与无 UI。
-    // @Test
-    // void mainShouldNotThrow_whenInvokedWithNoArgs() {
-    //     assertDoesNotThrow(() -> Launcher.main(new String[]{}));
-    // }
 }

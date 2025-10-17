@@ -26,7 +26,7 @@ import javafx.stage.StageStyle;
 import javafx.util.Duration;
 
 /**
- * Handles lesson pausing behaviour, including a modal overlay with navigation actions.
+ * Presents the full-screen pause experience and handles resume or navigation actions.
  */
 public class PauseMenu {
     private final Button pauseBtn;
@@ -45,8 +45,18 @@ public class PauseMenu {
     private Node blurredNode;
     private Effect previousEffect;
 
+    /**
+     * Wires the pause overlay into the host controller.
+     *
+     * @param pauseBtn button that triggers the pause window
+     * @param metrics shared metrics instance to pause/resume
+     * @param input hidden text area that captures typing input
+     * @param settingsAction callback invoked when the user opens settings
+     * @param homeAction callback invoked when the user returns home
+     */
     public PauseMenu(Button pauseBtn, typingNinja.model.lesson.Metrics metrics, TextArea input,
                      Runnable settingsAction, Runnable homeAction) {
+        // Hook the pause button so we can freeze the timer and raise the overlay on demand.
         this.pauseBtn = pauseBtn;
         this.metrics = metrics;
         this.input = input;
@@ -57,6 +67,7 @@ public class PauseMenu {
     }
 
     private void togglePause() {
+        // First press pauses instantly; subsequent presses trigger the short resume countdown.
         if (!paused) {
             paused = true;
             metrics.pause();
@@ -70,6 +81,7 @@ public class PauseMenu {
     }
 
     private void showOverlay() {
+        // Build the modal lazily and blur the main scene so focus stays on the pause controls.
         if (overlayStage == null) overlayStage = buildOverlay();
         Stage owner = pauseBtn.getScene() != null ? (Stage) pauseBtn.getScene().getWindow() : null;
         if (owner != null && owner.getScene() != null) {
@@ -85,6 +97,7 @@ public class PauseMenu {
     }
 
     private Stage buildOverlay() {
+        // Spin up a frameless stage that sits over the lesson and exposes pause actions.
         Stage owner = pauseBtn.getScene() != null ? (Stage) pauseBtn.getScene().getWindow() : null;
         Stage stage = new Stage(StageStyle.TRANSPARENT);
         if (owner != null) {
@@ -94,17 +107,12 @@ public class PauseMenu {
 
         stage.setResizable(false);
 
-        // size will be determined by content; we'll center after sizing
-
         BorderPane root = new BorderPane();
-        // Solid project purple (no transparency) + tighter outer padding
         root.setStyle("-fx-background-color: #140B38; -fx-background-radius: 24; -fx-padding: 24;");
 
-        // Content row: image immediately next to buttons (no spacing)
         javafx.scene.layout.HBox row = new javafx.scene.layout.HBox(0);
         row.setAlignment(Pos.CENTER);
 
-        // Logo image
         ImageView logoView = new ImageView();
         try {
             Image logoImg = new Image(getClass().getResource("/typingNinja/Images/Typing_Ninja_with_text.png").toExternalForm(),
@@ -113,7 +121,6 @@ public class PauseMenu {
             logoView.setPreserveRatio(true);
         } catch (Exception ignored) {}
 
-        // Status label under logo (kept within a VBox)
         VBox leftBox = new VBox(10);
         leftBox.setAlignment(Pos.CENTER_LEFT);
         statusLabel = new Label();
@@ -124,12 +131,10 @@ public class PauseMenu {
         statusLabel.setAlignment(Pos.CENTER);
         leftBox.getChildren().addAll(logoView, statusLabel);
 
-        // Vertical buttons column with header
         VBox buttons = new VBox(18);
         buttons.setAlignment(Pos.CENTER_LEFT);
         Label pausedHeader = new Label("LESSON PAUSED");
         pausedHeader.setStyle("-fx-text-fill: #ffffff; -fx-font-size: 28px; -fx-font-weight: 900;");
-        // Use the provided icon filenames from resources
         resumeButton = createOverlayButton("Resume", "play_button.png");
         resumeButton.setOnAction(e -> startResumeCountdownUpper());
         settingsButton = createOverlayButton("Settings", "settings_button.png");
@@ -143,7 +148,6 @@ public class PauseMenu {
             if (homeAction != null) homeAction.run();
         });
         buttons.getChildren().addAll(pausedHeader, resumeButton, settingsButton, homeButton);
-        // Place logo immediately adjacent to buttons (no spacing) and set fixed size relative to screen
         row.getChildren().addAll(leftBox, buttons);
         try {
             Rectangle2D vb = Screen.getPrimary().getVisualBounds();
@@ -168,14 +172,12 @@ public class PauseMenu {
         return stage;
     }
 
-    // removed height-binding helper to avoid layout oscillations
-
     private Button createOverlayButton(String text, String iconFileName) {
+        // Buttons share styling but swap icons as needed; fall back to blank space if assets miss.
         Button btn = new Button(text.toUpperCase());
         btn.setPrefWidth(260);
         btn.setStyle("-fx-background-color: #2EFF04; -fx-text-fill: #0a1f05; -fx-font-size: 18px; -fx-font-weight: 700; " +
                 "-fx-background-radius: 18; -fx-padding: 12 24; -fx-border-color: rgba(0,0,0,0.25); -fx-border-radius: 18; -fx-border-width: 1;");
-        // Add icon on the right: load if present, else a fixed-size placeholder region
         try {
             var url = getClass().getResource("/typingNinja/Images/" + iconFileName);
             if (url != null) {
@@ -209,6 +211,7 @@ public class PauseMenu {
     }
 
     private void startResumeCountdown() {
+        // Legacy countdown path for the old design; kept for potential reuse.
         if (resumeTimeline != null) resumeTimeline.stop();
         enableButtons(false);
         statusLabel.setText("Resuming in 3…");
@@ -225,13 +228,14 @@ public class PauseMenu {
     }
 
     private void enableButtons(boolean enabled) {
+        // Prevent accidental double taps while a countdown animation runs.
         if (resumeButton != null) resumeButton.setDisable(!enabled);
         if (settingsButton != null) settingsButton.setDisable(!enabled);
         if (homeButton != null) homeButton.setDisable(!enabled);
     }
 
-    // Uppercase, centered resume countdown text
     private void startResumeCountdownUpper() {
+        // Updated countdown mirrors the UI copy using uppercase typography.
         if (resumeTimeline != null) resumeTimeline.stop();
         enableButtons(false);
         statusLabel.setText("RESUMING IN 3...");
@@ -248,6 +252,7 @@ public class PauseMenu {
     }
 
     private void resumeImmediately() {
+        // Used when we leave the lesson entirely: tear down timers and close the overlay right away.
         if (resumeTimeline != null) {
             resumeTimeline.stop();
             resumeTimeline = null;
@@ -258,6 +263,7 @@ public class PauseMenu {
     }
 
     private void resumeFromOverlay() {
+        // Drop the blur, restore focus to the hidden input, and pick the timer back up.
         if (!paused) return;
         if (overlayStage != null) {
             overlayStage.hide();
@@ -279,6 +285,7 @@ public class PauseMenu {
     }
 
     private void render() {
+        // Button text doubles as a state indicator for folks who glance mid-lesson.
         pauseBtn.setText(paused ? "▶ Resume" : "⏸ Pause");
     }
 }

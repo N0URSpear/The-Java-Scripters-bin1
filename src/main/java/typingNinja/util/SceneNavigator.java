@@ -10,8 +10,7 @@ import java.io.IOException;
 import java.util.Objects;
 
 /**
- * Centralises primary-stage scene transitions so the application stays in a single window
- * while maintaining fullscreen/maximised state.
+ * Utility class for swapping scenes on the primary stage while preserving window state.
  */
 public final class SceneNavigator {
 
@@ -19,18 +18,13 @@ public final class SceneNavigator {
     private static final double DEFAULT_HEIGHT = 1080.0;
 
     private SceneNavigator() {
-        // utility class
     }
 
     /**
-     * Replace the current root on the supplied stage while keeping the same {@link Scene}.
-     * If the stage does not yet have a scene one will be created using a sensible default size.
-     *
-     * @param stage the primary stage
-     * @param root  the new root node to display
-     * @param title optional window title
+     * Swaps the stage root while keeping fullscreen state intact.
      */
     public static void show(Stage stage, Parent root, String title) {
+        // Swap the root while keeping the same stage instance minimised to one window.
         if (stage == null || root == null) {
             return;
         }
@@ -52,15 +46,10 @@ public final class SceneNavigator {
     }
 
     /**
-     * Convenience for loading FXML and swapping it into the stage.
-     *
-     * @param stage    the primary stage
-     * @param fxmlPath resource path for the FXML
-     * @param title    optional window title
-     * @return the loaded root node
-     * @throws IOException when the FXML cannot be loaded
+     * Loads an FXML file and shows it on the supplied stage.
      */
     public static Parent load(Stage stage, String fxmlPath, String title) throws IOException {
+        // Load the FXML, hand it to show(), and return the root for callers that need it.
         FXMLLoader loader = new FXMLLoader(SceneNavigator.class.getResource(Objects.requireNonNull(fxmlPath)));
         Parent root = loader.load();
         show(stage, root, title);
@@ -68,16 +57,10 @@ public final class SceneNavigator {
     }
 
     /**
-     * Use when the caller needs the controller instance after loading.
-     *
-     * @param stage    the primary stage
-     * @param fxmlPath resource path for the FXML
-     * @param title    optional window title
-     * @param <T>      controller type
-     * @return the controller for the loaded FXML
-     * @throws IOException when the FXML cannot be loaded
+     * Loads an FXML file and returns its controller after showing the scene.
      */
     public static <T> T loadController(Stage stage, String fxmlPath, String title) throws IOException {
+        // Same as load(), but returns the controller so callers can wire extra state.
         FXMLLoader loader = new FXMLLoader(SceneNavigator.class.getResource(Objects.requireNonNull(fxmlPath)));
         Parent root = loader.load();
         show(stage, root, title);
@@ -85,11 +68,10 @@ public final class SceneNavigator {
     }
 
     /**
-     * Re-applies fullscreen/maximise hints without tearing down the window.
-     *
-     * @param stage the primary stage
+     * Reapplies fullscreen hints without tearing down the existing stage.
      */
     public static void ensureFullscreen(Stage stage) {
+        // Reapply fullscreen and maximise flags without tearing down the scene graph.
         if (stage == null) {
             return;
         }
@@ -98,7 +80,6 @@ public final class SceneNavigator {
         if (!stage.isFullScreen()) {
             stage.setFullScreen(true);
         } else {
-            // Nudge layout so bindings recalculate while staying fullscreen.
             Platform.runLater(stage::requestFocus);
         }
     }

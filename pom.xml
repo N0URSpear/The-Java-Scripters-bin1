@@ -142,7 +142,18 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-suite</artifactId>
+            <version>1.12.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-commons</artifactId>
+            <version>1.12.1</version>
+            <scope>test</scope>
+        </dependency>
         <!-- logging backend (optional but helpful) -->
         <dependency>
             <groupId>org.slf4j</groupId>

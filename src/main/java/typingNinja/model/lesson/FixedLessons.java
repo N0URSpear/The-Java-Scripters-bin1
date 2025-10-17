@@ -1,7 +1,17 @@
 package typingNinja.model.lesson;
 
+/**
+ * Holds static lesson passages used by the legacy curriculum.
+ */
 public class FixedLessons {
+    /**
+     * Looks up the practice passage associated with the supplied lesson id.
+     *
+     * @param lessonType short lesson identifier (e.g. {@code "1a"})
+     * @return the matching passage or a default placeholder
+     */
     public static String passageFor(String lessonType) {
+        // Map static lesson ids to curated practice passages.
         switch (lessonType) {
             case "1a": return (
                 "fj jf ff jj fjf jfj jfjj fjjf fff jjj fj jf ff jj fjf jfj jfjj fjjf " +

@@ -2,6 +2,9 @@ package typingNinja.model.lesson;
 
 import java.util.List;
 
+/**
+ * Supplies built-in prompt seeds used as fallbacks when AI text is unavailable.
+ */
 public class CustomPrompts {
   public record Prompt(String title, String text, int durationSeconds) {}
   private final List<Prompt> prompts = List.of(
@@ -13,5 +16,8 @@ public class CustomPrompts {
     ), 60)
   );
   private int idx = 0;
+  /**
+   * @return the currently selected fallback prompt
+   */
   public Prompt current() { return prompts.get(idx); }
 }

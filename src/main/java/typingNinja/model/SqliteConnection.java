@@ -18,10 +18,29 @@ public class SqliteConnection {
         }
     }
 
-    public static Connection getInstance() {
-        if (instance == null) {
+    public static synchronized Connection getInstance() {
+        try {
+            if (instance == null || instance.isClosed()) {
+                new SqliteConnection();
+            }
+        } catch (SQLException e) {
+            // If the existing handle is in a bad state, build a fresh one.
             new SqliteConnection();
         }
         return instance;
+    }
+
+    /**
+     * Test-only hook that lets unit tests isolate themselves by closing and nulling the singleton.
+     * Production code should never call this.
+     */
+    public static void resetForTests() {
+        if (instance != null) {
+            try {
+                instance.close();
+            } catch (SQLException ignored) {
+            }
+            instance = null;
+        }
     }
 }

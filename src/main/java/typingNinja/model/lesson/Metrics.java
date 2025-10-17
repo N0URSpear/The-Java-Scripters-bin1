@@ -8,6 +8,9 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.control.Label;
 import javafx.util.Duration;
 
+/**
+ * Tracks timing, speed, and accuracy statistics for an active lesson.
+ */
 public class Metrics {
     private final int lessonSeconds;
     private final IntegerProperty timeRemaining = new SimpleIntegerProperty();
@@ -20,13 +23,18 @@ public class Metrics {
     private double charsPerWord = 5.0;
     private Runnable onEnd = () -> {};
 
+    /**
+     * @param lessonSeconds total length of the lesson in seconds
+     */
     public Metrics(int lessonSeconds) {
+        // Core timer and counters shared across controllers.
         this.lessonSeconds = lessonSeconds;
         this.timeRemaining.set(lessonSeconds);
         buildTimer();
     }
 
     private void buildTimer() {
+        // A one-second heartbeat drives the stats and signals when time runs out.
         timer = new Timeline(new KeyFrame(Duration.seconds(1), e -> {
             int t = timeRemaining.get() - 1;
             timeRemaining.set(t);
@@ -40,21 +48,37 @@ public class Metrics {
         timer.setCycleCount(lessonSeconds);
     }
 
+    /**
+     * Starts the timer from the beginning, resetting any prior run if needed.
+     */
     public void start() {
+        // Play from the top, resetting if another run already burned through the timer.
         if (timeRemaining.get() <= 0) reset();
         ended = false;
         timer.playFromStart();
     }
 
+    /**
+     * Pauses the timer without resetting counters.
+     */
     public void pause() {
+        // Pause is cheap because Timeline handles the bookkeeping.
         timer.pause();
     }
 
+    /**
+     * Resumes the timer after a pause.
+     */
     public void resume() {
+        // Resume picks up where pause left off.
         timer.play();
     }
 
+    /**
+     * Resets timer and counters to their initial state.
+     */
     public void reset() {
+        // Restore counters and timer to their initial state.
         timer.stop();
         ended = false;
         timeRemaining.set(lessonSeconds);
@@ -64,14 +88,26 @@ public class Metrics {
         errorRatePercent.set(0);
     }
 
+    /**
+     * Records a new keystroke and updates speed/accuracy metrics.
+     *
+     * @param correct whether the keystroke matched the expected character
+     */
     public void incTyped(boolean correct) {
+        // Called for every keypress so we can keep WPM and error rate reactive.
         charsTyped.set(charsTyped.get() + 1);
         if (!correct) errors.set(errors.get() + 1);
         int secondsElapsed = lessonSeconds - timeRemaining.get();
         recomputeDerived(Math.max(1, secondsElapsed));
     }
 
+    /**
+     * Rewinds counters when the student deletes a character.
+     *
+     * @param wasError whether the removed character was previously counted as an error
+     */
     public void decTypedIfBackspace(boolean wasError) {
+        // Rewind stats when the user backspaces, keeping error count honest.
         if (charsTyped.get() > 0) charsTyped.set(charsTyped.get() - 1);
         if (wasError && errors.get() > 0) errors.set(errors.get() - 1);
         int secondsElapsed = Math.max(1, lessonSeconds - timeRemaining.get());
@@ -79,6 +115,7 @@ public class Metrics {
     }
 
     private void recomputeDerived(int secondsElapsed) {
+        // All the secondary metrics flow through here so updates stay consistent.
         double minutes = Math.max(1.0 / 60.0, secondsElapsed / 60.0);
         int correctChars = Math.max(0, charsTyped.get() - errors.get());
         double divisor = Math.max(1.0, charsPerWord);
@@ -90,21 +127,37 @@ public class Metrics {
         errorRatePercent.set(rate);
     }
 
+    /**
+     * Binds the timer label to the remaining seconds in a friendly format.
+     */
     public void bindTimerLabel(Label timerLabel) {
+        // Simple binding so the UI auto-updates every tick.
         timerLabel.textProperty().bind(timeRemaining.asString().concat(" Seconds Remaining"));
     }
 
+    /**
+     * Binds the statistics labels to the computed metrics.
+     */
     public void bindStats(Label wpmLabel, Label errorsLabel, Label accuracyLabel) {
+        // These bindings keep the dashboard tiles in sync with the numbers we track.
         wpmLabel.textProperty().bind(wpm.asString());
         errorsLabel.textProperty().bind(errors.asString());
         accuracyLabel.textProperty().bind(errorRatePercent.asString().concat("%"));
     }
 
+    /**
+     * Registers a callback that fires when the lesson finishes.
+     */
     public void onLessonEnd(Runnable r) {
+        // Consumers provide a callback to run once the timer hits zero.
         this.onEnd = (r != null) ? r : () -> {};
     }
 
+    /**
+     * Ends the lesson immediately, invoking the registered callback.
+     */
     public void endLessonNow() {
+        // Immediate stop used for early completion cases.
         if (ended) return;
         ended = true;
         if (timer != null) {
@@ -114,37 +167,57 @@ public class Metrics {
         onEnd.run();
     }
 
+    /** @return configured lesson length in seconds */
     public int lessonSeconds() {
+        // Expose the configured duration for progress widgets.
         return lessonSeconds;
     }
 
+    /** @return observable remaining seconds property */
     public IntegerProperty timeRemainingProperty() {
+        // Allows progress bars and timers to bind directly.
         return timeRemaining;
     }
 
+    /** @return read-only view of typed character count */
     public ReadOnlyIntegerProperty charsTypedProperty() {
+        // Read-only view for UI components that chart typing volume.
         return charsTyped;
     }
 
+    /** @return read-only view of error count */
     public ReadOnlyIntegerProperty errorsProperty() {
+        // Read-only view for charts tracking mistakes over time.
         return errors;
     }
 
+    /** Convenience accessor for tests and summary views. */
     public int getWpm() { return wpm.get(); }
 
+    /** @return current error count */
     public int getErrors() { return errors.get(); }
 
+    /** @return raw typed character count including mistakes */
     public int getCharsTyped() { return charsTyped.get(); }
 
-    /** Returns accuracy as 0..100 (%) */
+    /**
+     * @return accuracy percentage in the range {@code 0..100}
+     */
     public double getAccuracyPercent() {
+        // Calculate accuracy on demand to avoid rounding artifacts in the bindings.
         int typed = getCharsTyped();
         if (typed <= 0) return 0.0;
         int correct = Math.max(typed - getErrors(), 0);
         return (correct * 100.0) / typed;
     }
 
+    /**
+     * Adjusts the character-per-word assumption used for WPM calculations.
+     *
+     * @param value new characters-per-word ratio
+     */
     public void setCharsPerWord(double value) {
+        // Free mode tweaks this so WPM reflects the looser pacing.
         if (value > 0) {
             this.charsPerWord = value;
             int secondsElapsed = Math.max(1, lessonSeconds - timeRemaining.get());

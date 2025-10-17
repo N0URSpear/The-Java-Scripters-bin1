@@ -14,6 +14,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Renders a virtual keyboard and hand hints to coach finger positioning.
+ */
 public class KeyboardHands {
     private final GridPane grid;
     private final Region handsRegion;
@@ -22,14 +25,23 @@ public class KeyboardHands {
     private final List<Button> shiftKeys = new ArrayList<>();
     private Button lit;
 
+    /**
+     * @param grid grid pane that hosts the visual keyboard
+     * @param handsRegion region that displays hand hint imagery
+     * @param handsLabel fallback label for textual finger guidance
+     */
     public KeyboardHands(GridPane grid, Region handsRegion, Label handsLabel) {
+        // Cache references so we can rebuild or highlight keys without recreating controls.
         this.grid = grid;
         this.handsRegion = handsRegion;
         this.handsLabel = handsLabel;
     }
 
-    /** neat, proportional keyboard that grows to fill its column */
+    /**
+     * Lays out a proportional QWERTY keyboard inside the supplied grid.
+     */
     public void buildQwerty() {
+        // Lay out a proportional keyboard so highlighting works regardless of window size.
         grid.setMinSize(0, 0);
         grid.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         grid.setPrefWidth(Double.MAX_VALUE);
@@ -71,6 +83,7 @@ public class KeyboardHands {
     }
 
     private void addRow(int row, String[][] keys) {
+        // Translate the simple span metadata into actual JavaFX buttons.
         int col = 0;
         for (String[] kv : keys) {
             String k = kv[0];
@@ -86,7 +99,13 @@ public class KeyboardHands {
         }
     }
 
+    /**
+     * Highlights the expected key and corresponding shift modifiers.
+     *
+     * @param ch character the student should press next
+     */
     public void highlightExpected(char ch) {
+        // Figure out which finger should move next and light both the key and the supporting shift.
         char base = baseChar(ch);
         boolean needShift = requiresShift(ch);
 
@@ -101,7 +120,13 @@ public class KeyboardHands {
         }
     }
 
+    /**
+     * Illuminates the keycap associated with the supplied character.
+     *
+     * @param ch character to highlight
+     */
     public void lightForChar(char ch) {
+        // Keep only one key lit so the visual cue is unambiguous.
         String key = mapCharToKey(ch).toLowerCase();
         Button b = keyMap.get(key);
         if (b == null) return;
@@ -110,7 +135,11 @@ public class KeyboardHands {
         if (!lit.getStyleClass().contains("keycap-lit")) lit.getStyleClass().add("keycap-lit");
     }
 
+    /**
+     * Clears all key and hand highlights.
+     */
     public void dim() {
+        // Clear all highlights when the lesson pauses or completes.
         if (lit != null) lit.getStyleClass().remove("keycap-lit");
         lit = null;
         for (Button s : shiftKeys) s.getStyleClass().remove("keycap-lit");
@@ -124,6 +153,7 @@ public class KeyboardHands {
     }
 
     private String mapCharToKey(char ch) {
+        // Normalise characters into the labels we used when constructing buttons.
         if (ch == ' ') return "space";
         if (ch == '\n' || ch == '\r') return "enter";
         if (Character.isLetter(ch)) return String.valueOf(Character.toUpperCase(ch));
@@ -145,6 +175,7 @@ public class KeyboardHands {
     }
 
     private boolean requiresShift(char ch) {
+        // Uppercase and symbol characters imply the shift key should glow too.
         if (Character.isUpperCase(ch)) return true;
         switch (ch) {
             case '!': case '@': case '#': case '$': case '%': case '^': case '&': case '*':
@@ -157,6 +188,7 @@ public class KeyboardHands {
     }
 
     private char baseChar(char ch) {
+        // Reduce shifted characters back to their physical key so lighting stays consistent.
         if (Character.isUpperCase(ch)) return Character.toLowerCase(ch);
         switch (ch) {
             case '!': return '1'; case '@': return '2'; case '#': return '3'; case '$': return '4'; case '%': return '5';
@@ -169,6 +201,7 @@ public class KeyboardHands {
     }
 
     private String fingerTextFor(char ch) {
+        // Quick lookup for which finger owns a key; mostly home-row grouped heuristics.
         char c = Character.toLowerCase(ch);
         if (c == ' ') return "left 1";
         if (c == '\n' || c == '\r') return "right 5";
@@ -184,17 +217,14 @@ public class KeyboardHands {
         return "right 2";
     }
 
-    /**
-     * Shows an image (if available) in the handsRegion for the given finger descriptor,
-     * e.g. "left 1" .. "left 5" and "right 1" .. "right 5". Falls back to text label if not found.
-     */
     private void updateHandsVisual(String descriptor) {
+        // Swap in a reference image if we have one, otherwise fall back to plain text coaching.
         if (handsRegion == null) return;
         String base = "/typingNinja/Images/";
         String[] exts = { ".png", ".jpg", ".jpeg", ".gif" };
         URL found = null;
         for (String ext : exts) {
-            String candidate = base + descriptor + ext; // descriptor contains space (e.g., "right 1")
+            String candidate = base + descriptor + ext;
             URL u = getClass().getResource(candidate);
             if (u != null) { found = u; break; }
         }
@@ -213,7 +243,6 @@ public class KeyboardHands {
                 handsLabel.setText("");
             }
         } else {
-            // Fallback: keep showing text if no image asset is present
             if (handsLabel != null) {
                 handsLabel.setVisible(true);
                 handsLabel.setManaged(true);

@@ -9,17 +9,20 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 
-/** Uses a local Ollama server (free) at http://localhost:11434/api/generate */
+/**
+ * Talks to a local Ollama server to generate higher quality passages when available.
+ */
 public class OllamaTextService implements AITextService {
     private static final String BASE =
             System.getenv("OLLAMA_BASE_URL") != null ? System.getenv("OLLAMA_BASE_URL") : "http://localhost:11434";
     private static final String MODEL =
-            System.getenv("OLLAMA_MODEL") != null ? System.getenv("OLLAMA_MODEL") : "gemma3:1b"; // small, fast
+            System.getenv("OLLAMA_MODEL") != null ? System.getenv("OLLAMA_MODEL") : "gemma3:1b";
     private static final String API_KEY = System.getenv("OLLAMA_API_KEY");
     private static final String AUTH_HEADER =
             System.getenv("OLLAMA_AUTH_HEADER") != null ? System.getenv("OLLAMA_AUTH_HEADER") : "Authorization";
 
     private static String clean(String s) {
+        // Trim quotes and whitespace so env-derived values behave predictably.
         if (s == null) return null;
         String t = s.trim();
         if (t.length() >= 2) {
@@ -40,13 +43,13 @@ public class OllamaTextService implements AITextService {
     public String generatePassage(String topic, int targetWords,
                                   boolean includeUpper, boolean includeNumbers,
                                   boolean includePunct, boolean includeSpecial) throws Exception {
+        // Compose a prompt for the local Ollama instance and post-process the response.
         String instructions = buildInstructions(topic, targetWords, includeUpper, includeNumbers, includePunct, includeSpecial);
 
         JsonObject body = new JsonObject();
         body.addProperty("model", MODEL);
         body.addProperty("prompt", instructions);
         body.addProperty("stream", false);
-        // optional generation options
         JsonObject options = new JsonObject();
         options.addProperty("temperature", 0.7);
         int numPredict = Math.max(120, targetWords * 2);
@@ -81,7 +84,6 @@ public class OllamaTextService implements AITextService {
         String headerName = clean(AUTH_HEADER);
         String apiKey = clean(API_KEY);
         if (apiKey != null && !apiKey.isBlank() && headerName != null && !headerName.isBlank()) {
-            // If you front Ollama with a proxy, set OLLAMA_AUTH_HEADER to what your proxy expects (e.g., "X-API-Key").
             String value;
             if (headerName.equalsIgnoreCase("authorization")) {
                 value = apiKey.regionMatches(true, 0, "Bearer ", 0, 7) ? apiKey : ("Bearer " + apiKey);
@@ -113,6 +115,7 @@ public class OllamaTextService implements AITextService {
     private String buildInstructions(String topic, int targetWords,
                                      boolean includeUpper, boolean includeNumbers,
                                      boolean includePunct, boolean includeSpecial) {
+        // Build a constrained instruction block that mirrors the toggles chosen in the UI.
         StringBuilder sb = new StringBuilder();
         sb.append("Generate a typing practice passage only. No headings.\n");
         if (topic != null && !topic.isBlank()) sb.append("Topic: ").append(topic).append(".\n");
