@@ -2,23 +2,15 @@ package typingNinja.model.lesson;
 
 import java.util.*;
 
-/** Tracks per-key mistakes (case-sensitive), with tie-break by (prev,expected) context. */
 public class WeakKeyTracker {
-
-    /** total mistakes per expected key */
     private final Map<Character, Integer> totals = new HashMap<>();
-
-    /** for each expected key -> (misinput key -> count) */
     private final Map<Character, Map<Character, Integer>> misinputs = new HashMap<>();
-
-    /** context counts: (prevExpected, expected) -> (misinput -> count) */
     private final Map<String, Map<Character, Integer>> ctx = new HashMap<>();
-
-    /** All printable ASCII keys except whitespace (space/newline/tab). Stable order. */
     public static final List<Character> ALL_KEYS;
     static {
+        // Precompute a stable ordering of trackable characters.
         List<Character> keys = new ArrayList<>();
-        keys.add(' ');                     // 先放一个空格
+        keys.add(' ');
         for (char c = 33; c <= 126; c++) {
             if (trackable(c)) keys.add(c);
         }
@@ -26,8 +18,8 @@ public class WeakKeyTracker {
         ALL_KEYS = Collections.unmodifiableList(keys);
     }
 
-    /** Record a mistake. prevExpected may be null. */
     public void record(Character prevExpected, char expected, char actual) {
+        // Count this mistake by key, by misinput, and by the two-character context.
         if (!trackable(expected) || !trackable(actual)) return;
         totals.merge(expected, 1, Integer::sum);
         misinputs.computeIfAbsent(expected, k -> new HashMap<>())
@@ -38,20 +30,23 @@ public class WeakKeyTracker {
     }
 
     public static boolean trackable(char c) {
+        // Ignore control characters so we stay focused on printable keys.
         if (Character.isISOControl(c)) return false;
         return !(c == '\n' || c == '\r' || c == '\t');
     }
 
     private static String key(Character prev, char expected) {
+        // Pack the previous character and expected key into a simple map key.
         return (prev == null ? "\u0000" : String.valueOf(prev)) + "|" + expected;
     }
 
     public String topPairsString(int k) {
+        // Produce the most troublesome expected/misinput pairs for quick summaries.
         List<String> pairs = new ArrayList<>(k);
 
         List<Map.Entry<Character,Integer>> sorted = new ArrayList<>(totals.entrySet());
         sorted.sort((a,b) -> {
-            int cmp = Integer.compare(b.getValue(), a.getValue()); // highest error count first
+            int cmp = Integer.compare(b.getValue(), a.getValue());
             return cmp != 0 ? cmp : Character.compare(a.getKey(), b.getKey());
         });
 
@@ -66,9 +61,9 @@ public class WeakKeyTracker {
     }
 
     public String topPrevExpectedPairsString(int k) {
+        // Focus on two-character contexts so we can craft smarter free-typing prompts.
         java.util.List<String> out = new java.util.ArrayList<>(k);
 
-        // Expected keys sorted by total mistakes (desc), then by key
         java.util.List<java.util.Map.Entry<Character,Integer>> sorted =
                 new java.util.ArrayList<>(totals.entrySet());
         sorted.sort((a,b) -> {
@@ -91,19 +86,18 @@ public class WeakKeyTracker {
 
     /** Find the prev char that maximizes total mistakes at (prev, expected), summing across misinputs. */
     private Character bestPrevForExpected(char expected) {
+        // Look for the preceding character that leads to the most mistakes on this key.
         int bestCount = -1;
         Character bestPrev = null;
-        String suffix = "|" + expected; // our ctx key is prev + "|" + expected
+        String suffix = "|" + expected;
 
         for (var entry : ctx.entrySet()) {
             String key = entry.getKey();
             if (!key.endsWith(suffix)) continue;
 
-            // prev is the first character of the key (we stored exactly one char for prev)
             char prev = key.charAt(0);
-            if (!trackable(prev)) continue; // skip space/newline/control and our NULL sentinel
+            if (!trackable(prev)) continue;
 
-            // sum all misinputs at this context
             int totalHere = 0;
             for (int v : entry.getValue().values()) totalHere += v;
 
@@ -117,6 +111,7 @@ public class WeakKeyTracker {
 
 
     private Character bestMisinput(char expected) {
+        // Tie-break multiple misinputs by checking which context sees them most often.
         Map<Character,Integer> counts = misinputs.get(expected);
         if (counts == null || counts.isEmpty()) return null;
 
@@ -142,15 +137,14 @@ public class WeakKeyTracker {
         }
         return best;
     }
-
-    //expose maps for local inspection
+    // Expose totals for diagnostics without letting callers mutate them.
     public Map<Character, Integer> totals() { return Collections.unmodifiableMap(totals); }
+    // Same idea for misinput breakdowns.
     public Map<Character, Map<Character, Integer>> misinputs() { return Collections.unmodifiableMap(misinputs); }
-    /** Pretty debug dump of totals, misinputs, and context, sorted by counts. */
     public String debugDump() {
+        // Handy textual report for console debugging and unit tests.
         StringBuilder sb = new StringBuilder();
 
-        // --- Totals (expected -> count) ---
         sb.append("=== Weak Key Totals (expected -> count) ===\n");
         var totalMap = totalsAllKeys();
         var totalList = new ArrayList<>(totalMap.entrySet());
@@ -162,9 +156,8 @@ public class WeakKeyTracker {
             sb.append(e.getKey()).append(" : ").append(e.getValue()).append('\n');
         }
 
-        // --- Misinputs per expected (expected -> misinput=count, ...), sorted desc by count
         sb.append("\n=== Misinputs per Expected (expected -> misinput=count, ...) ===\n");
-        for (var e : totalList) { // iterate expected keys in the same order as totals
+        for (var e : totalList) {
             char expected = e.getKey();
             var mm = misinputs.get(expected);
             if (mm == null || mm.isEmpty()) continue;
@@ -183,7 +176,6 @@ public class WeakKeyTracker {
             sb.append('\n');
         }
 
-        // --- Context (prev|expected -> misinput=count, ...), sorted by key then count desc
         sb.append("\n=== Context (prev|expected -> misinput=count, ...) ===\n");
         var ctxKeys = new ArrayList<>(ctx.keySet());
         Collections.sort(ctxKeys);
@@ -208,6 +200,7 @@ public class WeakKeyTracker {
     }
 
     public java.util.Map<Character, Integer> totalsAllKeys() {
+        // Return a stable map covering every key so UI rendering is easy.
         java.util.LinkedHashMap<Character, Integer> out = new java.util.LinkedHashMap<>(ALL_KEYS.size());
         for (char c : ALL_KEYS) {
             out.put(c, totals.getOrDefault(c, 0));

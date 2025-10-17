@@ -18,8 +18,13 @@ public class SqliteConnection {
         }
     }
 
-    public static Connection getInstance() {
-        if (instance == null) {
+    public static synchronized Connection getInstance() {
+        try {
+            if (instance == null || instance.isClosed()) {
+                new SqliteConnection();
+            }
+        } catch (SQLException e) {
+            // If the existing handle is in a bad state, build a fresh one.
             new SqliteConnection();
         }
         return instance;

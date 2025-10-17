@@ -9,6 +9,7 @@ public class TypingController {
 
     @FXML
     private void handleBack(ActionEvent event) {
+        // Return to the main menu view when the user exits the typing scene.
         try {
             Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
             MainMenu mainMenu = new MainMenu();

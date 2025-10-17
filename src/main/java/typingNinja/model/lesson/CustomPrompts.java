@@ -13,5 +13,6 @@ public class CustomPrompts {
     ), 60)
   );
   private int idx = 0;
+  // Return the active prompt; lesson controllers advance the index externally if needed.
   public Prompt current() { return prompts.get(idx); }
 }

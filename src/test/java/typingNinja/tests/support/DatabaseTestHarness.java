@@ -3,6 +3,7 @@ package typingNinja.tests.support;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import typingNinja.model.SqliteConnection;
+import typingNinja.model.auth.Session;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -26,6 +27,7 @@ public abstract class DatabaseTestHarness {
         originalUserDir = System.getProperty("user.dir");
         tempDir = Files.createTempDirectory("typingninja-db-");
         System.setProperty("user.dir", tempDir.toString());
+        Session.setCurrentUserId(1); // ensure tests always operate on the seeded test user
         SqliteConnection.resetForTests();
         try (Connection conn = SqliteConnection.getInstance()) {
             applySchema(conn);

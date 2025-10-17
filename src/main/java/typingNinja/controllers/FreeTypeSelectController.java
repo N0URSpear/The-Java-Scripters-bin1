@@ -19,21 +19,24 @@ public class FreeTypeSelectController {
 
     @FXML
     private void initialize() {
-        if (dur3 != null) dur3.setSelected(true); // default
+        // Default to the mid-length session so the modal feels ready out of the gate.
+        if (dur3 != null) dur3.setSelected(true);
     }
 
     @FXML
     private void onDurationChanged() {
-        // nothing extra; ToggleGroup ensures exclusivity
+        // Provided for FXML completeness; duration is consumed when the user confirms.
     }
 
     @FXML
     private void onBack() {
+        // Close the dialog without altering the calling scene.
         closeWindow();
     }
 
     @FXML
     private void onGenerate() {
+        // Record the free-typing choice and pivot the main stage into the active lesson.
         int duration = getSelectedDuration();
         dao.insertFreeType(Session.getCurrentUserId(), duration);
 
@@ -55,6 +58,7 @@ public class FreeTypeSelectController {
     }
 
     private int getSelectedDuration() {
+        // Map whichever toggle is hot back into its minute count.
         Toggle t = durationGroup.getSelectedToggle();
         if (t == dur1) return 1;
         if (t == dur3) return 3;
@@ -64,6 +68,7 @@ public class FreeTypeSelectController {
     }
 
     private void closeWindow() {
+        // Helper for both back and success flows.
         Stage st = (Stage) dur3.getScene().getWindow();
         st.close();
     }

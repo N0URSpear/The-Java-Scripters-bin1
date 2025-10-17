@@ -8,6 +8,7 @@ public class LocalSimpleTextService implements AITextService {
     public String generatePassage(String topic, int targetWords,
                                   boolean includeUpper, boolean includeNumbers,
                                   boolean includePunct, boolean includeSpecial) {
+        // Deterministic pseudo-random generator so identical prompts yield stable passages.
 
         long seed = (topic == null ? 0 : topic.toLowerCase(Locale.ROOT).hashCode());
         Random r = new Random(seed);
@@ -55,13 +56,12 @@ public class LocalSimpleTextService implements AITextService {
                 w = w.toUpperCase(Locale.ROOT);
             }
             if (includeNumbers && r.nextDouble() < 0.10) {
-                w = w + " " + (10 + r.nextInt(89)); // add a natural small number
+                w = w + " " + (10 + r.nextInt(89));
             }
             if (includeSpecial && r.nextDouble() < 0.06) {
                 w = w + specials[r.nextInt(specials.length)];
             }
             words.add(w);
-            // occasionally end a sentence
             if (includePunct && r.nextDouble() < 0.12) {
                 words.add(punct[r.nextInt(punct.length)]);
             }
@@ -71,7 +71,6 @@ public class LocalSimpleTextService implements AITextService {
             words.add(".");
         }
 
-        // stitch into a passage with basic spacing
         StringBuilder sb = new StringBuilder();
         boolean afterPunct = false;
         for (String w : words) {
@@ -94,11 +93,13 @@ public class LocalSimpleTextService implements AITextService {
     }
 
     private static String cap(String s) {
+        // Simple capitalisation helper so sentences look intentional.
         if (s == null || s.isEmpty()) return s;
         return Character.toUpperCase(s.charAt(0)) + (s.length() > 1 ? s.substring(1) : "");
     }
 
     private static void addSentence(List<String> words, String sentence) {
+        // Seed the passage with a consistent intro paragraph before randomness takes over.
         if (sentence == null || sentence.isBlank()) return;
         for (String token : sentence.trim().split("\\s+")) {
             words.add(token);

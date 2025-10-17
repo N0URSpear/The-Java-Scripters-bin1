@@ -2,6 +2,7 @@ package typingNinja.model.lesson;
 
 public class FixedLessons {
     public static String passageFor(String lessonType) {
+        // Map static lesson ids to curated practice passages.
         switch (lessonType) {
             case "1a": return (
                 "fj jf ff jj fjf jfj jfjj fjjf fff jjj fj jf ff jj fjf jfj jfjj fjjf " +
