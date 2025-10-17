@@ -1,0 +1,80 @@
+/* 全局使用 Jaro（确保已在启动时 Font.loadFont 加载字体文件） */
+.root {
+    -fx-font-family: "Jaro";
+}
+
+/* 大标题与小标题 */
+.title-label {
+    -fx-text-fill: white;
+    -fx-font-size: 64;
+    -fx-font-weight: bold;
+}
+.section-title {
+    -fx-text-fill: white;
+    -fx-font-size: 24;
+    -fx-font-weight: bold;
+}
+
+/* 三列左侧“描述” */
+.metric-label {
+    -fx-text-fill: white;
+    -fx-font-size: 22;
+    -fx-font-weight: bold;
+}
+
+/* 中列/右列 数值 */
+.goal-value {
+    -fx-text-fill: white;
+    -fx-font-size: 22;
+    -fx-font-weight: bold;
+}
+.actual-value {
+    -fx-text-fill: white;
+    -fx-font-size: 22;
+}
+
+/* 说明、小字 */
+.caption {
+    -fx-text-fill: white;
+    -fx-font-size: 18;
+}
+.info-label, .belt-label, .username-label {
+    -fx-text-fill: white;
+    -fx-font-size: 20;
+}
+
+/* 头像/铅笔按钮 */
+.icon-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0.0em 0.2em 0.0em 0.2em;
+}
+
+/* 绿色大按钮 */
+.action-button {
+    -fx-background-color: #38E21B;
+    -fx-text-fill: #071026;
+    -fx-font-size: 20;
+    -fx-font-weight: bold;
+    -fx-padding: 10 18 10 18;
+    -fx-background-radius: 12;
+}
+
+/* 底部导航 */
+.footer-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-size: 18;
+}
+.footer-button-active {
+    -fx-background-color: transparent;
+    -fx-text-fill: #39ff14;
+    -fx-font-size: 18;
+    -fx-font-weight: bold;
+}
+
+/* 星星数字 */
+.stars-label {
+    -fx-text-fill: gold;
+    -fx-font-size: 22;
+    -fx-font-weight: bold;
+}

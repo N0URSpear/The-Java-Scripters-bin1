@@ -8,6 +8,9 @@ public class NinjaUser {
     private final String secretQuestion2;
     private final String secretQuestion1Answer;
     private final String secretQuestion2Answer;
+    private String passwordPlain;// hashed
+    private String secretAnswer1Plain;      // plain
+    private String secretAnswer2Plain;      // plain
 
     public NinjaUser(String userName, String passwordHash, String secretQuestion1, String secretQuestion2, String secretQuestion1Answer, String secretQuestion2Answer) {
         this.userName = userName;
@@ -39,5 +42,11 @@ public class NinjaUser {
     public String getSecretQuestion1Answer() {return secretQuestion1Answer;}
 
     public String getSecretQuestion2Answer() {return secretQuestion2Answer;}
+
+    public String getPasswordPlain() { return passwordPlain; }
+
+    public String getSecretAnswer1Plain() { return secretAnswer1Plain; }
+
+    public String getSecretAnswer2Plain() { return secretAnswer2Plain; }
 
 }

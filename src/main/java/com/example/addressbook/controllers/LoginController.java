@@ -9,6 +9,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.mindrot.jbcrypt.BCrypt;
+import com.example.addressbook.SessionManager;
 
 public class LoginController {
     @FXML private TextField usernameField;
@@ -17,23 +18,14 @@ public class LoginController {
     private boolean forgotPassword = false;
     private boolean testMode = false;
     private final INinjaContactDAO NinjaDAO;
-    public LoginController() {this.NinjaDAO = new SqliteContactDAO();}
-    public LoginController(INinjaContactDAO mockDAO) {
-        this.NinjaDAO = mockDAO;
-    }
 
-    /**
-     * Sets test mode for unit tests.
-     *
-     * @param testMode sets test mode
-     */
+    public LoginController() { this.NinjaDAO = new SqliteContactDAO(); }
+    public LoginController(INinjaContactDAO mockDAO) { this.NinjaDAO = mockDAO; }
+
     public void setTestMode(boolean testMode) {
         this.testMode = testMode;
     }
 
-    /**
-     * Logic for when the login button is clicked.
-     */
     @FXML
     private void onLoginClicked() {
         String username = usernameField.getText().trim();
@@ -41,48 +33,34 @@ public class LoginController {
         doLogin(username, password);
     }
 
-    /**
-     * Takes a username and password and validates them.
-     *
-     * @param username provided username
-     * @param password provided password
-     */
     void doLogin(String username, String password) {
-
-        //check credentials
         NinjaUser ninja = NinjaDAO.getNinjaUser(username);
         if (ninja == null) {
-            showAlert(Alert.AlertType.ERROR,"Login Error", "Username not found!");
+            showAlert(Alert.AlertType.ERROR, "Login Error", "Username not found!");
             return;
         }
-        if (!BCrypt.checkpw(password,ninja.getPasswordHash())) {
-            showAlert(Alert.AlertType.ERROR,"Login Error","Incorrect password!");
+        if (!BCrypt.checkpw(password, ninja.getPasswordHash())) {
+            showAlert(Alert.AlertType.ERROR, "Login Error", "Incorrect password!");
             return;
         }
 
-        showAlert(Alert.AlertType.INFORMATION,"Login Successful","Welcome, " + ninja.getUserName() + "!"  );
+        showAlert(Alert.AlertType.INFORMATION, "Login Successful", "Welcome, " + ninja.getUserName() + "!");
         loginSuccessful = true;
 
-        //close popup after login
+        // ✅ 保存用户信息与明文密码到 Session（仅内存）
+        SessionManager.setUser(ninja.getId(), ninja.getUserName());
+        SessionManager.setCurrentPassword(password);
+
+        System.out.println("✅ Session set: userId=" + ninja.getId() + ", username=" + ninja.getUserName());
+
         if (usernameField != null && usernameField.getScene() != null) {
             Stage stage = (Stage) usernameField.getScene().getWindow();
             stage.close();
         }
     }
 
-    /**
-     * Method to show alert popups. Has a test mode check for unit testing.
-     *
-     * @param type the type of alert to be shown
-     * @param title the title text for the alert popup
-     * @param message the message the alert popup should display
-     */
     private void showAlert(Alert.AlertType type, String title, String message) {
-        if (testMode) {
-            // Don’t show alerts while testing
-            return;
-        }
-
+        if (testMode) return;
         Alert alert = new Alert(type);
         alert.setTitle(title);
         alert.setHeaderText(null);
@@ -90,9 +68,6 @@ public class LoginController {
         alert.showAndWait();
     }
 
-    /**
-     * Logic for when the cancel button is clicked.
-     */
     @FXML
     private void onCancelClicked() {
         if (usernameField != null && usernameField.getScene() != null) {
@@ -101,18 +76,8 @@ public class LoginController {
         }
     }
 
-    /**
-     * Logic for when the forgot password button is clicked.
-     */
     @FXML
     private void onForgotPasswordClicked() {
-        ForgotPassword();
-    }
-
-    /**
-     * Functionality when the forgot password button is clicked.
-     */
-    void ForgotPassword() {
         forgotPassword = true;
         if (usernameField != null && usernameField.getScene() != null) {
             Stage stage = (Stage) usernameField.getScene().getWindow();
@@ -120,21 +85,6 @@ public class LoginController {
         }
     }
 
-    /**
-     * Helper method for external functionality.
-     *
-     * @return returns whether login was successful or not
-     */
-    public boolean isLoginSuccessful() {
-        return loginSuccessful;
-    }
-
-    /**
-     * Helper method for external functionality.
-     *
-     * @return returns whether forgot password was clicked or not
-     */
-    public boolean isForgotPassword() {
-        return forgotPassword;
-    }
+    public boolean isLoginSuccessful() { return loginSuccessful; }
+    public boolean isForgotPassword() { return forgotPassword; }
 }

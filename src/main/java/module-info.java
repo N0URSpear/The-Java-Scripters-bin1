@@ -5,6 +5,8 @@ module com.example.addressbook {
     requires jbcrypt;
     requires java.sql;
     requires javafx.graphics;
+    requires itextpdf;
+    requires javafx.swing;
 
     requires com.google.gson;
     requires java.net.http;

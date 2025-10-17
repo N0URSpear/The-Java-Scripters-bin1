@@ -3,13 +3,11 @@ package com.example.addressbook.controllers;
 import com.example.addressbook.INinjaContactDAO;
 import com.example.addressbook.SqliteContactDAO;
 import com.example.addressbook.NinjaUser;
+import com.example.addressbook.SessionManager;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -21,15 +19,18 @@ public class CreateAccountController {
     @FXML private ComboBox<String> SecretQuestion2ComboBox;
     @FXML private TextField SecretQuestion1Answer;
     @FXML private TextField SecretQuestion2Answer;
+
     private boolean isCreateAccountSuccessful = false;
     private boolean testMode = false;
     private final INinjaContactDAO NinjaDAO;
-    public CreateAccountController() {this.NinjaDAO = new SqliteContactDAO();}
 
-    public CreateAccountController (INinjaContactDAO mockDao) {
-        this.NinjaDAO = mockDao;
+    public CreateAccountController() {
+        this.NinjaDAO = new SqliteContactDAO();
     }
 
+    public CreateAccountController(INinjaContactDAO mockDao) {
+        this.NinjaDAO = mockDao;
+    }
 
     public void setTestMode(boolean testMode) {
         this.testMode = testMode;
@@ -50,18 +51,13 @@ public class CreateAccountController {
         SecretQuestion1ComboBox.getSelectionModel().selectFirst();
         SecretQuestion2ComboBox.getSelectionModel().select(1);
 
-        SecretQuestion1ComboBox.valueProperty().addListener((obs, oldVal, newVal) -> enforceUniqueSelection(SecretQuestion1ComboBox, SecretQuestion2ComboBox, secretQuestions));
+        SecretQuestion1ComboBox.valueProperty().addListener(
+                (obs, oldVal, newVal) -> enforceUniqueSelection(SecretQuestion1ComboBox, SecretQuestion2ComboBox, secretQuestions));
 
-        SecretQuestion2ComboBox.valueProperty().addListener((obs, oldVal, newVal) -> enforceUniqueSelection(SecretQuestion2ComboBox, SecretQuestion1ComboBox, secretQuestions));
+        SecretQuestion2ComboBox.valueProperty().addListener(
+                (obs, oldVal, newVal) -> enforceUniqueSelection(SecretQuestion2ComboBox, SecretQuestion1ComboBox, secretQuestions));
     }
 
-    /**
-     * Ensure that the secret question options are not repeated.
-     *
-     * @param comboBox1 the value within combo box 1
-     * @param comboBox2 the value within combo box 2
-     * @param allSecretQuestions the secret questions available to choose from
-     */
     private void enforceUniqueSelection(ComboBox<String> comboBox1, ComboBox<String> comboBox2, ObservableList<String> allSecretQuestions) {
         String sourceSelection = comboBox1.getValue();
         String otherSelection = comboBox2.getValue();
@@ -78,9 +74,6 @@ public class CreateAccountController {
         }
     }
 
-    /**
-     * Logic for once the create account button is clicked.
-     */
     @FXML
     public void onCreateAccountClicked() {
         String username = usernameField.getText().trim();
@@ -91,76 +84,46 @@ public class CreateAccountController {
         String answer1 = SecretQuestion1Answer.getText().trim();
         String answer2 = SecretQuestion2Answer.getText().trim();
 
-        doCreateAccount(username,password,repeatPassword,secretQ1,secretQ2,answer1,answer2);
+        doCreateAccount(username, password, repeatPassword, secretQ1, secretQ2, answer1, answer2);
     }
 
-    /**
-     * Underlying logic for account creation. Ensures a unique username and has password confirmation.
-     *
-     * @param username the provided username
-     * @param password the provided password
-     * @param repeatPassword password confirmation
-     * @param secretQ1 the first selected secret question
-     * @param secretQ2 the second selected secret question
-     * @param answer1 the provided answer to the first question
-     * @param answer2 the provided answer to the second question
-     */
-    void doCreateAccount(String username, String password, String repeatPassword, String secretQ1, String secretQ2, String answer1, String answer2) {
+    void doCreateAccount(String username, String password, String repeatPassword,
+                         String secretQ1, String secretQ2, String answer1, String answer2) {
+
         isCreateAccountSuccessful = false;
-        if (username == null || username.isEmpty()) {
-            showError("Username cannot be empty.");
-            return;
-        }
 
-        if (password == null || password.isEmpty()) {
-            showError("Password cannot be empty.");
-            return;
-        }
+        if (username.isEmpty()) { showError("Username cannot be empty."); return; }
+        if (password.isEmpty()) { showError("Password cannot be empty."); return; }
+        if (!password.equals(repeatPassword)) { showError("Passwords do not match."); return; }
+        if (secretQ1 == null || secretQ2 == null) { showError("You must select both secret questions."); return; }
+        if (secretQ1.equals(secretQ2)) { showError("Secret questions must be different."); return; }
+        if (answer1.isEmpty() || answer2.isEmpty()) { showError("Both secret answers must be filled."); return; }
 
-        if (!password.equals(repeatPassword)) {
-            showError("Passwords do not match.");
-            return;
-        }
-
-        if (secretQ1 == null || secretQ2 == null) {
-            showError("You must select both secret questions.");
-            return;
-        }
-
-        if (secretQ1.equals(secretQ2)) {
-            showError("Secret questions must be different.");
-            return;
-        }
-
-        if (answer1 == null || answer1.isEmpty() ||
-                answer2 == null || answer2.isEmpty()) {
-            showError("Both secret question answers must be filled.");
-            return;
-        }
-
-        // Check for existing username before attempting to insert
         if (NinjaDAO.getNinjaUser(username) != null) {
-            showError("That username is already taken. Please choose a different one.");
+            showError("That username is already taken. Please choose another.");
             return;
         }
 
+        // 🔐 Hash sensitive data for DB
         String passwordHash = BCrypt.hashpw(password, BCrypt.gensalt());
         String answer1Hash = BCrypt.hashpw(answer1, BCrypt.gensalt());
         String answer2Hash = BCrypt.hashpw(answer2, BCrypt.gensalt());
 
-        NinjaUser newUser = new NinjaUser(
-                username,
-                passwordHash,
-                secretQ1,
-                secretQ2,
-                answer1Hash,
-                answer2Hash
-        );
+        NinjaUser newUser = new NinjaUser(username, passwordHash, secretQ1, secretQ2, answer1Hash, answer2Hash);
+        SqliteContactDAO dao = new SqliteContactDAO();
+        dao.addNinjaUser(newUser);
 
-        NinjaDAO.addNinjaUser(newUser);
+        // ✅ 初始化对应的 Goals & Statistics 记录
+        dao.safeInitUserData(newUser.getId());
+        dao.recalcUserStatistics(newUser.getId());
+        System.out.println("✅ Initialized Goals & Statistics for new user ID=" + newUser.getId());
+
+        // ✅ 临时保存明文（不进数据库）
+        SessionManager.setUser(newUser.getId(), newUser.getUserName());
+        SessionManager.setCurrentPassword(password);
+        SessionManager.setCurrentSecretAnswers(answer1, answer2);
 
         showSuccess();
-
         isCreateAccountSuccessful = true;
 
         if (usernameField != null && usernameField.getScene() != null) {
@@ -169,16 +132,8 @@ public class CreateAccountController {
         }
     }
 
-    /**
-     * Creates an error alert popup.
-     *
-     * @param message the message that should be displayed
-     */
     private void showError(String message) {
-        if (testMode) {
-            // Don’t show alerts while testing
-            return;
-        }
+        if (testMode) return;
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Invalid Input");
         alert.setHeaderText(null);
@@ -186,14 +141,8 @@ public class CreateAccountController {
         alert.showAndWait();
     }
 
-    /**
-     *  Creates a success alert popup.
-     */
     private void showSuccess() {
-        if (testMode) {
-            // Don’t show alerts while testing
-            return;
-        }
+        if (testMode) return;
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Success");
         alert.setHeaderText(null);
@@ -201,9 +150,6 @@ public class CreateAccountController {
         alert.showAndWait();
     }
 
-    /**
-     * Logic for when the cancel button is clicked.
-     */
     @FXML
     public void onCancelClicked() {
         if (usernameField != null && usernameField.getScene() != null) {
@@ -212,9 +158,6 @@ public class CreateAccountController {
         }
     }
 
-    /**
-     * @return a boolean to the controller indicating whether account creation was successful or not.
-     */
     public boolean isCreateAccountSuccessful() {
         return isCreateAccountSuccessful;
     }
