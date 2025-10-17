@@ -51,69 +51,58 @@ public final class Keyboard {
         keysLayer.setMinSize(width, height);
         keysLayer.setMaxSize(width, height);
 
-        // 布局参数
         double pad  = 14;
         double gapX = 6;
         double gapY = 8;
         int rows = ROWS.length;
 
-        // 统计总错误数（用于百分比）。对 null 做保护。
+        //counting the misstake
         int total = 0;
         if (counts != null) {
             for (Integer v : counts.values()) {
                 total += (v == null ? 0 : Math.max(0, v));
             }
         }
-        final int totalErrors = total; // 防止闭包修改
+        final int totalErrors = total;
 
-        // 每行键高
         double keyH = (height - pad * 2 - gapY * (rows - 1)) / rows;
 
-        // 逐行绘制
         double y = pad;
         for (int r = 0; r < rows; r++) {
             String[] rowKeys = ROWS[r];
             int cols = rowKeys.length;
 
-            // 本行可用宽度 & 键宽（等宽）
             double rowW = (width - pad * 2);
             double keyW = (rowW - gapX * (cols - 1)) / cols;
 
-            // 行偏移
             double offset = (r < ROW_OFFSET_IN_KEYW.length ? ROW_OFFSET_IN_KEYW[r] : 0.0) * keyW;
             double x = pad + offset;
 
             for (int c = 0; c < cols; c++) {
                 String k = rowKeys[c];
 
-                // 当前键的“错误次数”
                 int count = 0;
                 if (counts != null) {
                     Integer v = counts.get(k);
                     if (v == null) v = counts.get(k.toLowerCase());
                     if (v == null) v = counts.get(k.toUpperCase());
-                    // 也兼容 "SPACE" 作为空格键名
                     if (v == null && " ".equals(k)) v = counts.get("SPACE");
                     count = (v == null) ? 0 : Math.max(0, v);
                 }
 
-                // —— 关键变化：按“百分比”着色 —— //
                 double t = (totalErrors > 0) ? (count / (double) totalErrors) : 0.0; // 0.0 ~ 1.0
 
-                // 键帽
                 Rectangle keyRect = new Rectangle(keyW, keyH);
                 keyRect.setArcWidth(10);
                 keyRect.setArcHeight(10);
-                keyRect.setFill(colorFor(t));               // 白→红（按百分比）
+                keyRect.setFill(colorFor(t));
                 keyRect.setStroke(Color.web("#B3B3B3"));
                 keyRect.setStrokeWidth(1.0);
 
-                // 标签
                 Text label = new Text(k);
                 label.setFill(Color.BLACK);
                 label.setFont(Font.font(12));
 
-                // 居中容器
                 StackPane keyPane = new StackPane(keyRect, label);
                 keyPane.setAlignment(Pos.CENTER);
                 keyPane.setLayoutX(x);
@@ -138,7 +127,6 @@ public final class Keyboard {
      * @param t normalized intensity in [0, 1]
      * @return the Color corresponding to the intensity
      */
-    // 颜色映射（保持你原来的两段渐变风格）
     private static Color colorFor(double t) {
         t = clamp01(t);
         if (t < 0.5) {

@@ -19,7 +19,7 @@ public final class CertificatePdfUtil {
 
     private CertificatePdfUtil() {}
 
-    // 内置标准字体（无需外部 TTF）
+    // PDF word fort
     private static final PDFont FONT_REG  = new PDType1Font(Standard14Fonts.FontName.HELVETICA);
     private static final PDFont FONT_BOLD = new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD);
 
@@ -52,13 +52,13 @@ public final class CertificatePdfUtil {
             float pageHeight = box.getHeight();
 
             try (PDPageContentStream cs = new PDPageContentStream(doc, page)) {
-                // 边框
+                //fram
                 float margin = 36f;
                 cs.setLineWidth(2f);
                 cs.addRect(margin, margin, pageWidth - margin * 2, pageHeight - margin * 2);
                 cs.stroke();
 
-                // 标题（居中）
+                // Title
                 String title = "Certificate of Completion";
                 float titleFontSize = 28f;
                 float titleWidth = FONT_BOLD.getStringWidth(title) / 1000f * titleFontSize;
@@ -71,13 +71,13 @@ public final class CertificatePdfUtil {
                 cs.showText(title);
                 cs.endText();
 
-                // 副标题线
+                // subheading
                 cs.setLineWidth(1f);
                 cs.moveTo(margin + 40, titleY - 10);
                 cs.lineTo(pageWidth - margin - 40, titleY - 10);
                 cs.stroke();
 
-                // 正文
+                // body
                 float bodyLeft = margin + 60f;
                 float startY   = titleY - 60f;
                 float gap      = 28f;
@@ -87,19 +87,6 @@ public final class CertificatePdfUtil {
                 writeLine(cs, "Accuracy: " + String.format("%.1f%%", accuracyPercent), bodyLeft, startY - gap * 2, 14f, false);
                 writeLine(cs, "Date Completed: " + dateCompleted.format(DateTimeFormatter.ISO_DATE), bodyLeft, startY - gap * 3, 14f, false);
                 writeLine(cs, "Lesson: " + lesson, bodyLeft, startY - gap * 4, 14f, false);
-
-                // 底部签名区
-                float signY = margin + 120f;
-                cs.moveTo(bodyLeft, signY);
-                cs.lineTo(bodyLeft + 200, signY);
-                cs.stroke();
-                writeLine(cs, "Instructor Signature", bodyLeft, signY - 18, 12f, false);
-
-                float rightX = pageWidth - margin - 260;
-                cs.moveTo(rightX, signY);
-                cs.lineTo(rightX + 200, signY);
-                cs.stroke();
-                writeLine(cs, "Authorized By", rightX, signY - 18, 12f, false);
             }
 
             doc.save(outPath.toFile());

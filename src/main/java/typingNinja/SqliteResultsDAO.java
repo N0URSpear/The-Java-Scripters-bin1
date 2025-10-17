@@ -55,7 +55,6 @@ public class SqliteResultsDAO implements IResultsDAO {
 
     @Override
     public List<Result> getLastN(int n) throws Exception {
-        // 原来可能是：int userId = resolveCurrentUserId();
         Integer userId = resolveCurrentUserId(connection);
         if (userId == null) return java.util.Collections.emptyList();
 
@@ -78,7 +77,7 @@ public class SqliteResultsDAO implements IResultsDAO {
                             rs.getString("createdAt")
                     ));
                 }
-                return out; // 新→旧，调用层会反转成 旧→新 画图
+                return out;
             }
         }
     }
@@ -138,13 +137,10 @@ public class SqliteResultsDAO implements IResultsDAO {
     // ---------- helpers ----------
 
     /** Return the latest (max UserID) user; adjust if you have a proper current-user context. */
-// 需要：import com.example.addressbook.auth.Session;
     private Integer resolveCurrentUserId(Connection c) throws SQLException {
-        // ① 优先使用登录会话里的用户ID
-        Integer sid = typingNinja.auth.Session.getCurrentUserId(); // 若方法名不同，改成你的
+        Integer sid = typingNinja.auth.Session.getCurrentUserId();
         if (sid != null) return sid;
 
-        // ② 无会话时回退到 Users 表里“最新”的用户（也可改成直接 return null 更严格）
         try (PreparedStatement ps = c.prepareStatement(
                 "SELECT UserID FROM Users ORDER BY UserID DESC LIMIT 1");
              ResultSet rs = ps.executeQuery()) {

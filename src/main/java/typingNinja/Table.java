@@ -27,27 +27,26 @@ public final class Table {
     public static Node create(double width, double height,
                               List<Integer> wpm, List<Integer> accuracy) {
 
-        // 1) 背景板
         Rectangle bg = new Rectangle(width, height);
         bg.setFill(Color.web("#D9D9D9"));
         bg.setArcWidth(16 * 2);
         bg.setArcHeight(16 * 2);
 
-        // 2) 坐标轴
+        //XY
         int n = Math.min(wpm.size(), accuracy.size());
         NumberAxis x = new NumberAxis(1, Math.max(1, n), 1);
         x.setLabel(null);
         NumberAxis y = new NumberAxis();
         y.setLabel(null);
 
-        // 3) 折线图
+        //table
         LineChart<Number, Number> chart = new LineChart<>(x, y);
         chart.setLegendVisible(true);
         chart.setLegendSide(javafx.geometry.Side.BOTTOM);
         chart.setAnimated(false);
         chart.setCreateSymbols(true);
 
-        // 让背景透明，露出圆角灰底
+        //background
         chart.setHorizontalGridLinesVisible(true);
         chart.setVerticalGridLinesVisible(false);
         chart.setAlternativeColumnFillVisible(false);
@@ -57,7 +56,7 @@ public final class Table {
                 -fx-padding: 6;
                 """);
 
-        // 4) 两条数据线
+        //the line
         XYChart.Series<Number, Number> sAcc = new XYChart.Series<>();
         sAcc.setName("Accuracy");
         XYChart.Series<Number, Number> sWpm = new XYChart.Series<>();
@@ -70,7 +69,7 @@ public final class Table {
         }
         chart.getData().addAll(sAcc, sWpm);
 
-        // 5) 叠放（圆角底 + 图）
+
         StackPane wrapper = new StackPane(chart);
         wrapper.setPadding(new Insets(10));
         wrapper.setPrefSize(width, height);

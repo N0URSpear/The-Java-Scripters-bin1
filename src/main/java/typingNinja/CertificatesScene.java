@@ -35,27 +35,23 @@ import java.util.List;
 
 public class CertificatesScene {
 
-    // 设计基准
+
     private static final double DESIGN_W = 1920, DESIGN_H = 1080;
-    // 颜色与字体
+    // fort
     private static final String BG = "#140B38", GREEN = "#2EFF04", JARO = "/fonts/Jaro-Regular.ttf";
 
-    // 标题
+    //title
     private static final double TITLE_X = 36, TITLE_Y = 0, TITLE_SIZE = 180;
 
     // ScrollPane
     private static final double SCROLL_X = 178, SCROLL_Y = 249;
     private static final double SCROLL_W = 1569, SCROLL_H = 724;
 
-    // 内容占位，高于 ScrollPane 以产生滚动
     private static final double CONTENT_W = 1569, CONTENT_H = 10000;
 
-    // 右上角返回按钮
+    // back buttum
     private static final double BACK_X = 1734, BACK_Y = 52;
 
-    // 底部 3 个文字按钮
-    private static final double NAV_Y = 1000, NAV_FONT = 40;
-    private static final double NAV_MM_X = 600, NAV_PF_X = 900, NAV_ST_X = 1150;
 
 
     /**
@@ -328,14 +324,8 @@ public class CertificatesScene {
      */
     private static void populateListFromDb(VBox listBox) {
         listBox.getChildren().clear();
-
-        // 1) 取数：沿用 ResultsBridge.ensureTable（虽然它是 no-op，但不改你现有流程）
         ResultsBridge.ensureTable();
-
-        // 2) 读取完整字段（旧 -> 新）
         java.util.List<Row> rows = loadRowsFromDb(1000);
-
-        // 3) 空数据提示
         if (rows.isEmpty()) {
             Label empty = new Label("No results yet.");
             empty.setTextFill(Color.BLACK);
@@ -344,7 +334,6 @@ public class CertificatesScene {
             return;
         }
 
-        // 4) 渲染每一行
         for (Row r : rows) {
             HBox row = new HBox(12);
             row.setAlignment(Pos.CENTER_LEFT);
@@ -378,7 +367,7 @@ public class CertificatesScene {
                     File file = chooser.showSaveDialog(listBox.getScene().getWindow());
                     if (file == null) return;
 
-                    // —— 关键：全部换成数据库真实值 ——
+                    //database variable
                     String name = r.userName;
                     int typingSpeedWpm = r.wpm;
                     double accuracyPercent = r.acc;
@@ -402,7 +391,7 @@ public class CertificatesScene {
             listBox.getChildren().add(row);
         }
 
-        // 5) 内容高度估算，保证可滚动（保留你的逻辑）
+
         double estimatedHeight = 40 + rows.size() * 64.0;
         Pane parent = (Pane) listBox.getParent();
         parent.setMinHeight(Math.max(CONTENT_H, estimatedHeight));
@@ -421,7 +410,7 @@ public class CertificatesScene {
      * @param y     the y-coordinate of the label layout position
      * @return the Label node
      */
-    // 小工具
+
     private static Label label(String text, Font font, Color color, double x, double y) {
         Label l = new Label(text);
         l.setFont(font);

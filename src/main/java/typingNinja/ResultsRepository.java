@@ -27,8 +27,8 @@ public final class ResultsRepository {
 
     public static Metrics loadLastN(int n) {
         try {
-            var rows = dao().getLastN(n); // 新→旧
-            Collections.reverse(rows);    // 变为旧→新，便于图表
+            var rows = dao().getLastN(n);
+            Collections.reverse(rows);
             List<Integer> w = new ArrayList<>();
             List<Integer> a = new ArrayList<>();
             for (var r : rows) { w.add(r.wpm()); a.add(r.acc()); }

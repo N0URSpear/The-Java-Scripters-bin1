@@ -16,7 +16,7 @@ public class Stars {
      * @param p the percentage in the range 0–100
      * @return the computed star count (typically 0–5)
      */
-    // 百分比 》 星数
+    //rate to star
     private static int percentToStars(double p) {
         if (p >= 90) return 5;
         if (p >= 80) return 4;
@@ -33,7 +33,7 @@ public class Stars {
      * @param gap        the horizontal gap between adjacent stars in pixels
      * @return an HBox containing the star nodes
      */
-    //生成星星组件
+    //generate star
     public static HBox create(double percent, double starHeight, double gap) {
         int stars = percentToStars(percent);
         Image on  = new Image(Stars.class.getResourceAsStream(STAR_ON));
