@@ -61,7 +61,7 @@ public class CertificatesScene {
      * @param active whether the label should be styled as the active (selected) item
      * @return the configured Label
      */
-    // 创建带高亮的文本标签
+    // highlight
     private static Label navLabel(String text, boolean active) {
         Label l = new Label(text);
         l.setFont(Font.font("Jaro", 40)); // 与 MainMenu 一致
@@ -77,7 +77,6 @@ public class CertificatesScene {
      * @param root  the root Pane to which the navigation may be attached/aligned
      * @return the navigation Node
      */
-    // 构建底部栏（贴底居中）
     private static Node buildBottomNav(Stage stage, Pane root) {
         // Certificates 页面常见是 PROFILE 高亮；如需 MAIN MENU 高亮，把 true 改到 mainMenu
         Label mainMenu = navLabel("MAIN MENU", false);
@@ -86,7 +85,6 @@ public class CertificatesScene {
         Label sep2     = navLabel("|", false);
         Label settings = navLabel("SETTINGS",  false);
 
-        // 点击行为（复制 MainMenu 的跳转方式）
         asButton(mainMenu, () -> stage.setScene(new MainMenu().buildScene(stage)));
 
         asButton(profile, () -> switchTo(stage,
@@ -96,7 +94,6 @@ public class CertificatesScene {
                 "/com/example/addressbook/Settings.fxml",
                 "Settings - Typing Ninja"));
 
-        // 水平排布 + 居中 + 贴底
         HBox box = new HBox(12, mainMenu, sep1, profile, sep2, settings);
         box.setAlignment(Pos.CENTER);
         box.prefWidthProperty().bind(root.widthProperty());
@@ -111,7 +108,6 @@ public class CertificatesScene {
      * @param l      the Label to decorate with button-like behavior
      * @param action the action to run when the label is activated
      */
-    // 若项目里暂无 asButton，这里给一个本地最小实现（已有就删掉这段）
     private static void asButton(Label l, Runnable action) {
         l.setOnMouseEntered(e -> l.setUnderline(true));
         l.setOnMouseExited(e -> l.setUnderline(false));
@@ -127,7 +123,6 @@ public class CertificatesScene {
      * @param fxml  the classpath path of the FXML resource
      * @param title the window title for the new scene
      */
-    // 若项目里暂无 switchTo，这里给一个本地最小实现（已有就删掉这段）
     private static void switchTo(Stage stage, String fxml, String title) {
         try {
             Parent root = FXMLLoader.load(CertificatesScene.class.getResource(fxml));
@@ -149,7 +144,7 @@ public class CertificatesScene {
      * @return the Scene for the Certificates screen
      */
     public static Scene createScene(Stage stage) {
-        // 设计层
+        //desing
         Pane design = new Pane();
         design.setPrefSize(DESIGN_W, DESIGN_H);
         design.setMinSize(DESIGN_W, DESIGN_H);
@@ -158,7 +153,7 @@ public class CertificatesScene {
         Font jaro180 = loadFont(JARO, TITLE_SIZE, Font.font("Jaro", TITLE_SIZE));
         Label title  = label("CERTIFICATES", jaro180, Color.WHITE, TITLE_X, TITLE_Y);
 
-        // ScrollPane + 内容
+        // ScrollPane
         ScrollPane sp = new ScrollPane();
         sp.setLayoutX(SCROLL_X);
         sp.setLayoutY(SCROLL_Y);
@@ -171,26 +166,24 @@ public class CertificatesScene {
         sp.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         sp.setStyle("-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;");
 
-        // 内容容器（保持你的 Pane 架构，但内部放一个 VBox 列表）
         Pane content = new Pane();
         content.setPrefSize(CONTENT_W, CONTENT_H);
         content.setMinHeight(CONTENT_H);
         content.setMaxHeight(CONTENT_H);
         content.setStyle("-fx-background-color: lightgray;");
 
-        // 放置列表容器（在内容 Pane 内，控制具体偏移）
         VBox listBox = new VBox(16);
-        listBox.setLayoutX(40);           // 你可以微调这个位置
+        listBox.setLayoutX(40);
         listBox.setLayoutY(40);
-        listBox.setPrefWidth(CONTENT_W - 80); // 两侧各留 40px
+        listBox.setPrefWidth(CONTENT_W - 80);
         content.getChildren().add(listBox);
 
-        // —— 渲染数据库数据到列表 —— //
+
         populateListFromDb(listBox);
 
         sp.setContent(content);
 
-        //返回按钮
+        //Back
         Button backBtn = new Button("Back");
         backBtn.setLayoutX(BACK_X);
         backBtn.setLayoutY(BACK_Y);
@@ -200,13 +193,11 @@ public class CertificatesScene {
         backBtn.setFont(Font.font("Jaro", 40));
         backBtn.setOnAction(e -> stage.setScene(CongratulationsScene.createScene(stage)));
 
-        // 底部 3 个文字按钮
         design.getChildren().add(buildBottomNav(stage, design));
 
         design.getChildren().addAll(title, sp, backBtn);
 
 
-        //缩放容器：等比缩放 + 居中 + 背景
         Group scalable = new Group(design);
         StackPane viewport = new StackPane(scalable);
         viewport.setAlignment(Pos.CENTER);
@@ -223,15 +214,14 @@ public class CertificatesScene {
         return scene;
     }
 
-    // 从数据库加载，并渲染每条 result 一行 + 按钮
     private static final class Row {
-        final int index;           // 列表里的序号（#001, #002...）
-        final int lessonId;        // LessonID（用于回查）
-        final int wpm;             // 速度（WPM）
-        final int acc;             // 准确率（0..100）
-        final LocalDate date;      // DateCompleted -> LocalDate
-        final String lessonType;   // LessonType
-        final String userName;     // Users.Username
+        final int index;
+        final int lessonId;
+        final int wpm;
+        final int acc;
+        final LocalDate date;
+        final String lessonType;
+        final String userName;
 
         Row(int index, int lessonId, int wpm, int acc,
             LocalDate date, String lessonType, String userName) {
@@ -245,31 +235,25 @@ public class CertificatesScene {
         }
     }
 
-    // 把 "YYYY-MM-DD HH:MM:SS" 解析成 LocalDate；解析失败则回退为今天
     private static LocalDate toLocalDate(String dt) {
         try {
-            // SQLite 默认 datetime('now') 形如 "2025-10-10 12:34:56"
             return LocalDate.parse(dt.substring(0, 10));
         } catch (Exception ignore) {
             return LocalDate.now();
         }
     }
 
-    /**
-     * 读取最近 n 条（当前用户）的完整结果，包含：LessonID、WPM、Accuracy、DateCompleted、LessonType、Username。
-     * 数据顺序：旧 -> 新（和你现在列表显示保持一致）。
-     */
+
     private static java.util.List<Row> loadRowsFromDb(int limit) {
         java.util.List<Row> out = new java.util.ArrayList<>();
 
         try {
             Connection conn = SqliteConnection.getInstance();
-            // 用现有 DAO 获取“当前用户”的最近 n 条（它已处理当前用户的筛选与最新优先）
             SqliteResultsDAO dao = new SqliteResultsDAO(conn);
-            java.util.List<Result> base = dao.getLastN(limit);   // 新 -> 旧
-            java.util.Collections.reverse(base);                 // 变为 旧 -> 新（和你原来的 UI 一致）
+            java.util.List<Result> base = dao.getLastN(limit);
+            java.util.Collections.reverse(base);
 
-            // 为了性能，只准备一次语句，在循环里反复设参执行
+
             try (PreparedStatement psLesson = conn.prepareStatement(
                     "SELECT LessonType, UserID FROM Lesson WHERE LessonID=?");
                  PreparedStatement psUser = conn.prepareStatement(
@@ -281,7 +265,7 @@ public class CertificatesScene {
                     String lessonType = "Unknown";
                     int userId = -1;
 
-                    // 查 LessonType / UserID
+                    //LessonType  UserID
                     psLesson.setInt(1, lessonId);
                     try (ResultSet rs = psLesson.executeQuery()) {
                         if (rs.next()) {
@@ -290,7 +274,7 @@ public class CertificatesScene {
                         }
                     }
 
-                    // 查 Username
+                    //Username
                     String userName = "Student Name";
                     if (userId > 0) {
                         psUser.setInt(1, userId);
@@ -300,10 +284,10 @@ public class CertificatesScene {
                     }
 
                     out.add(new Row(
-                            idx++,                 // 列表序号
+                            idx++,
                             lessonId,
-                            r.wpm(),               // ——保持你原来拿法
-                            r.acc(),               // ——保持你原来拿法
+                            r.wpm(),
+                            r.acc(),
                             toLocalDate(r.createdAt()),
                             lessonType,
                             userName

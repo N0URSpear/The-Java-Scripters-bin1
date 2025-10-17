@@ -68,7 +68,7 @@ public class CongratulationsScene {
     private static final double KEY_H = 223;
 
     //image
-    private static final String NINJA_IMG = "Ninja"; // 资源基名，放 /images/Ninja.png
+    private static final String NINJA_IMG = "Ninja";
     private static final double NINJA_X = 1555;
     private static final double NINJA_Y = 601;
     private static final double NINJA_W = 416;
