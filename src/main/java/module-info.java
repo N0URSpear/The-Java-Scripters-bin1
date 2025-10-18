@@ -6,6 +6,8 @@ open module typingNinja {
     requires java.sql;
     requires javafx.graphics;
     requires javafx.media;
+    requires itextpdf;
+    requires javafx.swing;
 
     requires com.google.gson;
     requires java.net.http;

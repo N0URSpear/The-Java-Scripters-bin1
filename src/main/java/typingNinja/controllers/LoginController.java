@@ -3,6 +3,7 @@ package typingNinja.controllers;
 import typingNinja.model.INinjaContactDAO;
 import typingNinja.model.SqliteContactDAO;
 import typingNinja.model.NinjaUser;
+import typingNinja.model.SessionManager;
 import typingNinja.model.auth.Session;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -64,6 +65,9 @@ public class LoginController {
         showAlert(Alert.AlertType.INFORMATION,"Login Successful","Welcome, " + ninja.getUserName() + "!"  );
         loginSuccessful = true;
         Session.setCurrentUserId(ninja.getId());
+
+        SessionManager.setUser(ninja.getId(), ninja.getUserName());
+        SessionManager.setCurrentPassword(password);
 
         //close popup after login
         if (usernameField != null && usernameField.getScene() != null) {

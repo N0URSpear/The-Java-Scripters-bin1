@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="typingNinja.controllers.EditUserDialogController"
+            style="-fx-background-color: rgba(0,0,0,0.6);">
+
+    <center>
+        <StackPane>
+            <StackPane.margin>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </StackPane.margin>
+
+            <GridPane hgap="18" vgap="18"
+                      alignment="CENTER"
+                      style="-fx-background-color: #DDDDDD; -fx-background-radius: 18; -fx-padding: 24;">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="180" halignment="LEFT"/>
+                    <ColumnConstraints hgrow="ALWAYS"/>
+                    <ColumnConstraints minWidth="40" halignment="LEFT"/>
+                </columnConstraints>
+
+                <!-- Title -->
+                <Label text="User Information"
+                       style="-fx-font-family: 'Jaro'; -fx-font-size: 28; -fx-font-weight: bold;"
+                       GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="3"
+                       GridPane.halignment="CENTER"/>
+
+                <!-- Back button -->
+                <Button fx:id="backBtn" text="Back"
+                        style="-fx-background-color: #39ff14; -fx-text-fill: #000; -fx-font-weight: bold;
+                               -fx-background-radius: 12; -fx-padding: 6 16;"
+                        GridPane.rowIndex="0" GridPane.columnIndex="2"
+                        GridPane.halignment="RIGHT"/>
+
+                <!-- Username -->
+                <Label text="Username:" style="-fx-font-family: 'Jaro'; -fx-font-size: 22;"
+                       GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <Label fx:id="usernameValueLabel" style="-fx-font-size: 18;"
+                       GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                <!-- Password -->
+                <Label text="Password:" style="-fx-font-family: 'Jaro'; -fx-font-size: 22;"
+                       GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                <StackPane GridPane.rowIndex="2" GridPane.columnIndex="1">
+                    <Label fx:id="passwordMask" text="********"/>
+                    <Label fx:id="passwordPlain" visible="false" managed="true"/>
+                </StackPane>
+                <Button fx:id="togglePasswordBtn" style="-fx-background-color: transparent;"
+                        GridPane.rowIndex="2" GridPane.columnIndex="2">
+                    <graphic>
+                        <ImageView fx:id="eyePassword" fitWidth="22" fitHeight="22" preserveRatio="true">
+                            <Image url="@/images/eye-icon.png"/>
+                        </ImageView>
+                    </graphic>
+                </Button>
+
+                <!-- Secret Question 1 -->
+                <Label text="Secret Question 1:" style="-fx-font-family: 'Jaro'; -fx-font-size: 22;"
+                       GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                <ComboBox fx:id="secretQ1ComboBox"
+                          GridPane.rowIndex="3" GridPane.columnIndex="1" prefWidth="280"/>
+                <StackPane GridPane.rowIndex="4" GridPane.columnIndex="1">
+                    <Label fx:id="secretQ1Mask" text="********"/>
+                    <Label fx:id="secretQ1Plain" visible="false" managed="true"/>
+                </StackPane>
+                <Button fx:id="toggleQ1Btn" style="-fx-background-color: transparent;"
+                        GridPane.rowIndex="4" GridPane.columnIndex="2">
+                    <graphic>
+                        <ImageView fx:id="eyeQ1" fitWidth="22" fitHeight="22" preserveRatio="true">
+                            <Image url="@/images/eye-icon.png"/>
+                        </ImageView>
+                    </graphic>
+                </Button>
+
+                <!-- Secret Question 2 -->
+                <Label text="Secret Question 2:" style="-fx-font-family: 'Jaro'; -fx-font-size: 22;"
+                       GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                <ComboBox fx:id="secretQ2ComboBox"
+                          GridPane.rowIndex="5" GridPane.columnIndex="1" prefWidth="280"/>
+                <StackPane GridPane.rowIndex="6" GridPane.columnIndex="1">
+                    <Label fx:id="secretQ2Mask" text="********"/>
+                    <Label fx:id="secretQ2Plain" visible="false" managed="true"/>
+                </StackPane>
+                <Button fx:id="toggleQ2Btn" style="-fx-background-color: transparent;"
+                        GridPane.rowIndex="6" GridPane.columnIndex="2">
+                    <graphic>
+                        <ImageView fx:id="eyeQ2" fitWidth="22" fitHeight="22" preserveRatio="true">
+                            <Image url="@/images/eye-icon.png"/>
+                        </ImageView>
+                    </graphic>
+                </Button>
+
+            </GridPane>
+        </StackPane>
+    </center>
+</BorderPane>

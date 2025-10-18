@@ -1,0 +1,83 @@
+.root {
+    -fx-font-family: "Jaro";
+}
+
+/* 主标题（PROFILE） */
+.title-label {
+    -fx-text-fill: white;
+    -fx-font-size: 64;
+    -fx-font-weight: bold;
+}
+
+/* 小节标题（GOALS、Actual、Practice hours...） */
+.section-title {
+    -fx-text-fill: white;
+    -fx-font-size: 32;
+    -fx-font-weight: bold;
+}
+
+/* 中间 GOALS/Actual 数值文字 */
+.metric-label {
+    -fx-text-fill: white;
+    -fx-font-size: 30;
+    -fx-font-weight: bold;
+}
+
+.goal-value {
+    -fx-text-fill: white;
+    -fx-font-size: 30;
+    -fx-font-weight: bold;
+}
+
+.actual-value {
+    -fx-text-fill: white;
+    -fx-font-size: 30;
+}
+
+.caption {
+    -fx-text-fill: white;
+    -fx-font-size: 24;
+}
+
+/* 右侧统计信息（Belt、Lessons、Average WPM等） */
+.info-label, .belt-label, .username-label {
+    -fx-text-fill: white;
+    -fx-font-size: 28;
+}
+
+/* 铅笔按钮样式 */
+.icon-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0.0em 0.2em 0.0em 0.2em;
+}
+
+/* 绿色按钮（Lesson History, View Certificates） */
+.action-button {
+    -fx-background-color: #38E21B;
+    -fx-text-fill: #071026;
+    -fx-font-size: 26;
+    -fx-font-weight: bold;
+    -fx-padding: 12 22 12 22;
+    -fx-background-radius: 14;
+}
+
+/* 底部导航（Main Menu / Profile / Settings） */
+.footer-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-size: 24;
+}
+
+.footer-button-active {
+    -fx-background-color: transparent;
+    -fx-text-fill: #39ff14;
+    -fx-font-size: 22;
+    -fx-font-weight: bold;
+}
+
+/* 星星文字 */
+.stars-label {
+    -fx-text-fill: gold;
+    -fx-font-size: 28;
+    -fx-font-weight: bold;
+}
