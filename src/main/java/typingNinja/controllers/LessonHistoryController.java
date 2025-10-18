@@ -167,11 +167,9 @@ public class LessonHistoryController {
         try {
             Stage stage = (Stage) mainMenuLabel.getScene().getWindow();
 
-            // ✅ 使用 MainMenu 类来加载主菜单界面（与 SettingsController 一致）
             MainMenu mm = new MainMenu();
             mm.show(stage);
 
-            // ✅ 保持全屏
             stage.setFullScreen(true);
         } catch (Exception e) {
             e.printStackTrace();
@@ -187,7 +185,6 @@ public class LessonHistoryController {
             Scene scene = new Scene(root, stage.getWidth(), stage.getHeight());
             stage.setScene(scene);
 
-            // ✅ 返回时保持全屏
             if (returnToProfile) {
                 stage.setFullScreen(true);
             } else {
@@ -209,7 +206,6 @@ public class LessonHistoryController {
             Scene scene = new Scene(root, stage.getWidth(), stage.getHeight());
             stage.setScene(scene);
 
-            // ✅ 保持全屏
             stage.setFullScreen(true);
             stage.show();
         } catch (Exception e) {
@@ -295,7 +291,6 @@ public class LessonHistoryController {
             Scene scene = new Scene(root, stage.getWidth(), stage.getHeight());
             stage.setScene(scene);
 
-            // ✅ 返回时保持全屏
             if (returnToProfile) {
                 stage.setFullScreen(true);
             }

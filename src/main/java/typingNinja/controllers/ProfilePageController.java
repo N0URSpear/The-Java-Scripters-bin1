@@ -189,14 +189,12 @@ public class ProfilePageController {
 
             Stage stage = (Stage) lessonHistoryBtn.getScene().getWindow();
 
-            // ✅ 通知 LessonHistory 保留全屏状态
             typingNinja.controllers.LessonHistoryController controller = loader.getController();
             controller.setReturnToProfile(true);
 
             Scene scene = new Scene(root, stage.getWidth(), stage.getHeight());
             stage.setScene(scene);
 
-            // ✅ 打开 LessonHistory 时进入全屏
             stage.setFullScreen(true);
 
             stage.show();
