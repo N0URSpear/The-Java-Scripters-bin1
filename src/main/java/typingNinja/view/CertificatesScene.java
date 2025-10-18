@@ -25,11 +25,8 @@ import javafx.scene.Node;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 import typingNinja.util.SceneNavigator;
-import typingNinja.view.MainMenu;
 import javafx.scene.Parent;
 
 public class CertificatesScene {
@@ -93,7 +90,7 @@ public class CertificatesScene {
         asButton(mainMenu, () -> new MainMenu().show(stage));
 
         asButton(profile, () -> navigate(stage,
-                "/typingNinja/Profile.fxml",
+                "/typingNinja/ProfilePage.fxml",
                 "Profile - Typing Ninja"));
         asButton(settings, () -> navigate(stage,
                 "/typingNinja/Settings.fxml",

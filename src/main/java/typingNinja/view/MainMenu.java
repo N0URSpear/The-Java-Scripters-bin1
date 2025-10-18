@@ -168,7 +168,7 @@ public class MainMenu {
         sep1.setFont(Font.font("Jaro", 40));
         sep2.setFont(Font.font("Jaro", 40));
 
-        asButton(profile, () -> switchTo(stage, "/typingNinja/Profile.fxml", "Profile - Typing Ninja"));
+        asButton(profile, () -> switchTo(stage, "/typingNinja/ProfilePage.fxml", "Profile - Typing Ninja"));
         asButton(settings, () -> switchTo(stage, "/typingNinja/Settings.fxml", "Settings - Typing Ninja"));
 
         HBox bottomMenu = new HBox(40, mainMenu, sep1, profile, sep2, settings);

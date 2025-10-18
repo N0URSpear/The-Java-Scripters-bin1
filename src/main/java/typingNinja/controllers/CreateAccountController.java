@@ -3,6 +3,7 @@ package typingNinja.controllers;
 import typingNinja.model.INinjaContactDAO;
 import typingNinja.model.SqliteContactDAO;
 import typingNinja.model.NinjaUser;
+import typingNinja.model.SessionManager;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -148,6 +149,21 @@ public class CreateAccountController {
         String passwordHash = BCrypt.hashpw(password, BCrypt.gensalt());
         String answer1Hash = BCrypt.hashpw(answer1, BCrypt.gensalt());
         String answer2Hash = BCrypt.hashpw(answer2, BCrypt.gensalt());
+
+        NinjaUser newUser = new NinjaUser(username, passwordHash, secretQ1, secretQ2, answer1Hash, answer2Hash);
+        SqliteContactDAO dao = new SqliteContactDAO();
+        dao.addNinjaUser(newUser);
+
+        dao.safeInitUserData(newUser.getId());
+        dao.recalcUserStatistics(newUser.getId());
+        System.out.println("Initialized Goals & Statistics for new user ID=" + newUser.getId());
+
+        SessionManager.setUser(newUser.getId(), newUser.getUserName());
+        SessionManager.setCurrentPassword(password);
+        SessionManager.setCurrentSecretAnswers(answer1, answer2);
+
+        showSuccess();
+        isCreateAccountSuccessful = true;
 
         NinjaUser ninja = new NinjaUser(
                 username,
