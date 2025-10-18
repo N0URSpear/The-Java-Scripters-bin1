@@ -1,13 +1,15 @@
 package typingNinja.controllers;
 
-import typingNinja.MainLessonDAO;
-import typingNinja.auth.Session;
+import typingNinja.model.MainLessonDAO;
+import typingNinja.model.auth.Session;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+import typingNinja.util.SceneNavigator;
 
+/**
+ * Controller backing the custom topic modal where students choose AI prompt settings.
+ */
 public class CustomTopicSelectController {
 
     @FXML private ToggleGroup sourceGroup;
@@ -23,8 +25,12 @@ public class CustomTopicSelectController {
 
     private final MainLessonDAO dao = new MainLessonDAO();
 
+    /**
+     * Initialises toggle defaults and field constraints.
+     */
     @FXML
     private void initialize() {
+        // Default to the custom prompt path and clamp the text field length up front.
         btnCustom.setSelected(true);
         if (dur3 != null) dur3.setSelected(true);
 
@@ -37,12 +43,17 @@ public class CustomTopicSelectController {
         applySourceState();
     }
 
+    /**
+     * Updates the prompt field when the source toggle changes.
+     */
     @FXML
     private void onSourceChanged() {
+        // Flip the form between the weak-key preset and freeform topic entry.
         applySourceState();
     }
 
     private void applySourceState() {
+        // When weak-key practice is enabled we lock the prompt so it matches the lesson logic.
         boolean isWeak = btnWeakKeys.isSelected();
         if (isWeak) {
             promptField.setText("PracticeWeakKeyCombos");
@@ -55,18 +66,29 @@ public class CustomTopicSelectController {
         }
     }
 
+    /**
+     * FXML hook retained for completeness; no extra logic required.
+     */
     @FXML
     private void onDurationChanged() {
-        // nothing extra needed
+        // Method exists mainly for FXML binding symmetry; duration reads happen on submit.
     }
 
+    /**
+     * Closes the modal without launching a lesson.
+     */
     @FXML
     private void onBack() {
+        // Simply close the modal; caller remains on the selection menu.
         closeWindow();
     }
 
+    /**
+     * Validates the selections, persists the lesson row, and transitions into the active view.
+     */
     @FXML
     private void onGenerate() {
+        // Validate inputs, stash the lesson choice, and jump straight into the active lesson.
         int duration = getSelectedDuration();
         boolean upper = chkUpper.isSelected();
         boolean nums = chkNums.isSelected();
@@ -90,12 +112,7 @@ public class CustomTopicSelectController {
             Stage popup = (Stage) promptField.getScene().getWindow();
             Stage owner = (Stage) popup.getOwner();
 
-            Parent root = FXMLLoader.load(getClass().getResource("/typingNinja/LessonActivePage.fxml"));
-            owner.getScene().setRoot(root);
-            owner.setTitle("Typing - Typing Ninja");
-            owner.centerOnScreen();
-            owner.setFullScreen(true);
-            owner.setFullScreenExitHint("");
+            SceneNavigator.load(owner, "/typingNinja/LessonActivePage.fxml", "Typing - Typing Ninja");
 
             popup.close();
         } catch (Exception ex) {
@@ -103,7 +120,11 @@ public class CustomTopicSelectController {
         }
     }
 
+    /**
+     * @return selected duration in minutes, falling back to three if undefined
+     */
     private int getSelectedDuration() {
+        // Toggle group only surfaces the button, so translate it back into minutes.
         Toggle t = durationGroup.getSelectedToggle();
         if (t == dur1) return 1;
         if (t == dur3) return 3;
@@ -112,13 +133,21 @@ public class CustomTopicSelectController {
         return 3;
     }
 
+    /**
+     * Displays a simple blocking error dialog.
+     */
     private void showError(String msg) {
+        // Use a simple blocking alert to keep input focus in this dialog.
         Alert a = new Alert(Alert.AlertType.ERROR, msg, ButtonType.OK);
         a.setHeaderText(null);
         a.showAndWait();
     }
 
+    /**
+     * Closes the current window safely.
+     */
     private void closeWindow() {
+        // Drop the dialog without touching the owner scene.
         Stage st = (Stage) promptField.getScene().getWindow();
         st.close();
     }

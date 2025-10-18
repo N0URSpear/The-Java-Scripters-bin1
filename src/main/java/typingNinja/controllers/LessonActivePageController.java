@@ -20,18 +20,28 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.scene.text.TextAlignment;
 
-import typingNinja.lesson.*;
-import typingNinja.auth.Session;
-import typingNinja.SettingsDAO;
-import typingNinja.SettingsDAO.SettingsRecord;
-import typingNinja.CongratulationsScene;
-import typingNinja.MainMenu;
+import typingNinja.controllers.lesson.KeyboardHands;
+import typingNinja.controllers.lesson.InputSection;
+import typingNinja.controllers.lesson.FreeTypingInput;
+import typingNinja.controllers.lesson.ProgressBar;
+import typingNinja.controllers.lesson.PauseMenu;
+import typingNinja.model.lesson.Lesson;
+import typingNinja.model.lesson.CustomPrompts;
+import typingNinja.model.lesson.LessonDAO;
+import typingNinja.model.lesson.WeakKeyTracker;
+import typingNinja.model.lesson.StarRating;
+import typingNinja.model.auth.Session;
+import typingNinja.model.SettingsDAO;
+import typingNinja.model.SettingsDAO.SettingsRecord;
+import typingNinja.view.CongratulationsScene;
+import typingNinja.view.MainMenu;
 
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
+import typingNinja.util.SceneNavigator;
 
+/**
+ * Main controller that orchestrates the active typing lesson experience.
+ */
 public class LessonActivePageController {
     @FXML private HBox buttonBar;
     @FXML private Button pauseButton;
@@ -60,7 +70,7 @@ public class LessonActivePageController {
     @FXML private Label promptTitleLabel;
     @FXML private Label promptDisplayLabel;
 
-    private Metrics metrics;
+    private typingNinja.model.lesson.Metrics metrics;
     private CustomPrompts prompts;
     private ProgressBar progressFeature;
     private PauseMenu pauseMenu;
@@ -70,7 +80,7 @@ public class LessonActivePageController {
     private final WeakKeyTracker weakKeyTracker = new WeakKeyTracker();
     private Integer currentLessonId;
     private int currentUserId;
-    private final LessonDAO lessonDAO = new LessonDAO(); // reuse the same DAO
+    private final LessonDAO lessonDAO = new LessonDAO();
     private final SettingsDAO settingsDAO = new SettingsDAO();
     private boolean strictModePreferred = true;
     private boolean freeMode = false;
@@ -82,23 +92,22 @@ public class LessonActivePageController {
     private boolean finishedByTyping = false;
     private boolean lessonCompleteSoundEnabled = false;
 
-    // Sound toggles and clips (with throttling + pooling)
     private boolean keyboardSoundsEnabled = false;
     private boolean typingErrorSoundsEnabled = false;
-    private javafx.scene.media.AudioClip typingClip; // legacy single clip (fallback)
-    private javafx.scene.media.AudioClip errorClip;  // legacy single clip (fallback)
+    private javafx.scene.media.AudioClip typingClip;
+    private javafx.scene.media.AudioClip errorClip;
     private javafx.scene.media.AudioClip[] typingPool;
     private javafx.scene.media.AudioClip[] errorPool;
     private int typingPoolIdx = 0, errorPoolIdx = 0;
     private long lastTypingMs = 0, lastErrorMs = 0;
-    private static final long TYPING_GAP_MS = 25;  // ~40 clicks/sec max
-    private static final long ERROR_GAP_MS  = 200; // avoid buzzer spam
+    private static final long TYPING_GAP_MS = 25;
+    private static final long ERROR_GAP_MS  = 200;
     private int lastErrorCount = 0;
 
     
 
     private void onReachedEndOfText() {
-        // User reached end of passage before timer ended
+        // Flip the completion flag so we can decide whether to fast-forward the timer.
         finishedByTyping = true;
         if (inputSection == null) return;
         int passageLen = inputSection.getPassageLength();
@@ -110,15 +119,14 @@ public class LessonActivePageController {
         boolean passWithErrors = (percentCorrectOfPassage > 40.0 && accuracyVal >= 40.0);
 
         if (perfect || passWithErrors) {
-            // End timer and trigger onLessonEnd handler
             Platform.runLater(metrics::endLessonNow);
         } else {
-            // Too many errors; keep lesson running and show a fading prompt
             Platform.runLater(() -> showFadingErrorBanner("TOO MANY ERRORS — CORRECT AND CONTINUE"));
         }
     }
 
     private void showFadingErrorBanner(String message) {
+        // Lightweight overlay that nudges the user without blocking input.
         Label banner = new Label(message);
         banner.setStyle("-fx-background-color: rgba(205,25,25,0.95); -fx-text-fill: white; -fx-font-weight: 900; -fx-font-size: 20px; -fx-padding: 12 18; -fx-background-radius: 12; -fx-border-radius: 12;");
         banner.setMouseTransparent(true);
@@ -132,25 +140,18 @@ public class LessonActivePageController {
     }
 
     private void playCompletionSoundIfEnabled() {
+        // Respect the settings toggle before firing the celebratory chime.
         if (!lessonCompleteSoundEnabled) return;
-        try {
-            java.net.URL u = getClass().getResource("/typingNinja/Sounds/lesson_complete.mp3");
-            if (u != null) {
-                javafx.scene.media.AudioClip clip = new javafx.scene.media.AudioClip(u.toExternalForm());
-                clip.play();
-            }
-        } catch (Exception ignored) {}
+        try { typingNinja.util.SoundManager.playLessonComplete(); } catch (Exception ignored) {}
     }
 
-    // --- Sound helpers ---
     private void initSoundClips() {
+        // Load any available audio variants so we can hand out quick feedback without pops.
         try {
-            // Prefer WAV for lower latency; fallback to legacy MP3 if missing
             java.net.URL typingUrl = getClass().getResource("/typingNinja/Sounds/keyboard_click.wav");
             if (typingUrl == null) typingUrl = getClass().getResource("/typingNinja/Sounds/typing.mp3");
             if (typingUrl != null) {
                 typingClip = new javafx.scene.media.AudioClip(typingUrl.toExternalForm());
-                // Build a small pool for polyphony
                 int n = 4;
                 typingPool = new javafx.scene.media.AudioClip[n];
                 for (int i = 0; i < n; i++) typingPool[i] = new javafx.scene.media.AudioClip(typingUrl.toExternalForm());
@@ -178,9 +179,10 @@ public class LessonActivePageController {
     }
 
     private void playTypingKeySound() {
+        // Prevent the sound from spamming while still keeping the keyboard feeling responsive.
         if (!keyboardSoundsEnabled) return;
         long now = System.currentTimeMillis();
-        if (now - lastTypingMs < TYPING_GAP_MS) return; // throttle
+        if (now - lastTypingMs < TYPING_GAP_MS) return;
         lastTypingMs = now;
         if (typingPool != null && typingPool.length > 0) {
             javafx.scene.media.AudioClip c = typingPool[typingPoolIdx];
@@ -192,6 +194,7 @@ public class LessonActivePageController {
     }
 
     private void attachMetricsErrorSoundListener() {
+        // Listen to error deltas so mistakes trigger the buzzer exactly once.
         if (metrics == null) return;
         lastErrorCount = metrics.getErrors();
         metrics.errorsProperty().addListener((o, oldVal, newVal) -> {
@@ -203,10 +206,10 @@ public class LessonActivePageController {
             lastErrorCount = newCount;
         });
     }
-
     private void playErrorBuzzer() {
+        // Guard the buzzer so clustered typos do not overwhelm the mix.
         long now = System.currentTimeMillis();
-        if (now - lastErrorMs < ERROR_GAP_MS) return; // throttle
+        if (now - lastErrorMs < ERROR_GAP_MS) return;
         lastErrorMs = now;
         if (errorPool != null && errorPool.length > 0) {
             javafx.scene.media.AudioClip c = errorPool[errorPoolIdx];
@@ -219,32 +222,20 @@ public class LessonActivePageController {
 
 
     private void rebuildPauseMenu() {
+        // Defer to the FX thread since we might touch controls during init.
         Platform.runLater(() ->
                 pauseMenu = new PauseMenu(pauseButton, metrics, hiddenInput,
                         this::openSettingsView, this::returnToHome));
     }
 
     private void openSettingsView() {
-        // Cancel active lesson by removing its DB row if not completed
+        // Drop the active lesson before navigating so stale rows do not linger.
         cancelActiveLesson();
         Stage stage = pauseButton != null && pauseButton.getScene() != null
                 ? (Stage) pauseButton.getScene().getWindow() : null;
         if (stage == null) return;
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/typingNinja/Settings.fxml"));
-            Parent root = loader.load();
-            Scene scene = stage.getScene();
-            if (scene == null) {
-                scene = new Scene(root);
-                stage.setScene(scene);
-            }
-            else {
-                scene.setRoot(root);
-            }
-            stage.setTitle("Settings - Typing Ninja");
-            stage.centerOnScreen();
-            stage.setFullScreen(true);
-            stage.setFullScreenExitHint("");
+            SceneNavigator.load(stage, "/typingNinja/Settings.fxml", "Settings - Typing Ninja");
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -252,19 +243,14 @@ public class LessonActivePageController {
     }
 
     private void returnToHome() {
-        // Cancel active lesson by removing its DB row if not completed
+        // Same cleanup as settings navigation but return to the main menu.
         cancelActiveLesson();
         Stage stage = pauseButton != null && pauseButton.getScene() != null
                 ? (Stage) pauseButton.getScene().getWindow() : null;
         if (stage == null) return;
         try {
             MainMenu mainMenu = new MainMenu();
-            Scene scene = mainMenu.buildScene(stage);
-            stage.setScene(scene);
-            stage.setTitle("Typing Ninja");
-            stage.centerOnScreen();
-            stage.setFullScreen(true);
-            stage.setFullScreenExitHint("");
+            mainMenu.show(stage);
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -272,6 +258,7 @@ public class LessonActivePageController {
     }
 
     private void openResultsView() {
+        // Resolve whichever stage is active and replace the scene with the stats view.
         Stage stage = pauseButton != null && pauseButton.getScene() != null
                 ? (Stage) pauseButton.getScene().getWindow()
                 : (hiddenInput != null && hiddenInput.getScene() != null)
@@ -279,12 +266,7 @@ public class LessonActivePageController {
                     : null;
         if (stage == null) return;
         try {
-            Scene scene = CongratulationsScene.createScene(stage);
-            stage.setScene(scene);
-            stage.setTitle("Lesson Results - Typing Ninja");
-            stage.centerOnScreen();
-            stage.setFullScreen(true);
-            stage.setFullScreenExitHint("");
+            CongratulationsScene.show(stage);
         } catch (Exception ex) {
             ex.printStackTrace();
             returnToHome();
@@ -292,6 +274,7 @@ public class LessonActivePageController {
     }
 
     private void cancelActiveLesson() {
+        // Pending lessons are ephemeral; wipe them if the user bails out early.
         if (currentLessonId != null) {
             try {
                 lessonDAO.deleteIfNotCompleted(currentLessonId, currentUserId);
@@ -302,6 +285,7 @@ public class LessonActivePageController {
     }
 
     private void buildInputSectionAndStart(String passage) {
+        // Tear down any previous handlers and spin up the correct input mode for this lesson.
         if (keyTypedHandler != null) {
             hiddenInput.removeEventFilter(KeyEvent.KEY_TYPED, keyTypedHandler);
             keyTypedHandler = null;
@@ -366,6 +350,7 @@ public class LessonActivePageController {
     }
 
     private void ensureCursorVisible(Text cursorNode) {
+        // Keep the active caret quarter-screen from the edge to avoid sudden jumps.
         if (cursorNode == null) return;
         Platform.runLater(() -> {
             Bounds viewportBounds = readingScroll.getViewportBounds();
@@ -403,6 +388,7 @@ public class LessonActivePageController {
     }
 
     private void showLoadingPlaceholder() {
+        // Display a neutral waiting state while async content is loading.
         Text promptPlaceholder = new Text("LOADING ...");
         promptPlaceholder.getStyleClass().addAll("loading-placeholder", "mono");
         promptFlow.setTextAlignment(TextAlignment.CENTER);
@@ -413,6 +399,7 @@ public class LessonActivePageController {
     }
 
     private void configureStatsForFreeMode() {
+        // Free typing focuses on flow, so hide accuracy widgets that do not make sense here.
         if (errorsTitleLabel != null) {
             errorsTitleLabel.setVisible(false);
             errorsTitleLabel.setManaged(false);
@@ -440,6 +427,7 @@ public class LessonActivePageController {
     }
 
     private void restoreStatsForStandardMode() {
+        // Bring back the full stats grid when we're in a structured lesson.
         if (errorsTitleLabel != null) {
             errorsTitleLabel.setVisible(true);
             errorsTitleLabel.setManaged(true);
@@ -459,6 +447,7 @@ public class LessonActivePageController {
     }
 
     private void showCustomPrompt(String prompt) {
+        // Toggle the prompt header on and fill it with the freshly minted text.
         if (promptTitleLabel == null || promptDisplayLabel == null) return;
         promptTitleLabel.setVisible(true);
         promptTitleLabel.setManaged(true);
@@ -472,6 +461,7 @@ public class LessonActivePageController {
     }
 
     private void hidePrompt() {
+        // Reset prompt labels to the neutral placeholder state.
         if (promptTitleLabel != null) {
             promptTitleLabel.setVisible(true);
             promptTitleLabel.setManaged(true);
@@ -484,7 +474,11 @@ public class LessonActivePageController {
     }
 
     @FXML
+    /**
+     * JavaFX lifecycle entry point that wires up bindings and loads the relevant lesson.
+     */
     private void initialize() {
+        // Bootstraps UI bindings, pulls the latest lesson selection, and launches the timer.
         promptFlow.setMinWidth(0);
         promptFlow.setMaxWidth(Double.MAX_VALUE);
         userFlow.setMinWidth(0);
@@ -500,7 +494,7 @@ public class LessonActivePageController {
         restoreStatsForStandardMode();
         hidePrompt();
 
-        metrics = new Metrics(p.durationSeconds());
+        metrics = new typingNinja.model.lesson.Metrics(p.durationSeconds());
         metrics.setCharsPerWord(DEFAULT_CHARS_PER_WORD);
         metrics.bindTimerLabel(timerLabel);
         metrics.bindStats(wpmLabel, errorsLabel, accuracyLabel);
@@ -524,7 +518,6 @@ public class LessonActivePageController {
         typingErrorSoundsEnabled = settings.typingErrorSounds;
         initSoundClips();
         if (hiddenInput != null) {
-            // Use KEY_TYPED so we only play on actual character input, not modifiers
             hiddenInput.addEventFilter(KeyEvent.KEY_TYPED, e -> playTypingKeySound());
         }
 
@@ -568,19 +561,19 @@ public class LessonActivePageController {
             lessonTitleLabel.setText(latest.getLessonType());
             int durationSeconds = Math.max(10, latest.getDurationMinutes() * 60);
 
-            metrics = new Metrics(durationSeconds);
+            metrics = new typingNinja.model.lesson.Metrics(durationSeconds);
             metrics.setCharsPerWord(DEFAULT_CHARS_PER_WORD);
             metrics.bindTimerLabel(timerLabel);
             metrics.bindStats(wpmLabel, errorsLabel, accuracyLabel);
             attachMetricsErrorSoundListener();
-            progressFeature = new typingNinja.lesson.ProgressBar(timeProgress);
+            progressFeature = new typingNinja.controllers.lesson.ProgressBar(timeProgress);
             progressFeature.bindTo(metrics.timeRemainingProperty(), metrics.lessonSeconds());
             lessonDurationLabel.setText(durationSeconds + "s");
             rebuildPauseMenu();
 
             String lt = latest.getLessonType();
             boolean isCustom = "CustomTopic".equalsIgnoreCase(lt);
-            boolean isFree = (lt != null && lt.toLowerCase().startsWith("free")); // matches your FreeTypeSelectController ("FreeWeakKeys", "FreeAnything")
+            boolean isFree = (lt != null && lt.toLowerCase().startsWith("free"));
 
             if (isFree) {
                 freeMode = true;
@@ -595,15 +588,22 @@ public class LessonActivePageController {
                 restoreStatsForStandardMode();
                 lessonTitleLabel.setText("Custom Topic");
                 showCustomPrompt(latest.getPrompt());
-                typingNinja.ai.OllamaTextService ollama = new typingNinja.ai.OllamaTextService();
-                typingNinja.ai.LocalSimpleTextService local = new typingNinja.ai.LocalSimpleTextService();
-                int targetWords = Math.max(60, latest.getDurationMinutes() * 50); // ~50 wpm target
+                typingNinja.model.ai.OllamaTextService ollama = new typingNinja.model.ai.OllamaTextService();
+                typingNinja.model.ai.LocalSimpleTextService local = new typingNinja.model.ai.LocalSimpleTextService();
+                int wpmTarget = 50;
+                try {
+                    String envWpm = System.getenv("AI_TARGET_WPM");
+                    if (envWpm != null && !envWpm.isBlank()) {
+                        int v = Integer.parseInt(envWpm.trim());
+                        if (v >= 20 && v <= 150) wpmTarget = v;
+                    }
+                } catch (Exception ignored) {}
+                int targetWords = Math.max(60, latest.getDurationMinutes() * wpmTarget);
 
                 String promptToSend = latest.getPrompt();
                 if ("PracticeWeakKeyCombos".equalsIgnoreCase(promptToSend)) {
                     java.util.List<String> pairs = java.util.Collections.emptyList();
                     try {
-                        // only from PAST completed CustomTopic lessons
                         pairs = lessonDAO.topWeakPairsForUserFromCompletedCustomLessons(currentUserId, 7);
                     } catch (Exception ex) {
                         ex.printStackTrace();
@@ -627,12 +627,11 @@ public class LessonActivePageController {
                     promptToSend = sb.toString();
                     System.out.println("[AI] PracticeWeakKeyCombos pairs for user " + currentUserId + ": " + joined);
                 }
-                final String promptToUse = promptToSend;  // final for lambdas
+                final String promptToUse = promptToSend;
                 Lesson finalLatest = latest;
 
                 java.util.concurrent.CompletableFuture
                         .supplyAsync(() -> {
-                            // 1) Ollama (free, local API)
                             try {
                                 System.out.println("[AI] Trying Ollama (free/local). prompt='" + promptToUse + "' "
                                         + "flags: upper=" + finalLatest.isUpperCase()
@@ -657,7 +656,6 @@ public class LessonActivePageController {
                         })
                         .thenApply(text -> {
                             if (text != null && !text.isBlank()) return text;
-                            // 2) Local fallback (always free)
                             System.out.println("[AI] Falling back to LocalSimpleTextService");
                             try {
                                 return local.generatePassage(
@@ -670,12 +668,12 @@ public class LessonActivePageController {
                                 );
                             } catch (Exception e) {
                                 e.printStackTrace();
-                                return new typingNinja.lesson.CustomPrompts().current().text();
+                                return new typingNinja.model.lesson.CustomPrompts().current().text();
                             }
                         })
                         .thenAccept(text -> {
                             String finalPassage = (text == null || text.isBlank())
-                                    ? new typingNinja.lesson.CustomPrompts().current().text()
+                                    ? new typingNinja.model.lesson.CustomPrompts().current().text()
                                     : text;
                             Platform.runLater(() -> buildInputSectionAndStart(finalPassage));
                 });
@@ -686,8 +684,7 @@ public class LessonActivePageController {
                 metrics.setCharsPerWord(DEFAULT_CHARS_PER_WORD);
                 restoreStatsForStandardMode();
                 hidePrompt();
-                // 1a…4f fixed placeholders for now
-                String fixed = typingNinja.lesson.FixedLessons.passageFor(lt);
+                String fixed = typingNinja.model.lesson.FixedLessons.passageFor(lt);
                 buildInputSectionAndStart(fixed);
             }
         }
@@ -717,12 +714,11 @@ public class LessonActivePageController {
             int errorCount;
 
             wpmVal      = metrics.getWpm();
-            accuracyVal = metrics.getAccuracyPercent(); // 0..100
+            accuracyVal = metrics.getAccuracyPercent();
             errorCount  = metrics.getErrors();
-            double star = StarRating.compute(wpmVal, accuracyVal, errorCount); // 0.0 .. 5.0
-            String weakPairs = weakKeyTracker.topPrevExpectedPairsString(5); // e.g. "aC d4 e2 a1 B#" or with "--" pads
-
-            // --- DEBUG: print full weak-keys structure to terminal ---
+            double star = StarRating.compute(wpmVal, accuracyVal, errorCount);
+            String weakPairs = weakKeyTracker.topPrevExpectedPairsString(5);
+            
             System.out.println("\n----- WEAK KEYS DEBUG DUMP -----");
             System.out.println(weakKeyTracker.debugDump());
             System.out.println("Top-5 pairs stored to DB: " + weakPairs);
@@ -755,12 +751,9 @@ public class LessonActivePageController {
                     }
                 }
             } else {
-                // Timer expired or free mode ended
                 completed = true;
                 showResults = true;
             }
-
-            
 
             if (completed && currentLessonId != null) {
                 try {
@@ -776,15 +769,19 @@ public class LessonActivePageController {
                 } catch (Exception ex) { ex.printStackTrace(); }
             }
 
+            var totalsChar = weakKeyTracker.totalsAllKeys();
+            java.util.Map<String,Integer> totalsStr = new java.util.LinkedHashMap<>(totalsChar.size());
+            for (var e : totalsChar.entrySet()) {
+                totalsStr.put(String.valueOf(Character.toUpperCase(e.getKey())), e.getValue());
+            }
+            typingNinja.model.auth.Session.setLatestTotals(totalsStr);
+
             boolean finalCompleted = completed;
             boolean finalTimedOut = timerExpired;
             boolean finalShowResults = showResults;
             Platform.runLater(() -> {
                 if (finalShowResults) {
-                    if (finalCompleted && !finalTimedOut) {
-                        // Play completion sound for successful lessons
-                        playCompletionSoundIfEnabled();
-                    }
+                    playCompletionSoundIfEnabled();
                     openResultsView();
                 }
             });

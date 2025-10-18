@@ -1,0 +1,17 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="TypingNinja" type="Application" factoryName="Application">
+    <envs>
+      <env name="OLLAMA_BASE_URL" value="https://ai.34-40-132-86.sslip.io" />
+      <env name="OLLAMA_MODEL" value="gemma2:2b-instruct-q4_K_M" />
+      <env name="OLLAMA_AUTH_HEADER" value="X-API-Key" />
+      <env name="OLLAMA_API_KEY" value="ilovemysister" />
+      <env name="OLLAMA_NUM_PREDICT" value="800" />
+      <env name="OLLAMA_HTTP_TIMEOUT_SECONDS" value="600" />
+    </envs>
+    <option name="MAIN_CLASS_NAME" value="typingNinja.Launcher" />
+    <module name="addressbookpush" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

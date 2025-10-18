@@ -1,4 +1,4 @@
-module typingNinja {
+open module typingNinja {
     requires javafx.controls;
     requires javafx.fxml;
     requires java.desktop;
@@ -11,8 +11,6 @@ module typingNinja {
     requires java.net.http;
     requires org.apache.pdfbox;
 
-    opens typingNinja to javafx.fxml;
     exports typingNinja;
     exports typingNinja.controllers;
-    opens typingNinja.controllers to javafx.fxml;
 }

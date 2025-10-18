@@ -1,13 +1,12 @@
 package typingNinja.controllers;
 
-import typingNinja.MainLessonDAO;
-import typingNinja.auth.Session;
+import typingNinja.model.MainLessonDAO;
+import typingNinja.model.auth.Session;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
+import typingNinja.util.SceneNavigator;
 
 public class SubLessonSelectController {
 
@@ -71,12 +70,7 @@ public class SubLessonSelectController {
             Stage popup = (Stage) backButton.getScene().getWindow();
             Stage owner = (Stage) popup.getOwner();
 
-            Parent root = FXMLLoader.load(getClass().getResource("/typingNinja/LessonActivePage.fxml"));
-            owner.getScene().setRoot(root);
-            owner.setTitle("Typing - Typing Ninja");
-            owner.centerOnScreen();
-            owner.setFullScreen(true);
-            owner.setFullScreenExitHint("");
+            SceneNavigator.load(owner, "/typingNinja/LessonActivePage.fxml", "Typing - Typing Ninja");
 
             popup.close();
         } catch (Exception ex) {

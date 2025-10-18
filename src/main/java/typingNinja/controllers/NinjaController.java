@@ -1,12 +1,12 @@
 package typingNinja.controllers;
 
-import typingNinja.MainMenu;
+import javafx.scene.Scene;
+import typingNinja.view.MainMenu;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
@@ -107,11 +107,7 @@ public class NinjaController {
         if (controller.isLoginSuccessful()) {
             Stage stage = (Stage) logoImage.getScene().getWindow();
             MainMenu menu = new MainMenu();
-            Scene mainMenuScene = menu.buildScene(stage);
-            stage.setScene(mainMenuScene);
-            stage.setTitle("Main Menu - Typing Ninja");
-            stage.setFullScreen(true);
-            stage.setFullScreenExitHint("");
+            menu.show(stage);
         }
 
         if (controller.isForgotPassword()) {
@@ -149,11 +145,7 @@ public class NinjaController {
         if (controller.isCreateAccountSuccessful()) {
             Stage stage = (Stage) logoImage.getScene().getWindow();
             MainMenu menu = new MainMenu();
-            Scene mainMenuScene = menu.buildScene(stage);
-            stage.setScene(mainMenuScene);
-            stage.setTitle("Main Menu - Typing Ninja");
-            stage.setFullScreen(true);
-            stage.setFullScreenExitHint("");
+            menu.show(stage);
         }
     }
 
@@ -170,7 +162,6 @@ public class NinjaController {
         HelpPopup.initModality(Modality.WINDOW_MODAL);
         HelpPopup.setScene(new Scene(fxmlLoader.load()));
         HelpPopup.setResizable(false);
-        HelpPopup.initStyle(StageStyle.UNDECORATED);
         HelpPopup.showAndWait();
     }
 }
