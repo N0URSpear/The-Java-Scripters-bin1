@@ -1,7 +1,6 @@
-// File: src/test/java/typingNinja/CertificatePdfUtilTest.java
 package typingNinja;
 
-import org.apache.pdfbox.Loader;                  // PDFBox 3.x 推荐的装载入口
+import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.junit.jupiter.api.DisplayName;
@@ -35,13 +34,11 @@ class CertificatePdfUtilTest {
             assertTrue(Files.exists(outFile), "PDF file should be created");
             assertTrue(outFile.toString().toLowerCase().endsWith(".pdf"), "Output should have .pdf extension");
 
-            // 使用 PDFBox 打开并抽取文本
             try (PDDocument doc = Loader.loadPDF(outFile.toFile())) {
                 assertFalse(doc.isEncrypted(), "Generated PDF should not be encrypted");
                 assertTrue(doc.getNumberOfPages() >= 1, "PDF should have at least one page");
 
                 String text = extractText(doc);
-
 
                 assertTrue(text.contains("Awarded to") || text.contains("awarded to"),
                         "Should contain the 'Awarded to' label");
@@ -54,7 +51,6 @@ class CertificatePdfUtilTest {
                         "Should contain the student's name");
                 assertTrue(text.contains(String.valueOf(wpm)),
                         "Should contain the WPM number");
-
                 assertTrue(text.contains(String.valueOf((int) accuracy)) || text.contains("98.5"),
                         "Should contain accuracy number (e.g., 98 or 98.5)");
 
@@ -105,35 +101,75 @@ class CertificatePdfUtilTest {
                                                     LocalDate date,
                                                     String lesson,
                                                     String title) throws Exception {
-        Class<?> cls = Class.forName("typingNinja.CertificatePdfUtil");
+        String[] candidateClassNames = new String[] {
+                "typingNinja.view.pdf.CertificatePdfUtil",
+                "typingNinja.CertificatePdfUtil",
+                "typingNinja.util.pdf.CertificatePdfUtil",
+                "typingNinja.view.CertificatePdfUtil",
+                "typingNinja.util.CertificatePdfUtil"
+        };
 
-        // Path, String, int, double, LocalDate, String, String
-        try {
-            Method m = cls.getMethod("saveSimpleCertificate",
-                    Path.class, String.class, int.class, double.class, LocalDate.class, String.class, String.class);
-            m.invoke(null, outFile, name, wpm, accuracy, date, lesson, title);
-            return;
-        } catch (NoSuchMethodException ignore) { /* 回退尝试 */ }
-
-        // no title ver：Path, String, int, double, LocalDate, String
-        try {
-            Method m = cls.getMethod("saveSimpleCertificate",
-                    Path.class, String.class, int.class, double.class, LocalDate.class, String.class);
-            m.invoke(null, outFile, name, wpm, accuracy, date, lesson);
-        } catch (NoSuchMethodException e) {
-            StringBuilder sb = new StringBuilder("No suitable saveSimpleCertificate(...) found. Available:\n");
-            for (Method mth : cls.getDeclaredMethods()) sb.append("  ").append(mth).append('\n');
-            throw new IllegalStateException(sb.toString(), e);
+        Class<?> cls = null;
+        StringBuilder tried = new StringBuilder();
+        for (String cn : candidateClassNames) {
+            try {
+                cls = Class.forName(cn);
+                break;
+            } catch (ClassNotFoundException e) {
+                tried.append("  - ").append(cn).append('\n');
+            }
         }
+        if (cls == null) {
+            throw new ClassNotFoundException(
+                    "Could not locate CertificatePdfUtil. Tried:\n" + tried);
+        }
+
+        Method m = null;
+        Object[] args = null;
+
+        m = getMethodOrNull(cls, "saveSimpleCertificate",
+                Path.class, String.class, int.class, double.class, LocalDate.class, String.class, String.class);
+        if (m != null) { args = new Object[]{outFile, name, wpm, accuracy, date, lesson, title}; }
+
+        if (m == null) {
+            m = getMethodOrNull(cls, "saveSimpleCertificate",
+                    Path.class, String.class, int.class, double.class, LocalDate.class, String.class);
+            if (m != null) { args = new Object[]{outFile, name, wpm, accuracy, date, lesson}; }
+        }
+
+        if (m == null) {
+            m = getMethodOrNull(cls, "saveSimpleCertificate",
+                    Path.class, String.class, int.class, int.class, LocalDate.class, String.class, String.class);
+            if (m != null) { args = new Object[]{outFile, name, wpm, (int) Math.round(accuracy), date, lesson, title}; }
+        }
+
+        if (m == null) {
+            m = getMethodOrNull(cls, "saveSimpleCertificate",
+                    Path.class, String.class, int.class, int.class, LocalDate.class, String.class);
+            if (m != null) { args = new Object[]{outFile, name, wpm, (int) Math.round(accuracy), date, lesson}; }
+        }
+
+        if (m == null) {
+            StringBuilder sb = new StringBuilder("No suitable saveSimpleCertificate(...) found on ")
+                    .append(cls.getName()).append(". Available:\n");
+            for (Method mm : cls.getDeclaredMethods()) sb.append("  ").append(mm).append('\n');
+            throw new IllegalStateException(sb.toString());
+        }
+
+        m.invoke(null, args);
     }
 
-    //PDFBox
+    private static Method getMethodOrNull(Class<?> cls, String name, Class<?>... types) {
+        try { return cls.getMethod(name, types); }
+        catch (NoSuchMethodException e) { return null; }
+    }
+
+
     private static String extractText(PDDocument doc) throws IOException {
         PDFTextStripper stripper = new PDFTextStripper();
         stripper.setSortByPosition(true);
         return stripper.getText(doc);
     }
-
 
     private static void deleteRecursivelyQuiet(Path root) {
         try {
