@@ -102,7 +102,7 @@ public class CongratulationsScene {
 
         // 两行说明文字
         Label redHint = label("Red indicates error frequency", Font.font("Jaro", FontWeight.BOLD, TEXT_SIZE), Color.WHITE, RED_HINT_X, RED_HINT_Y);
-        Label prev10  = label("Previous 10 results for this lesson", Font.font("Jaro", FontWeight.BOLD, TEXT_SIZE), Color.WHITE, PREV10_X,  PREV10_Y);
+        Label prev10  = label("Previous 10 results", Font.font("Jaro", FontWeight.BOLD, TEXT_SIZE), Color.WHITE, PREV10_X,  PREV10_Y);
 
         // 白框 + 文案
         Rectangle wpmBox = whiteBox(WPM_X, WPM_Y);

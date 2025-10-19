@@ -32,7 +32,11 @@ public class CreateAccountController {
         this.NinjaDAO = mockDao;
     }
 
-
+    /**
+     * Sets test mode for unit tests.
+     *
+     * @param testMode sets test mode
+     */
     public void setTestMode(boolean testMode) {
         this.testMode = testMode;
     }
