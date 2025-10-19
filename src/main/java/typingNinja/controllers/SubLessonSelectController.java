@@ -11,24 +11,25 @@ import typingNinja.util.SceneNavigator;
 public class SubLessonSelectController {
 
     @FXML private Label headerLabel;
+    @FXML private Label lbl1a, lbl1b, lbl1c, lbl1d, lbl1e, lbl1f;
 
     @FXML private Button btn1a, btn1b, btn1c, btn1d, btn1e, btn1f;
     @FXML private Button backButton;
 
     private final MainLessonDAO dao = new MainLessonDAO();
 
-    private String codePrefix = "1"; // "1","2","3","4"
+    private String codePrefix = "1";
     private int userId = Session.getCurrentUserId();
 
     private String pendingTitle = null;
     private String[] pendingLeftTexts = null;
 
-    /** Called by MainMenu after FXML load. */
     public void configure(String title, String prefix, String[] leftTexts) {
         if (prefix != null) codePrefix = prefix;
         pendingTitle = title;
         pendingLeftTexts = leftTexts;
         applyConfigToNodes();
+        populateResults();
     }
 
     @FXML
@@ -59,6 +60,15 @@ public class SubLessonSelectController {
             if (btn1e != null) btn1e.setText(pendingLeftTexts[4]);
             if (btn1f != null) btn1f.setText(pendingLeftTexts[5]);
         }
+    }
+
+    private void populateResults() {
+        if (lbl1a != null) lbl1a.setText(dao.getBestTimeAndDate(codePrefix + "a"));
+        if (lbl1b != null) lbl1b.setText(dao.getBestTimeAndDate(codePrefix + "b"));
+        if (lbl1c != null) lbl1c.setText(dao.getBestTimeAndDate(codePrefix + "c"));
+        if (lbl1d != null) lbl1d.setText(dao.getBestTimeAndDate(codePrefix + "d"));
+        if (lbl1e != null) lbl1e.setText(dao.getBestTimeAndDate(codePrefix + "e"));
+        if (lbl1f != null) lbl1f.setText(dao.getBestTimeAndDate(codePrefix + "f"));
     }
 
     private void pick(String letter) {
