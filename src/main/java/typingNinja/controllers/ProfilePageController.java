@@ -11,6 +11,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import typingNinja.util.SceneNavigator;
 
 import java.util.Optional;
 
@@ -207,19 +208,13 @@ public class ProfilePageController {
 
     private void openSettings() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/typingNinja/Settings.fxml"));
-            Parent root = loader.load();
-
             Stage stage = (Stage) settingsLabel.getScene().getWindow();
-            double width = stage.getWidth();
-            double height = stage.getHeight();
-
-            Scene scene = new Scene(root, width, height);
-            stage.setScene(scene);
+            SceneNavigator.load(stage,"/typingNinja/Settings.fxml", "Settings - Typing Ninja");
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
 
     private void openMainMenu() {
         try {
