@@ -4,7 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<StackPane alignment="CENTER" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="typingNinja.controllers.FreeTypeSelectController">
+<StackPane alignment="CENTER" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="typingNinja.controllers.FreeTypeSelectController" style="-fx-background-color: transparent;">
     <VBox maxWidth="920" prefHeight="330.0" prefWidth="941.0" spacing="18" style="-fx-background-color:#D9D9D9; -fx-border-color:#2EFF04; -fx-border-width:3;                  -fx-background-radius:20; -fx-border-radius:20;">
         <padding><Insets bottom="18" left="18" right="18" top="18" /></padding>
 
@@ -23,15 +23,12 @@
         <!-- Duration -->
         <Label style="-fx-font-family:'Jaro'; -fx-font-size:26; -fx-text-fill:black;" text="For what duration?" />
         <HBox alignment="CENTER_LEFT" spacing="18">
-            <ToggleButton fx:id="dur1" onAction="#onDurationChanged" style="-fx-font-family:'Jaro'; -fx-font-size:22; -fx-background-radius:12; -fx-padding:8 12 8 12;" text="1 minute">
-            <toggleGroup>
-               <ToggleGroup fx:id="durationGroup" />
-            </toggleGroup></ToggleButton>
+            <ToggleButton fx:id="dur1" onAction="#onDurationChanged" style="-fx-font-family:'Jaro'; -fx-font-size:22; -fx-background-radius:12; -fx-padding:8 12 8 12;" text="1 minute" />
             <ToggleButton fx:id="dur3" onAction="#onDurationChanged" style="-fx-font-family:'Jaro'; -fx-font-size:22; -fx-background-radius:12; -fx-padding:8 12 8 12;" text="3 minutes" toggleGroup="$durationGroup" />
             <ToggleButton fx:id="dur5" onAction="#onDurationChanged" style="-fx-font-family:'Jaro'; -fx-font-size:22; -fx-background-radius:12; -fx-padding:8 12 8 12;" text="5 minutes" toggleGroup="$durationGroup" />
             <ToggleButton fx:id="dur10" onAction="#onDurationChanged" style="-fx-font-family:'Jaro'; -fx-font-size:22; -fx-background-radius:12; -fx-padding:8 12 8 12;" text="10 minutes" toggleGroup="$durationGroup" />
         </HBox>
 
-        <Button onAction="#onGenerate" style="-fx-font-family:'Jaro'; -fx-font-size:26;                        -fx-background-color:#2EFF04; -fx-text-fill:black;                        -fx-background-radius:14; -fx-padding:10 18 10 18;" text="Generate and begin lesson" />
+        <Button onAction="#onGenerate" style="-fx-font-family:'Jaro'; -fx-font-size:26;                        -fx-background-color:#2EFF04; -fx-text-fill:black;                        -fx-background-radius:14; -fx-padding:10 18 10 18;" text="Begin Lesson" />
     </VBox>
 </StackPane>
