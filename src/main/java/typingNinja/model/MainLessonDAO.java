@@ -1,18 +1,17 @@
 package typingNinja.model;
 
 import java.sql.*;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+import typingNinja.model.auth.Session;
 
-/**
- * DAO used to record a user's chosen lesson (and options for custom/free type).
- * It keeps your existing behavior but adds optional columns if they don't exist.
- */
 public class MainLessonDAO {
     private final Connection connection;
 
     public MainLessonDAO() {
         connection = SqliteConnection.getInstance();
         createTableIfNeeded();
-        ensureOptionalColumns(); // add new columns if they weren't created earlier
+        ensureOptionalColumns();
     }
 
     private void createTableIfNeeded() {
@@ -31,15 +30,15 @@ public class MainLessonDAO {
         }
     }
 
-    /** Adds new columns in a forward-compatible way (safe if they already exist). */
     private void ensureOptionalColumns() {
-        // Each ADD COLUMN is idempotent because we guard with pragma table_info
-        addColumnIfMissing("Prompt",        "TEXT");
-        addColumnIfMissing("LessonDuration","INTEGER");
-        addColumnIfMissing("UpperCase",     "INTEGER");  // 0/1
-        addColumnIfMissing("Numbers",       "INTEGER");
-        addColumnIfMissing("Punctuation",   "INTEGER");
-        addColumnIfMissing("SpecialChars",  "INTEGER");
+        addColumnIfMissing("Prompt", "TEXT");
+        addColumnIfMissing("LessonDuration", "INTEGER");
+        addColumnIfMissing("UpperCase", "INTEGER");
+        addColumnIfMissing("Numbers", "INTEGER");
+        addColumnIfMissing("Punctuation", "INTEGER");
+        addColumnIfMissing("SpecialChars", "INTEGER");
+        addColumnIfMissing("DateStarted", "TEXT");
+        addColumnIfMissing("DateCompleted", "TEXT");
     }
 
     private void addColumnIfMissing(String col, String type) {
@@ -54,14 +53,12 @@ public class MainLessonDAO {
                 }
             }
         } catch (SQLException e) {
-            // If for any reason this fails, we log and carry on (older DBs still work).
             e.printStackTrace();
         }
     }
 
-    /** Original simple insert (used by Lesson 1–4). */
     public void insertSelection(int userId, String lessonType) {
-        final String sql = "INSERT INTO Lesson (UserID, LessonType) VALUES (?, ?)";
+        final String sql = "INSERT INTO Lesson (UserID, LessonType, DateStarted) VALUES (?, ?, datetime('now'))";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, userId);
             ps.setString(2, lessonType);
@@ -71,7 +68,6 @@ public class MainLessonDAO {
         }
     }
 
-    /** Custom Topic insert with all requested fields. */
     public void insertCustomTopic(
             int userId,
             String prompt,
@@ -83,9 +79,9 @@ public class MainLessonDAO {
     ) {
         final String sql = """
             INSERT INTO Lesson
-              (UserID, LessonType, Prompt, LessonDuration, UpperCase, Numbers, Punctuation, SpecialChars)
+              (UserID, LessonType, Prompt, LessonDuration, UpperCase, Numbers, Punctuation, SpecialChars, DateStarted)
             VALUES
-              (?,      'CustomTopic', ?,      ?,             ?,         ?,       ?,            ?)
+              (?, 'CustomTopic', ?, ?, ?, ?, ?, ?, datetime('now'))
             """;
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, userId);
@@ -101,11 +97,10 @@ public class MainLessonDAO {
         }
     }
 
-    /** Free Type insert with duration only. */
     public void insertFreeType(int userId, int lessonDuration) {
         final String sql = """
-            INSERT INTO Lesson (UserID, LessonType, LessonDuration)
-            VALUES (?, 'FreeType', ?)
+            INSERT INTO Lesson (UserID, LessonType, LessonDuration, DateStarted)
+            VALUES (?, 'FreeType', ?, datetime('now'))
             """;
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, userId);
@@ -114,5 +109,55 @@ public class MainLessonDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    /** Returns formatted best time and date for the current user, or "Not Yet Completed" if none valid. */
+    public String getBestTimeAndDate(String lessonType) {
+        int userId = Session.getCurrentUserId();
+        final String sql = """
+            SELECT 
+                (strftime('%s', DateCompleted) - strftime('%s', DateStarted)) AS seconds,
+                DateCompleted
+            FROM Lesson
+            WHERE UserID = ? 
+              AND LessonType = ?
+              AND DateCompleted IS NOT NULL
+              AND DateStarted IS NOT NULL
+              AND strftime('%s', DateCompleted) > strftime('%s', DateStarted)
+            ORDER BY seconds ASC
+            LIMIT 1
+            """;
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.setString(2, lessonType);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    int seconds = rs.getInt("seconds");
+                    String dateCompleted = rs.getString("DateCompleted");
+                    if (dateCompleted != null && dateCompleted.length() >= 10) {
+                        String formatted = formatDate(dateCompleted);
+                        return "Best time: " + seconds + " seconds\nCompleted " + formatted;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return "Not Yet Completed";
+    }
+
+    private String formatDate(String dateTime) {
+        try {
+            var in = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
+            var out = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH);
+            return out.format(in.parse(dateTime));
+        } catch (Exception e) {
+            try {
+                var in = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
+                var out = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH);
+                return out.format(in.parse(dateTime));
+            } catch (Exception ignored) {}
+        }
+        return dateTime;
     }
 }

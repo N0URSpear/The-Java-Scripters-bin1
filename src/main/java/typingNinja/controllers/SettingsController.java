@@ -43,8 +43,20 @@ public class SettingsController {
 
     @FXML
     private void initialize() {
+        // Ensure the same stylesheet is applied for hover/press effects
+        javafx.application.Platform.runLater(() -> {
+            try {
+                String css = getClass().getResource("/typingNinja/NinjaStyles.css").toExternalForm();
+                var sc = outer.getScene();
+                if (sc != null && css != null && !sc.getStylesheets().contains(css)) {
+                    sc.getStylesheets().add(css);
+                }
+            } catch (Exception ignored) {}
+        });
+
+        // Active tab visual: green, not disabled
         navSettings.setTextFill(Color.web("#2EFF04"));
-        navSettings.setDisable(true);
+        navSettings.setDisable(false);
 
         asButton(navMainMenu, this::goMainMenu);
         asButton(navProfile, () -> switchTo("/typingNinja/ProfilePage.fxml", "Profile - Typing Ninja"));

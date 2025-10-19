@@ -7,6 +7,7 @@
 <StackPane xmlns="http://javafx.com/javafx/21"
            xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="typingNinja.controllers.FreeTypeSelectController"
+           style="-fx-background-color: transparent;"
            alignment="CENTER">
     <VBox spacing="18" maxWidth="920"
           style="-fx-background-color:#D9D9D9; -fx-border-color:#2EFF04; -fx-border-width:3;
@@ -46,7 +47,7 @@
                           style="-fx-font-family:'Jaro'; -fx-font-size:22; -fx-background-radius:12; -fx-padding:8 12 8 12;"/>
         </HBox>
 
-        <Button text="Generate and begin lesson" onAction="#onGenerate"
+        <Button text=" Begin lesson " onAction="#onGenerate"
                 style="-fx-font-family:'Jaro'; -fx-font-size:26;
                        -fx-background-color:#2EFF04; -fx-text-fill:black;
                        -fx-background-radius:14; -fx-padding:10 18 10 18;"/>

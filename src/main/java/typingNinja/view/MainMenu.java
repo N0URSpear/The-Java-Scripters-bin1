@@ -7,6 +7,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -21,14 +22,12 @@ public class MainMenu {
     private static final double BASE_WIDTH = 1920.0;
     private static final double BASE_HEIGHT = 1080.0;
 
-    // Maximize only the first time we open Main Menu in this run
     private static boolean FIRST_OPEN = true;
 
     public void show(Stage stage) {
         Parent root = buildView(stage);
         SceneNavigator.show(stage, root, "Main Menu - Typing Ninja");
 
-        // Apply stylesheet once the scene exists
         var scene = stage.getScene();
         String css = null;
         try {
@@ -38,12 +37,18 @@ public class MainMenu {
             scene.getStylesheets().add(css);
         }
 
-        // Maximise on first open to eliminate window resizing flashes
         if (FIRST_OPEN) {
             FIRST_OPEN = false;
             javafx.application.Platform.runLater(() -> {
-                stage.setMaximized(true);
-                SceneNavigator.ensureFullscreen(stage);
+                if (!stage.isFullScreen()) {
+                    stage.setFullScreenExitHint("");
+                    stage.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
+                    stage.setAlwaysOnTop(true);
+                    stage.setFullScreen(true);
+                    stage.toFront();
+                    stage.requestFocus();
+                    javafx.application.Platform.runLater(() -> stage.setAlwaysOnTop(false));
+                }
             });
         }
     }
@@ -52,7 +57,6 @@ public class MainMenu {
         Font.loadFont(getClass().getResourceAsStream("/com/example/typingNinja/fonts/Jaro-Regular.ttf"), 10);
         Font.loadFont(getClass().getResourceAsStream("/com/example/typingNinja/fonts/Inter-VariableFont.ttf"), 10);
 
-        // Top bar
         Label title = new Label("TYPING NINJA");
         title.setTextFill(Color.WHITE);
         title.setFont(Font.font("Jaro", 180));
@@ -66,7 +70,6 @@ public class MainMenu {
         BorderPane.setAlignment(title, Pos.CENTER_LEFT);
         topBar.setPadding(new Insets(10, 20, 0, 20));
 
-        // Lessons
         VBox lesson1 = createLessonBox("Lesson 1 - The Home Row",
                 "Type words using just the home row\nwhere your fingers rest");
         VBox lesson2 = createLessonBox("Lesson 2 - The Next Step",
@@ -80,64 +83,29 @@ public class MainMenu {
         VBox freeType = createLessonBox("Free Type",
                 "Type whatever you want or practice\nyour least accurate key combos");
 
-        // Click handlers – open modals (controllers handle DB + navigation)
-        asButton(lesson1, () -> openSubLesson(
-                stage,
-                "Lesson 1 - The Home Row",
-                "1",
-                new String[]{
-                        "Lesson 1a - f, j and space keys",
-                        "Lesson 1b - g, and h keys",
-                        "Lesson 1c - d and k keys",
-                        "Lesson 1d - s and l keys",
-                        "Lesson 1e - a and ; keys",
-                        "Lesson 1f - The whole home row"
-                }));
+        asButton(lesson1, () -> openSubLesson(stage, "Lesson 1 - The Home Row", "1", new String[]{
+                "Lesson 1a - f, j and space keys", "Lesson 1b - g, and h keys",
+                "Lesson 1c - d and k keys", "Lesson 1d - s and l keys",
+                "Lesson 1e - a and ; keys", "Lesson 1f - The whole home row"}));
 
-        asButton(lesson2, () -> openSubLesson(
-                stage,
-                "Lesson 2 - The Next Step",
-                "2",
-                new String[]{
-                        "Lesson 2a - r, t, y, u keys",
-                        "Lesson 2b - q, w, e, i, o, p keys",
-                        "Lesson 2c - The whole upper row",
-                        "Lesson 2d - c, v, b, n keys",
-                        "Lesson 2e - z, x, m keys",
-                        "Lesson 2f - The whole lower row"
-                }));
+        asButton(lesson2, () -> openSubLesson(stage, "Lesson 2 - The Next Step", "2", new String[]{
+                "Lesson 2a - r, t, y, u keys", "Lesson 2b - q, w, e, i, o, p keys",
+                "Lesson 2c - The whole upper row", "Lesson 2d - c, v, b, n keys",
+                "Lesson 2e - z, x, m keys", "Lesson 2f - The whole lower row"}));
 
-        asButton(lesson3, () -> openSubLesson(
-                stage,
-                "Lesson 3 - Shift Up",
-                "3",
-                new String[]{
-                        "Lesson 3a - 4, 5, 6, 7",
-                        "Lesson 3b - 1, 2, 3, 8, 9, 0",
-                        "Lesson 3c - The whole number row",
-                        "Lesson 3d - Shift and home row",
-                        "Lesson 3e - Shift and all letters",
-                        "Lesson 3f - Special characters"
-                }));
+        asButton(lesson3, () -> openSubLesson(stage, "Lesson 3 - Shift Up", "3", new String[]{
+                "Lesson 3a - 4, 5, 6, 7", "Lesson 3b - 1, 2, 3, 8, 9, 0",
+                "Lesson 3c - The whole number row", "Lesson 3d - Shift and home row",
+                "Lesson 3e - Shift and all letters", "Lesson 3f - Special characters"}));
 
-        asButton(lesson4, () -> openSubLesson(
-                stage,
-                "Lesson 4 - Full Keyboard",
-                "4",
-                new String[]{
-                        "Lesson 4a - Full keyboard - Very Easy",
-                        "Lesson 4b - Full keyboard - Easy",
-                        "Lesson 4c - Full keyboard - Medium",
-                        "Lesson 4d - Full keyboard - Hard",
-                        "Lesson 4e - Full keyboard - Very Hard",
-                        "Lesson 4f - Full keyboard - Expert"
-                }));
+        asButton(lesson4, () -> openSubLesson(stage, "Lesson 4 - Full Keyboard", "4", new String[]{
+                "Lesson 4a - Full keyboard - Very Easy", "Lesson 4b - Full keyboard - Easy",
+                "Lesson 4c - Full keyboard - Medium", "Lesson 4d - Full keyboard - Hard",
+                "Lesson 4e - Full keyboard - Very Hard", "Lesson 4f - Full keyboard - Expert"}));
 
-        // Custom / FreeType
-        asButton(custom,   () -> openCustomTopic(stage));
+        asButton(custom, () -> openCustomTopic(stage));
         asButton(freeType, () -> openFreeType(stage));
 
-        // Grid
         GridPane grid = new GridPane();
         grid.setHgap(30);
         grid.setVgap(80);
@@ -149,7 +117,6 @@ public class MainMenu {
         grid.add(custom, 1, 1);
         grid.add(freeType, 2, 1);
 
-        // Bottom menu
         Label mainMenu = new Label("MAIN MENU");
         Label sep1 = new Label("|");
         Label profile = new Label("PROFILE");
@@ -181,10 +148,8 @@ public class MainMenu {
 
         Group contentGroup = new Group(content);
         StackPane outer = new StackPane(contentGroup);
-        outer.setBackground(new Background(new BackgroundFill(Color.web("#140B38"),
-                CornerRadii.EMPTY, Insets.EMPTY)));
+        outer.setBackground(new Background(new BackgroundFill(Color.web("#140B38"), CornerRadii.EMPTY, Insets.EMPTY)));
 
-        // Bind scaling (scene-based) and listen to stage too
         bindDpiNeutralScale(outer, content, stage);
 
         return outer;
@@ -218,8 +183,8 @@ public class MainMenu {
     private void asButton(javafx.scene.Node node, Runnable onClick) {
         node.getStyleClass().add("button");
         node.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> { if (onClick != null) onClick.run(); });
-        node.addEventHandler(MouseEvent.MOUSE_PRESSED,  e -> { node.setScaleX(0.98); node.setScaleY(0.98); });
-        node.addEventHandler(MouseEvent.MOUSE_RELEASED, e -> { node.setScaleX(1.0);  node.setScaleY(1.0);  });
+        node.addEventHandler(MouseEvent.MOUSE_PRESSED, e -> { node.setScaleX(0.98); node.setScaleY(0.98); });
+        node.addEventHandler(MouseEvent.MOUSE_RELEASED, e -> { node.setScaleX(1.0); node.setScaleY(1.0); });
     }
 
     private void switchTo(Stage stage, String fxmlPath, String title) {
@@ -230,7 +195,6 @@ public class MainMenu {
         }
     }
 
-    // ---------- Popups ----------
     private void openSubLesson(Stage owner, String title, String codePrefix, String[] leftTexts) {
         try {
             FXMLLoader fxml = new FXMLLoader(getClass().getResource("/typingNinja/SubLessonSelect.fxml"));
@@ -241,8 +205,12 @@ public class MainMenu {
             Stage popup = new Stage();
             popup.initOwner(owner);
             popup.initModality(Modality.APPLICATION_MODAL);
-            popup.initStyle(StageStyle.UNDECORATED);
-            popup.setScene(new Scene(root));
+            popup.initStyle(StageStyle.TRANSPARENT);
+
+            Scene scene = new Scene(root);
+            scene.setFill(Color.TRANSPARENT);
+            popup.setScene(scene);
+
             popup.setResizable(false);
             popup.showAndWait();
         } catch (Exception ex) {
@@ -258,8 +226,12 @@ public class MainMenu {
             Stage popup = new Stage();
             popup.initOwner(owner);
             popup.initModality(Modality.APPLICATION_MODAL);
-            popup.initStyle(StageStyle.UNDECORATED);
-            popup.setScene(new Scene(root));
+            popup.initStyle(StageStyle.TRANSPARENT);
+
+            Scene scene = new Scene(root);
+            scene.setFill(Color.TRANSPARENT);
+            popup.setScene(scene);
+
             popup.setResizable(false);
             popup.showAndWait();
         } catch (Exception ex) {
@@ -275,8 +247,12 @@ public class MainMenu {
             Stage popup = new Stage();
             popup.initOwner(owner);
             popup.initModality(Modality.APPLICATION_MODAL);
-            popup.initStyle(StageStyle.UNDECORATED);
-            popup.setScene(new Scene(root));
+            popup.initStyle(StageStyle.TRANSPARENT);
+
+            Scene scene = new Scene(root);
+            scene.setFill(Color.TRANSPARENT);
+            popup.setScene(scene);
+
             popup.setResizable(false);
             popup.showAndWait();
         } catch (Exception ex) {
@@ -284,13 +260,12 @@ public class MainMenu {
         }
     }
 
-    // Scene-based DPI-neutral scaling (logical pixels only; no explicit DPI math)
     private void bindDpiNeutralScale(StackPane outer, Region content, Stage stage) {
-        final double EDGE_MARGIN = 64.0; // logical px on each side
+        final double EDGE_MARGIN = 64.0;
 
         Runnable apply = () -> {
             Scene sc = outer.getScene();
-            double w = (sc != null && sc.getWidth()  > 1) ? sc.getWidth()  : outer.getWidth();
+            double w = (sc != null && sc.getWidth() > 1) ? sc.getWidth() : outer.getWidth();
             double h = (sc != null && sc.getHeight() > 1) ? sc.getHeight() : outer.getHeight();
             if (w <= 1 || h <= 1) return;
 
@@ -299,18 +274,16 @@ public class MainMenu {
 
             double sx = wEff / BASE_WIDTH;
             double sy = hEff / BASE_HEIGHT;
-            double s  = Math.min(sx, sy);
+            double s = Math.min(sx, sy);
 
             content.setScaleX(s);
             content.setScaleY(s);
         };
 
-        // Node size/layout changes
         outer.widthProperty().addListener((o, ov, nv) -> apply.run());
         outer.heightProperty().addListener((o, ov, nv) -> apply.run());
         outer.layoutBoundsProperty().addListener((o, ov, nv) -> apply.run());
 
-        // Scene attach & size changes (covers navigation)
         outer.sceneProperty().addListener((o, oldScene, newScene) -> {
             if (newScene != null) {
                 newScene.widthProperty().addListener((oo, ov, nv) -> apply.run());
@@ -323,10 +296,8 @@ public class MainMenu {
                         st.fullScreenProperty().addListener((oooo, ov, nv) -> javafx.application.Platform.runLater(apply));
                         st.showingProperty().addListener((oooo, was, is) -> { if (is) javafx.application.Platform.runLater(apply); });
                         javafx.application.Platform.runLater(apply);
-                        javafx.application.Platform.runLater(apply);
                     }
                 });
-                javafx.application.Platform.runLater(apply);
                 javafx.application.Platform.runLater(apply);
             }
         });
@@ -339,7 +310,6 @@ public class MainMenu {
             stage.showingProperty().addListener((o, ov, nv) -> { if (nv) javafx.application.Platform.runLater(apply); });
         }
 
-        // kick off a couple of pulses immediately
         javafx.application.Platform.runLater(apply);
         javafx.application.Platform.runLater(apply);
     }
