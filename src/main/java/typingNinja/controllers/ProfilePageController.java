@@ -78,6 +78,7 @@ public class ProfilePageController {
         settingsLabel.setOnMouseClicked(e -> openSettings());
     }
 
+
     private void ensureDataAndRefresh() {
         String name = SessionManager.getCurrentUsername();
         if (name != null && !name.isBlank()) usernameLabel.setText(name);

@@ -16,7 +16,6 @@ import javafx.stage.StageStyle;
 
 import java.io.IOException;
 
-
 public class NinjaController {
 
     @FXML private ImageView logoImage;
