@@ -26,6 +26,11 @@ import java.io.FileWriter;
 import java.sql.*;
 import javafx.embed.swing.SwingFXUtils;
 
+/**
+ * Controller class for the Lesson History page in Typing Ninja.
+ * This class handles displaying past lessons, plotting performance trends,
+ * exporting data (CSV/PDF), and navigating to other parts of the application.
+ */
 public class LessonHistoryController {
 
     @FXML private VBox lessonList;
@@ -46,6 +51,11 @@ public class LessonHistoryController {
         this.returnToProfile = value;
     }
 
+    /**
+     * Initializes the controller after FXML loading.
+     * This method loads the user's lesson data, plots trends, sets event handlers
+     * for buttons and navigation labels, and configures export functionality.
+     */
     @FXML
     public void initialize() {
         int userId = SessionManager.getCurrentUserId();
@@ -67,6 +77,12 @@ public class LessonHistoryController {
         exportPdfBtn.setOnAction(e -> exportToPdf());
     }
 
+    /**
+     * Loads the user's completed lessons and displays them as rows with
+     * date, WPM, and star rating.
+     *
+     * @param userId the current user's unique identifier
+     */
     private void loadLessonList(int userId) {
         lessonList.getChildren().clear();
 
@@ -108,6 +124,12 @@ public class LessonHistoryController {
         }
     }
 
+    /**
+     * Plots the user's typing speed (WPM) progression across lessons
+     * in a line chart.
+     *
+     * @param userId the current user's unique identifier
+     */
     private void plotLessonTrend(int userId) {
         lineChart.getData().clear();
 
@@ -131,6 +153,11 @@ public class LessonHistoryController {
         lineChart.getData().add(series);
     }
 
+    /**
+     * Retrieves and displays the user's highest WPM record along with accuracy and date achieved.
+     *
+     * @param userId the current user's unique identifier
+     */
     private void loadPersonalBest(int userId) {
         String sql = """
             SELECT WPM, Accuracy, DateStarted
@@ -163,6 +190,10 @@ public class LessonHistoryController {
         }
     }
 
+    /**
+     * Navigates to the main menu screen.
+     * This method replaces the current scene with {@link MainMenu}.
+     */
     private void openMainMenu() {
         try {
             Stage stage = (Stage) mainMenuLabel.getScene().getWindow();
@@ -176,6 +207,10 @@ public class LessonHistoryController {
         }
     }
 
+    /**
+     * Opens the user's profile page.
+     * Loads the corresponding FXML file and sets the stage to full-screen mode.
+     */
     private void openProfilePage() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/typingNinja/ProfilePage.fxml"));
@@ -197,6 +232,9 @@ public class LessonHistoryController {
         }
     }
 
+    /**
+     * Opens the settings page where users can modify preferences.
+     */
     private void openSettings() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/typingNinja/Settings.fxml"));
@@ -213,6 +251,11 @@ public class LessonHistoryController {
         }
     }
 
+    /**
+     * Exports the user's lesson history to a CSV file selected via a file chooser.
+     * Each record includes lesson ID, WPM, accuracy, star rating, and date.
+     * On success, displays an informational alert showing the saved path.
+     */
     private void exportToCsv() {
         String sql = "SELECT LessonID, WPM, Accuracy, StarRating, DateStarted FROM Lesson WHERE UserID = ?";
         int userId = SessionManager.getCurrentUserId();
@@ -248,6 +291,11 @@ public class LessonHistoryController {
         }
     }
 
+    /**
+     * Exports the visible lesson list to a PDF file.
+     * Takes a snapshot of the lesson list, converts it to a PDF image using iText,
+     * and saves it to a user-chosen file location.
+     */
     private void exportToPdf() {
         try {
             FileChooser fileChooser = new FileChooser();
@@ -280,6 +328,9 @@ public class LessonHistoryController {
         }
     }
 
+    /**
+     * Handles the "Back" button click event and returns to the profile page.
+     */
     @FXML
     private void onBackClicked() {
         try {

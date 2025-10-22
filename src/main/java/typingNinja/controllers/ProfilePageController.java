@@ -15,6 +15,15 @@ import typingNinja.util.SceneNavigator;
 
 import java.util.Optional;
 
+/**
+ * Controller class for the Profile Page of the Typing Ninja application.
+ * This controller manages the display and interaction of user profile information,
+ * including training goals, performance statistics, belt progress, and star ratings.
+ * It also handles navigation to other pages such as the Lesson History, Settings,
+ * and Main Menu, as well as editing user information and goals.
+ * All UI elements are bound through FXML and populated dynamically using data
+ * retrieved from the {@link SqliteContactDAO} and {@link SessionManager}.
+ */
 public class ProfilePageController {
 
     // Header

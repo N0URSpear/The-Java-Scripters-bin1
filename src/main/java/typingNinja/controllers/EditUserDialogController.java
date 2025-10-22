@@ -11,6 +11,15 @@ import javafx.stage.Stage;
 
 import java.util.Arrays;
 
+/**
+ * Controller class for the Edit User dialog in Typing Ninja.
+ * This dialog allows users to review their stored credentials and security
+ * questions in a secure, read-only format. Users can toggle visibility of
+ * sensitive information such as passwords and secret answers for verification.
+ * All data is retrieved from the {@link SqliteContactDAO} and displayed using
+ * JavaFX controls. The dialog does not modify data, it only provides a safe
+ * interface for reviewing account details.
+ */
 public class EditUserDialogController {
 
     @FXML private Button backBtn;
@@ -33,6 +42,17 @@ public class EditUserDialogController {
     private final SqliteContactDAO dao = new SqliteContactDAO();
     private NinjaUser currentUser;
 
+    /**
+     * Initializes the Edit User dialog after its FXML elements are loaded.
+     * This method:
+     * <ul>
+     *     <li>Populates the ComboBoxes with preset security questions.</li>
+     *     <li>Fetches the current user from the database via {@link SqliteContactDAO}.</li>
+     *     <li>Displays user information in masked format (password and answers hidden).</li>
+     *     <li>Sets up toggle buttons to switch between masked and plain text views.</li>
+     *     <li>Registers the Back button to close the dialog window.</li>
+     * </ul>
+     */
     @FXML
     private void initialize() {
         var questions = Arrays.asList(
@@ -74,6 +94,15 @@ public class EditUserDialogController {
         backBtn.setOnAction(e -> closeWindow());
     }
 
+    /**
+     * Toggles between showing and hiding the plain text version of a masked field.
+     * When toggled on, the plain label becomes visible and the mask is hidden.
+     * The associated eye icon is updated to reflect visibility state.
+     *
+     * @param mask the label displaying masked text (e.g., ********)
+     * @param plain the label displaying plain text (visible when toggled)
+     * @param btn the button whose eye icon changes according to state
+     */
     private void toggle(Label mask, Label plain, Button btn) {
         boolean showPlain = !plain.isVisible();
         plain.setVisible(showPlain);
@@ -84,6 +113,9 @@ public class EditUserDialogController {
         iv.setImage(new Image(getClass().getResource(icon).toExternalForm()));
     }
 
+    /**
+     * Closes the current Edit User dialog window and returns control to the profile screen.
+     */
     private void closeWindow() {
         Stage stage = (Stage) backBtn.getScene().getWindow();
         stage.close();
