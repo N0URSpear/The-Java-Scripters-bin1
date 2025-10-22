@@ -11,6 +11,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import typingNinja.util.SceneNavigator;
 
 import java.util.Optional;
 
@@ -57,6 +58,11 @@ public class ProfilePageController {
         if (initialized) ensureDataAndRefresh();
     }
 
+    /**
+     * Initializes the controller after its FXML elements have been loaded.
+     * This method wires up button handlers, ensures that user data exists,
+     * loads profile statistics, and sets navigation events for menu labels.
+     */
     @FXML
     private void initialize() {
         initialized = true;
@@ -77,6 +83,13 @@ public class ProfilePageController {
         settingsLabel.setOnMouseClicked(e -> openSettings());
     }
 
+    /**
+     * Ensures that user-related data exists in the database and refreshes
+     * the displayed statistics on the profile page.
+     * It retrieves the current user's name from the SessionManager,
+     * initializes the user's data if necessary, recalculates statistics,
+     * and updates the display.
+     */
     private void ensureDataAndRefresh() {
         String name = SessionManager.getCurrentUsername();
         if (name != null && !name.isBlank()) usernameLabel.setText(name);
@@ -87,6 +100,9 @@ public class ProfilePageController {
 
     private enum GoalField { HOURS, WPM, ACCURACY }
 
+    /**
+     * Links an edit pencil button to a dialog for updating the user's goal values to set goal hours, WPM, or accuracy.
+     */
     private void wireGoalEditor(Button pencil, GoalField type) {
         pencil.setOnAction(e -> {
             String current = switch (type) {
@@ -118,6 +134,13 @@ public class ProfilePageController {
     private String withPct(String v) { return nz(v) + "%";  }
     private String stripUnits(String v) { return v == null ? "" : v.replaceAll("[^0-9-]", ""); }
 
+    /**
+     * Loads and updates all user statistics displayed on the profile page.
+     * <p>
+     * Retrieves goal and performance data (hours, WPM, accuracy, stars, belt level, etc.)
+     * from the database through {@link SqliteContactDAO}, then populates all related
+     * JavaFX labels and icons.
+     */
     private void loadStats() {
         SqliteContactDAO.ProfileStats s = dao.getUserGoalsAndStats(userId);
         if (s == null) return;
@@ -141,8 +164,18 @@ public class ProfilePageController {
         fillRatingWithShuriken(avgRatingBox,     parseDoubleSafe(s.getAvgRating()));
     }
 
+    /**
+     * Parses a double safely from a string.
+     * Returns 0.0 if parsing fails.
+     */
     private double parseDoubleSafe(String s) { try { return Double.parseDouble(s); } catch (Exception e) { return 0.0; } }
 
+    /**
+     * Fills the specified HBox with star (shuriken) icons to visually represent a rating.
+     *
+     * @param box    the HBox container for the icons
+     * @param rating the numeric rating
+     */
     private void fillRatingWithShuriken(HBox box, double rating) {
         box.getChildren().clear();
 
@@ -161,6 +194,11 @@ public class ProfilePageController {
         }
     }
 
+    /**
+     * Opens the "Edit User" dialog popup, allowing the user to see their
+     * profile details such as username, password, or security questions.
+     * Once closed, it refreshes the username label and recalculates statistics.
+     */
     private void openEditUserDialog() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/typingNinja/EditUserDialog.fxml"));
@@ -181,6 +219,11 @@ public class ProfilePageController {
         }
     }
 
+    /**
+     * Navigates to the Lesson History page where users can view past typing sessions.
+     * This method loads a new FXML scene, maintains window size, and passes control
+     * to the {@link typingNinja.controllers.LessonHistoryController}.
+     */
     @FXML
     private void openLessonHistory() {
         try {
@@ -203,22 +246,24 @@ public class ProfilePageController {
         }
     }
 
+    /**
+     * Opens the application settings page.
+     * Uses {@link SceneNavigator} to replace the current scene with the settings view.
+     */
     private void openSettings() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/typingNinja/Settings.fxml"));
-            Parent root = loader.load();
-
             Stage stage = (Stage) settingsLabel.getScene().getWindow();
-            double width = stage.getWidth();
-            double height = stage.getHeight();
-
-            Scene scene = new Scene(root, width, height);
-            stage.setScene(scene);
+            SceneNavigator.load(stage,"/typingNinja/Settings.fxml", "Settings - Typing Ninja");
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * Returns to the main menu screen of Typing Ninja.
+     * This method instantiates {@link typingNinja.view.MainMenu} and displays it
+     * in the current window stage.
+     */
     private void openMainMenu() {
         try {
             Stage stage = (Stage) mainMenuLabel.getScene().getWindow();
