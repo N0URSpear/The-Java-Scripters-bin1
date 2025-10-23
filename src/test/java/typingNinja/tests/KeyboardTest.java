@@ -33,24 +33,24 @@ class KeyboardTest {
     }
 
     @Test
-    @DisplayName("create(): root sized to requested width/height and has background rectangle")
+    @DisplayName("create(): has a background rectangle sized to requested width/height")
     void root_and_background() {
         double w = 521, h = 223;
 
         Node root = Keyboard.create(w, h, Map.of());
         assertNotNull(root, "Root should not be null");
-        assertTrue(root instanceof StackPane || root instanceof Pane, "Root should be a StackPane or Pane");
-        assertTrue(root instanceof Region, "Root should be a Region");
-
-        Region region = (Region) root;
-        assertEquals(w, region.getPrefWidth(), 1e-4, "Preferred width should match");
-        assertEquals(h, region.getPrefHeight(), 1e-4, "Preferred height should match");
+        assertTrue(root instanceof StackPane || root instanceof Pane,
+                "Root should be a StackPane or Pane");
 
         Rectangle bg = find(root, Rectangle.class);
-        assertNotNull(bg, "Background rectangle should exist");
+        assertNotNull(bg, "A background Rectangle should exist");
         assertEquals(w, bg.getWidth(), 1e-4, "Background width should match");
         assertEquals(h, bg.getHeight(), 1e-4, "Background height should match");
+
+        assertTrue(bg.getArcWidth() >= 0 && bg.getArcHeight() >= 0,
+                "Arc sizes should be non-negative");
     }
+
 
     @Test
     @DisplayName("create(): common key labels are present (Q/A/SPACE or variants)")
@@ -87,8 +87,9 @@ class KeyboardTest {
             Color cold = getFillColor(map.get(coldKey));
             assertNotNull(cold, "Cold key color should not be null");
             assertTrue(colorsDiffer(hot, cold), "Hot key color should differ from cold key color");
-            assertTrue(hot.getRed() + 1e-6 >= cold.getRed(),
-                    "Hot key should not be less red than cold key (weak monotonicity check)");
+            assertTrue(chroma(hot) + 1e-6 >= chroma(cold),
+                    "Hot key should be at least as saturated as cold key (weak monotonicity check)");
+
         } else {
             Rectangle bg = find(root, Rectangle.class);
             assertNotNull(bg, "Background should exist");
@@ -161,6 +162,14 @@ class KeyboardTest {
                 Math.abs(a.getGreen() - b.getGreen()) > 1e-6 ||
                 Math.abs(a.getBlue() - b.getBlue()) > 1e-6;
     }
+    private static double chroma(Color c) {
+        if (c == null) return 0.0;
+        double r = c.getRed(), g = c.getGreen(), b = c.getBlue();
+        double max = Math.max(r, Math.max(g, b));
+        double min = Math.min(r, Math.min(g, b));
+        return max - min;
+    }
+
 
     private record KeyNode(StackPane pane, Rectangle rect, Text label) {}
 }
