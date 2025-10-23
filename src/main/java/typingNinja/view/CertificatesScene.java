@@ -137,6 +137,18 @@ public class CertificatesScene {
         SceneNavigator.show(stage, createView(stage), "Certificates - Typing Ninja");
     }
 
+    /**
+     * Build the Certificates view and return it as a scalable root node.
+     * The UI is laid out at a fixed design size and uniformly scaled to fit
+     * the available viewport while preserving aspect ratio. The view includes
+     * a scrollable results list populated from the database and a Back button
+     * that navigates to the Congratulations screen.
+     * <p>Must be called on the JavaFX Application Thread.</p>
+     *
+     * @param stage the hosting {@link javafx.stage.Stage} used for navigation callbacks and sizing context; must not be {@code null}
+     * @return the root {@link javafx.scene.Parent} for the Certificates view (never {@code null})
+     */
+
     public static Parent createView(Stage stage) {
         //desigh
         Pane design = new Pane();
@@ -213,7 +225,11 @@ public class CertificatesScene {
         return viewport;
     }
 
-
+    /**
+     * Immutable view-model for a single Certificates list entry.
+     * Holds lesson metadata and performance metrics used to render one row.
+     * Instances are read-only and safe to share across JavaFX nodes.
+     */
     private static final class Row {
         final int index;
         final int lessonId;
@@ -223,6 +239,17 @@ public class CertificatesScene {
         final String lessonType;
         final String userName;
 
+         /**
+         * Create a new immutable row for the Certificates list.
+         *
+         * @param index      1-based ordinal position in the list (for UI display)
+         * @param lessonId   unique lesson identifier from the data source
+         * @param wpm        typing speed in words per minute
+         * @param acc        typing accuracy percentage (0–100)
+         * @param date       date the result was recorded; must not be {@code null}
+         * @param lessonType human-readable lesson type/title; may be {@code null} or empty if unknown
+         * @param userName   user display name; may be {@code null} or empty if anonymous
+         */
         Row(int index, int lessonId, int wpm, int acc,
             LocalDate date, String lessonType, String userName) {
             this.index = index;
@@ -235,6 +262,15 @@ public class CertificatesScene {
         }
     }
 
+    /**
+     * Parse the first 10 characters of the given string as a {@code yyyy-MM-dd} date.
+     * Any time or timezone component after position 10 is ignored. If the input is
+     * {@code null}, shorter than 10 characters, or not parseable, the current date is returned.
+     *
+     * @param dt a date/time string whose first 10 characters follow {@code yyyy-MM-dd} (e.g., {@code "2025-10-23T12:34:56Z"}); may be {@code null}
+     * @return the parsed {@link java.time.LocalDate}, or {@link java.time.LocalDate#now()} if parsing fails
+     */
+
     private static LocalDate toLocalDate(String dt) {
         try {
             return LocalDate.parse(dt.substring(0, 10));
@@ -243,7 +279,16 @@ public class CertificatesScene {
         }
     }
 
-
+    /**
+     * Load up to {@code limit} recent results from the database, enrich each with
+     * lesson/user metadata, and return rows in oldest→newest order.
+     * If lookups or parsing fail, sensible defaults are used (e.g., "Unknown" lesson type,
+     * "Student Name", and {@link java.time.LocalDate#now()}).
+     * <p>This performs blocking DB I/O.</p>
+     *
+     * @param limit maximum number of results to fetch
+     * @return a list of {@link Row} entries in chronological order (never {@code null})
+     */
     private static java.util.List<Row> loadRowsFromDb(int limit) {
         java.util.List<Row> out = new java.util.ArrayList<>();
 

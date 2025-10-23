@@ -11,9 +11,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import typingNinja.view.widgets.Stars;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -22,10 +26,8 @@ class StarsTest {
     @BeforeAll
     static void initJavaFx() {
         try {
-            Platform.startup(() -> {});
-        } catch (IllegalStateException ignore) {
-            // Toolkit already running
-        }
+            Platform.startup(() -> { /* no-op */ });
+        } catch (IllegalStateException ignore) { }
     }
 
     @Test
@@ -52,10 +54,16 @@ class StarsTest {
     }
 
     @Test
-    @DisplayName("create(0%): all stars are the same image (all OFF)")
-    void zero_percent_all_off() {
+    @DisplayName("create(0%): by current mapping should be 1 ON then 4 OFF (single switch)")
+    void zero_percent_one_on_rest_off() {
         HBox box = Stars.create(0.0, 20.0, 4.0);
-        assertAllSameImage(box);
+        List<Node> children = box.getChildren();
+        assertEquals(5, children.size(), "There must be exactly 5 stars");
+
+        assertEquals(1, expectedStars(0.0), "By mapping, 0% should yield 1 star");
+        assertTrue(hasSingleSwitch(children), "Images should change at most once");
+        assertEquals(1, countFirstRunLength(children), "Leading ON-run length should be 1");
+        assertEquals(2, countDistinctImages(children), "Should contain two image kinds (ON/OFF)");
     }
 
     @Test
@@ -66,19 +74,22 @@ class StarsTest {
     }
 
     @Test
-    @DisplayName("create(60%): contains a single switch from ON to OFF (prefix ON, suffix OFF)")
+    @DisplayName("create(60%): single switch with prefix length equal to expected star count")
     void middle_percent_has_single_switch() {
-        HBox box = Stars.create(60.0, 20.0, 4.0);
+        double p = 60.0;
+        HBox box = Stars.create(p, 20.0, 4.0);
         List<Node> children = box.getChildren();
 
+        assertTrue(hasSingleSwitch(children), "Images should change at most once");
+        assertEquals(expectedStars(p), countFirstRunLength(children),
+                "Leading ON-run length should equal expected star count");
         int distinct = countDistinctImages(children);
         assertTrue(distinct == 1 || distinct == 2,
-                "Within one box, images should be either all same (1) or two kinds (2)");
-        assertTrue(hasSingleSwitch(children), "Images should change at most once from left to right");
+                "Images should be either all same (1) or two kinds (2)");
     }
 
     @Test
-    @DisplayName("create(<0% and >100%): should clamp to valid output without exceptions")
+    @DisplayName("create(<0% and >100%): clamped mapping yields sensible layouts")
     void out_of_range_inputs_are_clamped() {
         HBox below = Stars.create(-10.0, 18.0, 4.0);
         HBox above = Stars.create(200.0, 18.0, 4.0);
@@ -86,16 +97,11 @@ class StarsTest {
         assertEquals(5, below.getChildren().size(), "Below 0% should still produce 5 stars");
         assertEquals(5, above.getChildren().size(), "Above 100% should still produce 5 stars");
 
-        for (Node n : below.getChildren()) {
-            assertTrue(n instanceof ImageView, "Children must be ImageViews");
-            assertNotNull(((ImageView) n).getImage(), "Image must not be null");
-        }
-        for (Node n : above.getChildren()) {
-            assertTrue(n instanceof ImageView, "Children must be ImageViews");
-            assertNotNull(((ImageView) n).getImage(), "Image must not be null");
-        }
+        assertEquals(1, expectedStars(-10.0));
+        assertTrue(hasSingleSwitch(below.getChildren()));
+        assertEquals(1, countFirstRunLength(below.getChildren()));
+        assertEquals(2, countDistinctImages(below.getChildren()));
 
-        assertAllSameImage(below);
         assertAllSameImage(above);
     }
 
@@ -109,27 +115,43 @@ class StarsTest {
     private static int countDistinctImages(List<Node> children) {
         Set<Image> set = new HashSet<>();
         for (Node n : children) {
-            ImageView iv = (ImageView) n;
-            set.add(iv.getImage());
+            Image img = ((ImageView) n).getImage();
+            if (img != null) set.add(img);
         }
         return set.size();
     }
 
     private static boolean hasSingleSwitch(List<Node> children) {
         if (children.isEmpty()) return true;
-        Image first = ((ImageView) children.get(0)).getImage();
+        Image type = ((ImageView) children.get(0)).getImage();
         boolean switched = false;
         for (Node n : children) {
             Image img = ((ImageView) n).getImage();
-            if (img != first) {
-                if (!switched) {
-                    switched = true;
-                    first = img;
-                } else {
-                    return false;
-                }
+            if (img != type) {
+                if (switched) return false;
+                switched = true;
+                type = img;
             }
         }
         return true;
+    }
+
+    private static int countFirstRunLength(List<Node> children) {
+        if (children.isEmpty()) return 0;
+        Image first = ((ImageView) children.get(0)).getImage();
+        int k = 0;
+        for (Node n : children) {
+            Image img = ((ImageView) n).getImage();
+            if (img == first) k++; else break;
+        }
+        return k;
+    }
+
+    private static int expectedStars(double p) {
+        if (p >= 90) return 5;
+        if (p >= 80) return 4;
+        if (p >= 70) return 3;
+        if (p >= 40) return 2;
+        return 1;
     }
 }
