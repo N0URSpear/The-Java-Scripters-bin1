@@ -16,6 +16,10 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import typingNinja.util.SceneNavigator;
 
+/**
+ * Controller for the Settings page. Loads, displays and updates user preferences
+ */
+
 public class SettingsController {
 
     @FXML private StackPane outer;
@@ -40,6 +44,10 @@ public class SettingsController {
 
     private final SettingsDAO dao = new SettingsDAO();
     private boolean binding = false;
+
+    /**
+     * Initialises the settings screen, binds controls, applies styling / scaling
+     */
 
     @FXML
     private void initialize() {
@@ -87,17 +95,34 @@ public class SettingsController {
         });
     }
 
+    /**
+     * Selects value in a combo box if it exists
+     * @param box the combo box to operate on
+     * @param value the value to select if present
+     * @param <T> the item type
+     */
+
     private <T> void selectIfPresent(ComboBox<T> box, T value) {
         if (box.getItems().contains(value)) {
             box.getSelectionModel().select(value);
         }
     }
 
+    /**
+     * Navigates back to the Main Menu if clicked
+     */
+
     private void goMainMenu() {
         Stage stage = (Stage) navMainMenu.getScene().getWindow();
         MainMenu mm = new MainMenu();
         mm.show(stage);
     }
+
+    /**
+     * Switches to another scene using fxml path and title
+     * @param fxmlPath path to the fxml file
+     * @param title window title for the destination scene
+     */
 
     private void switchTo(String fxmlPath, String title) {
         try {
@@ -108,12 +133,26 @@ public class SettingsController {
         }
     }
 
+    /**
+     * Makes a label behave like a clickable button
+     * @param node the label node
+     * @param onClick the action to execute on click
+     */
+
     private void asButton(Node node, Runnable onClick) {
         node.getStyleClass().add("button");
         node.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> { if (onClick != null) onClick.run(); });
         node.addEventHandler(MouseEvent.MOUSE_PRESSED,  e -> { node.setScaleX(0.98); node.setScaleY(0.98); });
         node.addEventHandler(MouseEvent.MOUSE_RELEASED, e -> { node.setScaleX(1.0);  node.setScaleY(1.0);  });
     }
+
+    /**
+     * Dynamically scales the content to remain DPI neutral across different
+     * resolutions and window sizes
+     * @param outerPane the outer container used to read available space
+     * @param contentRoot the content node to scale
+     * @param stage the current stage
+     */
 
     // Scene-based DPI-neutral scaling (logical pixels only; no explicit DPI math)
     private void bindDpiNeutralScale(StackPane outerPane, Region contentRoot, Stage stage) {
