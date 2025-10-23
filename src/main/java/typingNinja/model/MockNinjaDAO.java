@@ -50,4 +50,12 @@ public class MockNinjaDAO implements INinjaContactDAO {
         NinjaUsers.clear();
         autoIncrementedID = 0;
     }
+
+    @Override
+    public void safeInitUserData(int userId) {
+    }
+
+    @Override
+    public void recalcUserStatistics(int userId) {
+    }
 }
