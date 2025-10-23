@@ -5,15 +5,28 @@ import java.text.SimpleDateFormat;
 import java.util.Locale;
 import typingNinja.model.auth.Session;
 
+/**
+ * Data access object for managing lesson progress and statistics
+ * handles inserts for standard, custom, and free-type lessons
+ * retrieves best completion times for display in the UI
+ */
+
 public class MainLessonDAO {
     private final Connection connection;
 
+
+    /**
+     * creates a new DAO instance and ensures the lesson table exists
+     */
     public MainLessonDAO() {
         connection = SqliteConnection.getInstance();
         createTableIfNeeded();
         ensureOptionalColumns();
     }
 
+    /**
+     * creates the main lesson table if it doesn't already exist
+     */
     private void createTableIfNeeded() {
         final String sql = """
             CREATE TABLE IF NOT EXISTS Lesson (
@@ -30,6 +43,9 @@ public class MainLessonDAO {
         }
     }
 
+    /**
+     * ensures optional columns exist for extended lesson tracking
+     */
     private void ensureOptionalColumns() {
         addColumnIfMissing("Prompt", "TEXT");
         addColumnIfMissing("LessonDuration", "INTEGER");
@@ -41,6 +57,11 @@ public class MainLessonDAO {
         addColumnIfMissing("DateCompleted", "TEXT");
     }
 
+    /**
+     * add a column to the lesson table if it does not exist
+     * @param col the column name
+     * @param type the column sql data type
+     */
     private void addColumnIfMissing(String col, String type) {
         try (PreparedStatement ps = connection.prepareStatement(
                 "SELECT 1 FROM pragma_table_info('Lesson') WHERE name = ?")) {
@@ -57,6 +78,11 @@ public class MainLessonDAO {
         }
     }
 
+    /**
+     * inserts a new lesson record for a chosen sub-lesson
+     * @param userId the current user's ID
+     * @param lessonType the lesson identifier (e.g. 1a, 2b)
+     */
     public void insertSelection(int userId, String lessonType) {
         final String sql = "INSERT INTO Lesson (UserID, LessonType, DateStarted) VALUES (?, ?, datetime('now'))";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -68,6 +94,16 @@ public class MainLessonDAO {
         }
     }
 
+    /**
+     * Inserts a new record for a custom ai-generated topic lesson
+     * @param userId the user's ID
+     * @param prompt the text prompt used for generation
+     * @param lessonDuration the selected lesson duration in seconds
+     * @param upperCase whether uppercase letters are included
+     * @param numbers whether numbers are included
+     * @param punctuation whether punctuation is included
+     * @param specialChars whether special characters are included
+     */
     public void insertCustomTopic(
             int userId,
             String prompt,
@@ -97,6 +133,11 @@ public class MainLessonDAO {
         }
     }
 
+    /**
+     * Inserts a new record for a Free Type lesson
+     * @param userId The user's ID
+     * @param lessonDuration duration of the session
+     */
     public void insertFreeType(int userId, int lessonDuration) {
         final String sql = """
             INSERT INTO Lesson (UserID, LessonType, LessonDuration, DateStarted)
@@ -111,7 +152,8 @@ public class MainLessonDAO {
         }
     }
 
-    /** Returns formatted best time and date for the current user, or "Not Yet Completed" if none valid. */
+    /** Returns formatted best time and date for the current user,
+     * or "Not Yet Completed" if none valid. */
     public String getBestTimeAndDate(String lessonType) {
         int userId = Session.getCurrentUserId();
         final String sql = """
@@ -145,6 +187,12 @@ public class MainLessonDAO {
         }
         return "Not Yet Completed";
     }
+
+    /**
+     * converts database date strings to readable dates in dd/mm/yyyy format
+     * @param dateTime the date-time string from SQLite
+     * @return formatted date string
+     */
 
     private String formatDate(String dateTime) {
         try {

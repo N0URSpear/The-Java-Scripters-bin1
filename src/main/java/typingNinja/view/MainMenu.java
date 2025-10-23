@@ -19,10 +19,18 @@ import java.util.Objects;
 
 public class MainMenu {
 
+    /**
+     * Builds and shows the Main Menu screen. Provides navigation to other views
+     */
+
     private static final double BASE_WIDTH = 1920.0;
     private static final double BASE_HEIGHT = 1080.0;
 
     private static boolean FIRST_OPEN = true;
+
+    /**
+     * Shows the Main Menu on the stage and applies shared stiles
+     */
 
     public void show(Stage stage) {
         Parent root = buildView(stage);
@@ -52,6 +60,12 @@ public class MainMenu {
             });
         }
     }
+
+    /**
+     * Builds the Main Menu view hierachy and returns the root node
+     * @param stage the stage hosting this view
+     * @return the root node for the Main Menu scene
+     */
 
     public Parent buildView(Stage stage) {
         Font.loadFont(getClass().getResourceAsStream("/com/example/typingNinja/fonts/Jaro-Regular.ttf"), 10);
@@ -155,6 +169,13 @@ public class MainMenu {
         return outer;
     }
 
+    /**
+     * Creates a lesson title with heading and description
+     * @param headingText the lesson heading text
+     * @param descriptionText the lesson descriptin text
+     * @return a VBox representing the styled lesson tile
+     */
+
     private VBox createLessonBox(String headingText, String descriptionText) {
         Label heading = new Label(headingText);
         heading.setFont(Font.font("Jaro", 40));
@@ -180,12 +201,25 @@ public class MainMenu {
         return box;
     }
 
+    /**
+     * Applies button-like press/release behaviour to a node
+     * @param node the node to behave like a button
+     * @param onClick the action to run on click
+     */
+
     private void asButton(javafx.scene.Node node, Runnable onClick) {
         node.getStyleClass().add("button");
         node.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> { if (onClick != null) onClick.run(); });
         node.addEventHandler(MouseEvent.MOUSE_PRESSED, e -> { node.setScaleX(0.98); node.setScaleY(0.98); });
         node.addEventHandler(MouseEvent.MOUSE_RELEASED, e -> { node.setScaleX(1.0); node.setScaleY(1.0); });
     }
+
+    /**
+     * switches the current stage to the FXML scene
+     * @param stage the stage to update
+     * @param fxmlPath the bath to the fxml file
+     * @param title the title to apply to the window
+     */
 
     private void switchTo(Stage stage, String fxmlPath, String title) {
         try {
@@ -194,6 +228,14 @@ public class MainMenu {
             ex.printStackTrace();
         }
     }
+
+    /**
+     * Opens the sub-lesson selection modal and wires its controller
+     * @param owner the owner stage for modality
+     * @param title the header text to display
+     * @param codePrefix the lesson code prefix
+     * @param leftTexts the button labels for the six sub lessons
+     */
 
     private void openSubLesson(Stage owner, String title, String codePrefix, String[] leftTexts) {
         try {
@@ -218,6 +260,11 @@ public class MainMenu {
         }
     }
 
+    /**
+     * opens the custom topic modal
+     * @param owner the owner stage for modality
+     */
+
     private void openCustomTopic(Stage owner) {
         try {
             FXMLLoader fxml = new FXMLLoader(getClass().getResource("/typingNinja/CustomTopicSelect.fxml"));
@@ -239,6 +286,10 @@ public class MainMenu {
         }
     }
 
+    /**
+     * opens the free type modal
+     * @param owner the owner stage for modality
+     */
     private void openFreeType(Stage owner) {
         try {
             FXMLLoader fxml = new FXMLLoader(getClass().getResource("/typingNinja/FreeTypeSelect.fxml"));
@@ -260,6 +311,12 @@ public class MainMenu {
         }
     }
 
+    /**
+     * Maintains DPI neutral scaling for the content within the available window
+     * @param outer
+     * @param content
+     * @param stage
+     */
     private void bindDpiNeutralScale(StackPane outer, Region content, Stage stage) {
         final double EDGE_MARGIN = 64.0;
 

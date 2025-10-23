@@ -8,6 +8,12 @@ import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import typingNinja.util.SceneNavigator;
 
+/**
+ * Controller for the sub-lesson selection popup
+ * handles configuration of sub-lesson labels, fetching best times from database
+ * and launching the active lesson view when a sub-lesson is chosen
+ */
+
 public class SubLessonSelectController {
 
     @FXML private Label headerLabel;
@@ -24,6 +30,12 @@ public class SubLessonSelectController {
     private String pendingTitle = null;
     private String[] pendingLeftTexts = null;
 
+    /**
+     * configures the controller with sub-lesson data before display
+     * @param title the title text to display at the top of the popup
+     * @param prefix the lesson code prefix
+     * @param leftTexts the array of button labels for the six sub-lessons
+     */
     public void configure(String title, String prefix, String[] leftTexts) {
         if (prefix != null) codePrefix = prefix;
         pendingTitle = title;
@@ -32,6 +44,9 @@ public class SubLessonSelectController {
         populateResults();
     }
 
+    /**
+     * initialises button actions and sets up initial state
+     */
     @FXML
     private void initialize() {
         if (backButton != null) {
@@ -48,6 +63,9 @@ public class SubLessonSelectController {
         applyConfigToNodes();
     }
 
+    /**
+     * applies the configured title and sub-lesson names to UI nodes
+     */
     private void applyConfigToNodes() {
         if (pendingTitle != null && headerLabel != null) {
             headerLabel.setText(pendingTitle);
@@ -62,6 +80,9 @@ public class SubLessonSelectController {
         }
     }
 
+    /**
+     * retrieves best time and date data for each sub-lesson and updates labels
+     */
     private void populateResults() {
         if (lbl1a != null) lbl1a.setText(dao.getBestTimeAndDate(codePrefix + "a"));
         if (lbl1b != null) lbl1b.setText(dao.getBestTimeAndDate(codePrefix + "b"));
@@ -71,6 +92,11 @@ public class SubLessonSelectController {
         if (lbl1f != null) lbl1f.setText(dao.getBestTimeAndDate(codePrefix + "f"));
     }
 
+    /**
+     * handles a user selecting a specific sub-lesson.
+     * records the selection, loads the active lesson, closes the popup
+     * @param letter sub-lesson suffix (a-f)
+     */
     private void pick(String letter) {
         userId = Session.getCurrentUserId();
         String lessonType = codePrefix + letter;
