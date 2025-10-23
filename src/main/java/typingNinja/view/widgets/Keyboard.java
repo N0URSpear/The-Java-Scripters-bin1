@@ -17,6 +17,16 @@ public final class Keyboard {
 
     private Keyboard() {}
 
+    /**
+     * Load up to {@code limit} recent results from the database, enrich each with
+     * lesson/user metadata, and return rows in oldest→newest order.
+     * If lookups or parsing fail, defaults are used (e.g., "Unknown", "Student Name",
+     * and {@link java.time.LocalDate#now()}).
+     * <p>Performs blocking database I/O.</p>
+     *
+     * @param limit maximum number of results to fetch
+     * @return list of rows in chronological order (never {@code null})
+     */
 
     private static final String[][] ROWS = new String[][]{
             {"`","1","2","3","4","5","6","7","8","9","0","-","+","="} ,
