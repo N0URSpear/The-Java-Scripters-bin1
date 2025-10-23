@@ -12,4 +12,8 @@ public interface INinjaContactDAO {
     public NinjaUser getNinjaUser(String userName);
 
     public List<NinjaUser> getAllNinjas();
+
+    void safeInitUserData(int userId);
+
+    void recalcUserStatistics(int userId);
 }

@@ -155,11 +155,10 @@ public class CreateAccountController {
         String answer2Hash = BCrypt.hashpw(answer2, BCrypt.gensalt());
 
         NinjaUser newUser = new NinjaUser(username, passwordHash, secretQ1, secretQ2, answer1Hash, answer2Hash);
-        SqliteContactDAO dao = new SqliteContactDAO();
-        dao.addNinjaUser(newUser);
+        NinjaDAO.addNinjaUser(newUser);
 
-        dao.safeInitUserData(newUser.getId());
-        dao.recalcUserStatistics(newUser.getId());
+        NinjaDAO.safeInitUserData(newUser.getId());
+        NinjaDAO.recalcUserStatistics(newUser.getId());
         System.out.println("Initialized Goals & Statistics for new user ID=" + newUser.getId());
 
         SessionManager.setUser(newUser.getId(), newUser.getUserName());
@@ -167,22 +166,6 @@ public class CreateAccountController {
         SessionManager.setCurrentSecretAnswers(answer1, answer2);
 
         showSuccess();
-        isCreateAccountSuccessful = true;
-
-        NinjaUser ninja = new NinjaUser(
-                username,
-                passwordHash,
-                secretQ1,
-                secretQ2,
-                answer1Hash,
-                answer2Hash
-        );
-
-        NinjaDAO.addNinjaUser(ninja);
-        Session.setCurrentUserId(ninja.getId());
-
-        showSuccess();
-
         isCreateAccountSuccessful = true;
 
         if (usernameField != null && usernameField.getScene() != null) {
