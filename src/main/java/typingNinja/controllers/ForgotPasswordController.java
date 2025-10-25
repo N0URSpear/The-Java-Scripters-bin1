@@ -13,6 +13,9 @@ import javafx.stage.Stage;
 import org.mindrot.jbcrypt.BCrypt;
 import java.util.Objects;
 
+/**
+ * Controller that handles forgot password logic.
+ */
 public class ForgotPasswordController {
     @FXML private VBox getUsername;
     @FXML private VBox getSecretQuestions;
@@ -33,17 +36,50 @@ public class ForgotPasswordController {
         this.NinjaDAO = mockDAO;
     }
 
+    /**
+     * The possible outcomes for user inputs.
+     */
     public enum ForgotPasswordResult {
+        /**
+         * No errors detected.
+         */
         SUCCESS,
+        /**
+         * no username detected.
+         */
         EMPTY_USERNAME,
+        /**
+         * username doesn't exist.
+         */
         USER_NOT_FOUND,
+        /**
+         * no secret answers detected.
+         */
         EMPTY_SECRET_ANSWERS,
+        /**
+         * secret answers are wrong.
+         */
         WRONG_ANSWERS,
+        /**
+         * no password detected.
+         */
         EMPTY_PASSWORD,
+        /**
+         * no confirmation password detected.
+         */
         EMPTY_CONFIRMATION,
+        /**
+         * password and confirmation don't match.
+         */
         PASSWORDS_MISMATCH
     }
 
+    /**
+     * Outputs to use depending on result of user inputs.
+     *
+     * @param result the result of the user input.
+     * @return The Alert popups to be displayed.
+     */
     private String getMessageForResult(ForgotPasswordResult result) {
         return switch (result) {
             case EMPTY_USERNAME -> "Username cannot be empty!";
@@ -124,6 +160,9 @@ public class ForgotPasswordController {
         this.testMode = testMode;
     }
 
+    /**
+     * Initializes the forgot password popup.
+     */
     @FXML public void initialize() {
         getStage(stageNumber);
     }

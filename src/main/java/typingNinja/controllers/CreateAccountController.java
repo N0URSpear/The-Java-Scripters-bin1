@@ -13,8 +13,10 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.mindrot.jbcrypt.BCrypt;
-import typingNinja.model.auth.Session;
 
+/**
+ * Controller that manages Account Creation Logic.
+ */
 public class CreateAccountController {
     @FXML private TextField usernameField;
     @FXML private PasswordField passwordField;
@@ -26,8 +28,17 @@ public class CreateAccountController {
     private boolean isCreateAccountSuccessful = false;
     private boolean testMode = false;
     private final INinjaContactDAO NinjaDAO;
+
+    /**
+     * Default constructor that initiates a connection with the Database.
+     */
     public CreateAccountController() {this.NinjaDAO = new SqliteContactDAO();}
 
+    /**
+     * Constructor for testmode
+     *
+     * @param mockDao Mock Data Access Object for testing.
+     */
     public CreateAccountController (INinjaContactDAO mockDao) {
         this.NinjaDAO = mockDao;
     }
@@ -41,6 +52,9 @@ public class CreateAccountController {
         this.testMode = testMode;
     }
 
+    /**
+     * Initialises the create account popup.
+     */
     @FXML
     public void initialize() {
         ObservableList<String> secretQuestions = FXCollections.observableArrayList(
@@ -234,6 +248,8 @@ public class CreateAccountController {
     }
 
     /**
+     * Utility for outside controllers to check whether account creation was successful or not.
+     *
      * @return a boolean to the controller indicating whether account creation was successful or not.
      */
     public boolean isCreateAccountSuccessful() {
