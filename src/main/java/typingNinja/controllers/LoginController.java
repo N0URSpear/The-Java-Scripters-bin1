@@ -12,6 +12,9 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.mindrot.jbcrypt.BCrypt;
 
+/**
+ * Controller class that handles login logic.
+ */
 public class LoginController {
     @FXML private TextField usernameField;
     @FXML private PasswordField passwordField;
@@ -19,7 +22,16 @@ public class LoginController {
     private boolean forgotPassword = false;
     private boolean testMode = false;
     private final INinjaContactDAO NinjaDAO;
+
+    /**
+     * Initiates connection to database.
+     */
     public LoginController() {this.NinjaDAO = new SqliteContactDAO();}
+
+    /**
+     * Constructor for testing data input.
+     * @param mockDAO
+     */
     public LoginController(INinjaContactDAO mockDAO) {
         this.NinjaDAO = mockDAO;
     }

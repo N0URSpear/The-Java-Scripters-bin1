@@ -16,6 +16,7 @@ public class CustomPrompts {
     ), 60)
   );
   private int idx = 0;
+
   /**
    * @return the currently selected fallback prompt
    */

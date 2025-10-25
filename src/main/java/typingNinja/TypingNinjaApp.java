@@ -14,7 +14,7 @@ public class TypingNinjaApp extends Application {
     @Override
     public void start(Stage stage) throws IOException {
 
-        // Load Jaro font for stylesheets and FXML usag
+        // Load Jaro font for stylesheets and FXML usage
         Font.loadFont(getClass().getResourceAsStream("/typingNinja/Fonts/Jaro-Regular-VariableFont_opsz.ttf"), 14);
 
         // Load FXML
