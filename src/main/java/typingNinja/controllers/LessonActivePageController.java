@@ -20,6 +20,7 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.scene.text.TextAlignment;
 
+import typingNinja.config.AppConfig;
 import typingNinja.controllers.lesson.KeyboardHands;
 import typingNinja.controllers.lesson.InputSection;
 import typingNinja.controllers.lesson.FreeTypingInput;
@@ -590,14 +591,10 @@ public class LessonActivePageController {
                 showCustomPrompt(latest.getPrompt());
                 typingNinja.model.ai.OllamaTextService ollama = new typingNinja.model.ai.OllamaTextService();
                 typingNinja.model.ai.LocalSimpleTextService local = new typingNinja.model.ai.LocalSimpleTextService();
-                int wpmTarget = 50;
-                try {
-                    String envWpm = System.getenv("AI_TARGET_WPM");
-                    if (envWpm != null && !envWpm.isBlank()) {
-                        int v = Integer.parseInt(envWpm.trim());
-                        if (v >= 20 && v <= 150) wpmTarget = v;
-                    }
-                } catch (Exception ignored) {}
+                int wpmTarget = AppConfig.getInt("AI_TARGET_WPM", 50);
+                if (wpmTarget < 20 || wpmTarget > 150) {
+                    wpmTarget = 50;
+                }
                 int targetWords = Math.max(60, latest.getDurationMinutes() * wpmTarget);
 
                 String promptToSend = latest.getPrompt();
@@ -629,9 +626,16 @@ public class LessonActivePageController {
                 }
                 final String promptToUse = promptToSend;
                 Lesson finalLatest = latest;
+                int fallbackSeconds = AppConfig.getInt("OLLAMA_FALLBACK_SECONDS", 12);
+                if (fallbackSeconds < 5) fallbackSeconds = 5;
+                int httpTimeoutSeconds = AppConfig.getInt("OLLAMA_HTTP_TIMEOUT_SECONDS", 15);
+                if (httpTimeoutSeconds < 10) httpTimeoutSeconds = 10;
+                if (fallbackSeconds >= httpTimeoutSeconds) {
+                    fallbackSeconds = Math.max(5, httpTimeoutSeconds - 2);
+                }
 
-                java.util.concurrent.CompletableFuture
-                        .supplyAsync(() -> {
+                java.util.concurrent.CompletableFuture<String> remoteTask =
+                        java.util.concurrent.CompletableFuture.supplyAsync(() -> {
                             try {
                                 System.out.println("[AI] Trying Ollama (free/local). prompt='" + promptToUse + "' "
                                         + "flags: upper=" + finalLatest.isUpperCase()
@@ -653,8 +657,21 @@ public class LessonActivePageController {
                                 ex.printStackTrace();
                                 return null;
                             }
-                        })
+                        });
+
+                java.util.concurrent.CompletableFuture<String> ollamaFuture =
+                        remoteTask
+                                .completeOnTimeout(null, fallbackSeconds, java.util.concurrent.TimeUnit.SECONDS)
+                                .exceptionally(ex -> {
+                                    System.out.println("[AI] Ollama future exception → " + ex.getMessage());
+                                    return null;
+                                });
+
+                ollamaFuture
                         .thenApply(text -> {
+                            if ((text == null || text.isBlank()) && !remoteTask.isDone()) {
+                                remoteTask.cancel(true);
+                            }
                             if (text != null && !text.isBlank()) return text;
                             System.out.println("[AI] Falling back to LocalSimpleTextService");
                             try {
@@ -676,7 +693,7 @@ public class LessonActivePageController {
                                     ? new typingNinja.model.lesson.CustomPrompts().current().text()
                                     : text;
                             Platform.runLater(() -> buildInputSectionAndStart(finalPassage));
-                });
+                        });
 
             }
             else {

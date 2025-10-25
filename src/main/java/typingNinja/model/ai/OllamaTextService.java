@@ -3,6 +3,8 @@ package typingNinja.model.ai;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
+import typingNinja.config.AppConfig;
+
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -14,12 +16,14 @@ import java.time.Duration;
  */
 public class OllamaTextService implements AITextService {
     private static final String BASE =
-            System.getenv("OLLAMA_BASE_URL") != null ? System.getenv("OLLAMA_BASE_URL") : "http://localhost:11434";
+            AppConfig.getOrDefault("OLLAMA_BASE_URL", "http://localhost:11434");
     private static final String MODEL =
-            System.getenv("OLLAMA_MODEL") != null ? System.getenv("OLLAMA_MODEL") : "gemma3:1b";
-    private static final String API_KEY = System.getenv("OLLAMA_API_KEY");
+            AppConfig.getOrDefault("OLLAMA_MODEL", "gemma3:1b");
+    private static final String API_KEY = AppConfig.get("OLLAMA_API_KEY");
     private static final String AUTH_HEADER =
-            System.getenv("OLLAMA_AUTH_HEADER") != null ? System.getenv("OLLAMA_AUTH_HEADER") : "Authorization";
+            AppConfig.getOrDefault("OLLAMA_AUTH_HEADER", "Authorization");
+    private static final int HTTP_TIMEOUT_SECONDS = sanitizeTimeout(
+            AppConfig.getInt("OLLAMA_HTTP_TIMEOUT_SECONDS", 15));
 
     private static String clean(String s) {
         // Trim quotes and whitespace so env-derived values behave predictably.
@@ -52,33 +56,16 @@ public class OllamaTextService implements AITextService {
         body.addProperty("stream", false);
         JsonObject options = new JsonObject();
         options.addProperty("temperature", 0.7);
-        int numPredict = Math.max(120, targetWords * 2);
-        try {
-            String np = clean(System.getenv("OLLAMA_NUM_PREDICT"));
-            if (np != null && !np.isBlank()) {
-                int v = Integer.parseInt(np);
-                if (v >= 64 && v <= 4096) numPredict = v;
-            }
-        } catch (Exception ignored) {}
-        numPredict = Math.min(numPredict, 1200);
+        int numPredict = computePredictTokens(targetWords);
         options.addProperty("num_predict", numPredict);
         body.add("options", options);
 
         String url = BASE + "/api/generate";
         System.out.println("[AI] Ollama request → " + url + " model=" + MODEL);
 
-        int timeoutSec = 40;
-        try {
-            String t = clean(System.getenv("OLLAMA_HTTP_TIMEOUT_SECONDS"));
-            if (t != null && !t.isBlank()) {
-                int v = Integer.parseInt(t);
-                if (v >= 10 && v <= 3600) timeoutSec = v;
-            }
-        } catch (Exception ignored) {}
-
         HttpRequest.Builder b = HttpRequest.newBuilder()
                 .uri(URI.create(url))
-                .timeout(Duration.ofSeconds(timeoutSec))
+                .timeout(Duration.ofSeconds(HTTP_TIMEOUT_SECONDS))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(body)));
         String headerName = clean(AUTH_HEADER);
@@ -110,6 +97,31 @@ public class OllamaTextService implements AITextService {
         }
         return PassageConstraintEnforcer.enforce(
                 resp.body(), includeUpper, includeNumbers, includePunct, includeSpecial);
+    }
+
+    private static int sanitizeTimeout(int configured) {
+        if (configured < 10) {
+            return 10;
+        }
+        if (configured > 3600) {
+            return 3600;
+        }
+        return configured;
+    }
+
+    private static int computePredictTokens(int targetWords) {
+        int configuredPredict = AppConfig.getInt("OLLAMA_NUM_PREDICT", -1);
+        if (configuredPredict >= 64 && configuredPredict <= 4096) {
+            return configuredPredict;
+        }
+        double multiplier = 1.35;
+        int heuristic = (int) Math.round(targetWords * multiplier);
+        if (heuristic < 96) {
+            heuristic = 96;
+        } else if (heuristic > 900) {
+            heuristic = 900;
+        }
+        return heuristic;
     }
 
     private String buildInstructions(String topic, int targetWords,
